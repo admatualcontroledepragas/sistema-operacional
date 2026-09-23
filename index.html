@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atual Saúde Ambiental - Portal</title>
     
-    <!-- Link para transformar em App -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#021f59">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -14,21 +13,32 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f4f8; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
         
-        .header { text-align: center; margin-top: 30px; margin-bottom: 40px; }
+        .header { text-align: center; margin-top: 30px; margin-bottom: 30px; }
         .header h1 { color: #021f59; font-size: 24px; font-weight: 800; text-transform: uppercase; }
         .header p { color: #666; font-size: 14px; margin-top: 5px; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; max-width: 400px; }
+        /* TELA DE LOGIN */
+        #tela-login { width: 100%; max-width: 350px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .input-login { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; outline: none; }
+        .input-login:focus { border-color: #021f59; }
+        .btn-login { background-color: #021f59; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-login:disabled { background-color: #666; cursor: not-allowed; }
+
+        /* MENU DE SISTEMAS (OCULTO POR PADRÃO) */
+        #menu-sistemas { display: none; width: 100%; max-width: 400px; flex-direction: column; gap: 15px; }
+        .bem-vindo { text-align: center; margin-bottom: 15px; font-weight: 600; color: #021f59; }
         
         .menu-card {
             background: white; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s;
             border-left: 5px solid #004481;
         }
         .menu-card:active { transform: scale(0.98); }
         .menu-card .icon { background: #e9ecef; padding: 12px; border-radius: 50%; color: #004481; display: flex; }
         .menu-card .info h3 { font-size: 16px; margin-bottom: 3px; }
         .menu-card .info p { font-size: 12px; color: #777; }
+        
+        .btn-sair { margin-top: 20px; text-align: center; color: #dc3545; font-weight: bold; cursor: pointer; padding: 10px; }
     </style>
 </head>
 <body>
@@ -38,36 +48,88 @@
         <p>Atual Saúde Ambiental</p>
     </div>
 
-    <div class="menu-grid">
-        <!-- Link para a pasta comunicados -->
-        <a href="comunicados/index.html" class="menu-card">
-            <div class="icon"><span class="material-icons">campaign</span></div>
-            <div class="info">
-                <h3>Comunicados</h3>
-                <p>Dedetização, Limpeza e Termo</p>
-            </div>
-        </a>
-
-        <!-- Link para a pasta relatorios -->
-        <a href="relatorios/index.html" class="menu-card">
-            <div class="icon"><span class="material-icons">assignment_turned_in</span></div>
-            <div class="info">
-                <h3>Relatórios e Certificados</h3>
-                <p>Gestão de Serviços e Garantias</p>
-            </div>
-        </a>
+    <!-- ÁREA DE LOGIN -->
+    <div id="tela-login">
+        <form onsubmit="fazerLogin(event)">
+            <input type="text" id="loginUser" class="input-login" placeholder="Usuário" required>
+            <input type="password" id="loginPass" class="input-login" placeholder="Senha" required>
+            <button type="submit" id="btnLogin" class="btn-login">Entrar no Portal</button>
+        </form>
     </div>
 
-    <!-- Script para registrar o Service Worker (Obrigatório para PWA) -->
+    <!-- ÁREA DOS SISTEMAS -->
+    <div id="menu-sistemas">
+        <div class="bem-vindo" id="msg-bemvindo"></div>
+
+        <a href="comunicados/index.html" class="menu-card">
+            <div class="icon"><span class="material-icons">campaign</span></div>
+            <div class="info"><h3>Comunicados</h3><p>Dedetização, Limpeza e Termo</p></div>
+        </a>
+
+        <a href="relatorios/index.html" class="menu-card">
+            <div class="icon"><span class="material-icons">assignment_turned_in</span></div>
+            <div class="info"><h3>Relatórios e Certificados</h3><p>Gestão de Serviços e Garantias</p></div>
+        </a>
+        
+        <div class="btn-sair" onclick="sair()">Sair do Portal</div>
+    </div>
+
     <script>
+        // COLOQUE AQUI A URL DO NOVO SCRIPT (O COFRE CENTRAL)
+        const URL_API_LOGIN = "https://script.google.com/macros/s/SUA_NOVA_URL_AQUI/exec";
+
+        // Verifica ao abrir se já está logado
+        window.onload = function() {
+            if (sessionStorage.getItem("sessaoAtiva") === "true") {
+                liberarPortal(sessionStorage.getItem("nomeUsuario"));
+            }
+        };
+
+        async function fazerLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = "Verificando..."; btn.disabled = true;
+
+            const payload = {
+                acao: "login",
+                usuario: document.getElementById('loginUser').value,
+                senha: document.getElementById('loginPass').value
+            };
+
+            try {
+                const req = await fetch(URL_API_LOGIN, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await req.json();
+
+                if (res.sucesso) {
+                    // Grava o "Cadeado Visual" no telemóvel
+                    sessionStorage.setItem("sessaoAtiva", "true");
+                    sessionStorage.setItem("nomeUsuario", res.nome);
+                    liberarPortal(res.nome);
+                } else {
+                    alert(res.mensagem);
+                }
+            } catch (erro) {
+                alert("Erro de conexão com o servidor de acessos.");
+            }
+            btn.innerText = "Entrar no Portal"; btn.disabled = false;
+        }
+
+        function liberarPortal(nome) {
+            document.getElementById('tela-login').style.display = 'none';
+            document.getElementById('menu-sistemas').style.display = 'flex';
+            document.getElementById('msg-bemvindo').innerText = "Olá, " + nome;
+        }
+
+        function sair() {
+            sessionStorage.clear();
+            document.getElementById('menu-sistemas').style.display = 'none';
+            document.getElementById('tela-login').style.display = 'block';
+            document.getElementById('loginPass').value = "";
+        }
+
+        // Registo do PWA
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('Service Worker registrado com sucesso!');
-                }).catch(err => {
-                    console.log('Falha ao registrar o Service Worker', err);
-                });
-            });
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
