@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestão</title>
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+ 
+  <style>
+    /* --- CSS GERAL --- */
+    /* Fundo transparente para se integrar ao Google Sites */
+    body { font-family: 'Inter', sans-serif; background: transparent; margin: 0; padding: 0; color: #1f2937; }
+    
+    /* === CONTROLE DE VISIBILIDADE (SPA) === */
+    #view-dashboard { display: block; animation: fadein 0.3s; }
+    #view-historico { display: none; animation: fadein 0.3s; }
+    #view-formulario { display: none; animation: fadein 0.3s; }
+ 
+    /* SPINNER */
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 3px solid rgba(0, 68, 129, 0.3); border-radius: 50%; border-top-color: #004481;
+      animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+ 
+    /* TOAST */
+    #toast {
+      visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center;
+      border-radius: 8px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px;
+      transform: translateX(-50%); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight: 600;
+      width: 80%;
+    }
+    #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+    #toast.success { background-color: #10b981; }
+    #toast.error { background-color: #ef4444; }
+    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+ 
+    /* ========================================= */
+    /* === AJUSTE SOLICITADO: LOGIN === */
+    /* ========================================= */
+    #tela-login { 
+      display: flex; flex-direction: column; align-items: center; 
+      justify-content: flex-start; padding-top: 60px; 
+      height: 100vh; 
+      background: transparent; /* Fundo externo transparente */
+    }
+    .card-login { 
+      background: white; /* Cartão BRANCO */
+      padding: 30px; 
+      border-radius: 16px; 
+      width: 85%; max-width: 380px; 
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Com Sombra */
+      text-align: center; 
+    }
+    .input-login {
+      width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+      box-sizing: border-box; background: #f9fafb; transition: 0.3s; font-size: 16px; 
+    }
+    .input-login:focus { border-color: #004481; background: #fff; outline: none; }
+    
+    /* APP PRINCIPAL */
+    #app-container { display: none; }
+    
+    .navbar { 
+      background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; 
+      border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .navbar h1 { margin: 0; font-size: 18px; color: #004481; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .btn-sair { color: #ef4444; font-weight: 600; cursor: pointer; margin-left: 15px; font-size: 14px; transition: 0.2s; white-space: nowrap; }
+    .btn-sair:hover { color: #b91c1c; }
+ 
+    .content { padding: 20px; max-width: 1100px; margin: auto; padding-bottom: 80px; }
+ 
+    /* DASHBOARD - Botões e Abas */
+    .dash-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.6); padding: 4px; border-radius: 12px; }
+    .tab-btn {
+      flex: 1; padding: 12px; border: none; background: transparent; color: #6b7280; font-weight: 600; 
+      cursor: pointer; border-radius: 8px; font-size: 14px; transition: 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .tab-btn:hover { color: #374151; background: rgba(255,255,255,0.5); }
+    .tab-btn.active { background: white; color: #004481; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+ 
+    /* ========================================= */
+    /* === AJUSTE SOLICITADO: TELA PRINCIPAL === */
+    /* ========================================= */
+    
+    /* Removemos o fundo branco sólido e sombras pesadas dos containers principais */
+    .metrics-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    
+    .card-metric { 
+        background: rgba(255, 255, 255, 0.85); /* Fundo levemente transparente */
+        padding: 20px; border-radius: 12px; 
+        box-shadow: none; /* Sem sombra */
+        border: 1px solid #e5e7eb;
+        border-left: 6px solid #004481; 
+    }
+    .card-metric span { font-size: 13px; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-metric strong { font-size: 32px; display: block; margin-top: 5px; color: #111827; }
+ 
+    .action-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .btn-action { 
+      border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; 
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; 
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .btn-novo { background-color: #004481; color: white; }
+    .btn-novo:hover { background-color: #003366; transform: translateY(-1px); }
+    .btn-historico { background-color: white; color: #374151; border: 1px solid #d1d5db; }
+    .btn-historico:hover { background-color: #f9fafb; border-color: #9ca3af; }
+ 
+    /* TABELAS - CONFIGURAÇÃO DESKTOP PADRÃO */
+    .table-container { 
+        background: rgba(255, 255, 255, 0.85); /* Transparencia leve */
+        border-radius: 12px; padding: 15px; 
+        box-shadow: none; /* Sem sombra */
+        overflow-x: auto; border: 1px solid #e5e7eb; 
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    th { text-align: left; padding: 14px; border-bottom: 2px solid #e5e7eb; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; white-space: nowrap; }
+    td { padding: 14px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
+ 
+    /* FORMULÁRIO */
+    .form-card { 
+        background: white; /* Formulário mantém branco para leitura */
+        padding: 25px; border-radius: 16px; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+        max-width: 800px; margin: auto; 
+    }
+    .form-header { text-align: center; margin-bottom: 25px; }
+    .form-header h2 { margin: 0; color: #111827; font-size: 20px; }
+    .form-header p { margin: 5px 0 0; color: #6b7280; font-size: 13px; }
+    
+    .form-section-title {
+        font-size: 12px; font-weight: 700; color: #004481; text-transform: uppercase; letter-spacing: 1px;
+        margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;
+    }
+ 
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-full { grid-column: span 2; }
+    
+    .form-group { margin-bottom: 5px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; display: block; }
+    
+    .form-input, .form-select {
+        width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;
+        background-color: #fff; font-size: 14px; color: #1f2937; transition: all 0.2s;
+        box-sizing: border-box; appearance: none;
+    }
+    .form-input:focus, .form-select:focus {
+        background-color: #fff; border-color: #004481; outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 68, 129, 0.1);
+    }
+    .form-input:read-only { background-color: #e5e7eb; color: #6b7280; cursor: not-allowed; }
+ 
+    .btn-importar {
+        background: #e5e7eb; border: 1px solid #d1d5db; color: #374151; 
+        border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: 600; 
+        font-size: 13px; transition: 0.2s; white-space: nowrap; height: 42px;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-importar:hover { background: #d1d5db; }
+
+    .input-group-row { display: flex; gap: 8px; }
+
+    /* Custom Multiselect */
+    .multiselect { position: relative; width: 100%; }
+    .selectBox { position: relative; cursor: pointer; }
+    .selectBox select { width: 100%; font-weight: normal; color: #1f2937; cursor: pointer; }
+    .overSelect { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+    #checkboxes { 
+        display: none; border: 1px solid #d1d5db; border-radius: 8px; max-height: 200px; 
+        overflow-y: auto; position: absolute; width: 100%; background: white; z-index: 100; 
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-top: 4px;
+    }
+    #checkboxes label { display: block; padding: 10px 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; margin:0; font-weight: normal; }
+    #checkboxes label:hover { background: #f3f4f6; }
+    #checkboxes input { width: auto; margin-right: 12px; accent-color: #004481; transform: scale(1.1); }
+    
+    #descReservatorio { border-color: #f59e0b; background: #fffbeb; }
+ 
+    .btn-cancelar { background: white; border: 1px solid #d1d5db; color: #374151; }
+    .btn-cancelar:hover { background: #f3f4f6; }
+    .btn-salvar { background: #004481; color: white; border: none; }
+    .btn-salvar:hover { background: #003366; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .form-actions { display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end; }
+    .form-actions button { padding: 14px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
+ 
+    /* FILTROS E HISTÓRICO */
+    .filters-bar { background: rgba(255,255,255,0.85); padding: 16px; border-radius: 12px; box-shadow: none; border: 1px solid #e5e7eb; display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
+    .filter-group { flex: 1; min-width: 150px; }
+    .filter-group input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
+ 
+    /* MODAIS */
+    .modal-overlay { 
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.5); z-index: 3000; backdrop-filter: blur(2px);
+      align-items: flex-start; justify-content: center; padding-top: 80px; overflow-y: auto;
+    }
+    .modal-content, .modal-confirm-content { 
+        background: white; padding: 25px; border-radius: 16px; 
+        text-align: center; width: 85%; max-width: 340px; 
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+        margin-bottom: 50px;
+    }
+    
+    .btn-opcao { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 16px; margin: 12px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; color: white; }
+    .btn-imovel { background: linear-gradient(135deg, #004481 0%, #003366 100%); }
+    .btn-imovel:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-veiculo { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+    .btn-veiculo:hover { opacity: 0.95; transform: translateY(-1px); }
+ 
+    .btn-doc { 
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px; 
+      padding: 6px 12px; border-radius: 6px; text-decoration: none; 
+      font-size: 11px; font-weight: 700; color: white; transition: 0.2s; letter-spacing: 0.5px;
+    }
+    .btn-doc:hover { opacity: 0.9; transform: translateY(-1px); }
+    .bg-relatorio { background-color: #4b5563; }
+    .bg-certificado { background-color: #d97706; }
+    .no-file { color: #9ca3af; font-size: 11px; font-style: italic; }
+ 
+    .btn-table-action {
+        background: transparent; border: none; cursor: pointer; color: #6b7280; 
+        padding: 8px; border-radius: 50%; transition: 0.2s; display: inline-flex;
+    }
+    .btn-table-action:hover { background: #f3f4f6; color: #111827; }
+    .btn-edit:hover { color: #2563eb; background: #eff6ff; }
+    .btn-delete:hover { color: #dc2626; background: #fef2f2; }
+ 
+    .btn-confirm-sim { background: #ef4444; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1; }
+    .btn-confirm-sim:hover { background: #dc2626; }
+    .btn-confirm-nao { background: #e5e7eb; color: #374151; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1; }
+    .btn-confirm-nao:hover { background: #d1d5db; }
+
+    #listaClientes {
+        max-height: 250px; overflow-y: auto; text-align: left; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+    }
+    .item-cliente {
+        padding: 12px 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; font-size: 14px; color: #374151;
+        transition: 0.2s;
+    }
+    .item-cliente:hover { background: #f9fafb; color: #004481; font-weight: 600; }
+    .item-cliente:last-child { border-bottom: none; }
+
+    /* ========================================= */
+    /* === AJUSTES MOBILE (Até 600px) === */
+    /* ========================================= */
+    @media (max-width: 600px) {
+        .navbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 15px; }
+        .navbar div { width: 100%; justify-content: space-between; }
+        
+        .form-grid { grid-template-columns: 1fr; gap: 10px; }
+        .form-full { grid-column: span 1; }
+        
+        .action-bar { flex-direction: column; }
+        .btn-action { width: 100%; justify-content: center; }
+        .form-actions { flex-direction: column; }
+        .form-actions button { width: 100%; }
+        
+        .input-group-row { flex-direction: column; gap: 10px; }
+        .btn-importar { width: 100%; justify-content: center; }
+        
+        .modal-content { width: 90%; padding: 20px; }
+        .modal-overlay { padding-top: 40px; }
+        
+        .dash-tabs { flex-wrap: wrap; }
+        .tab-btn { min-width: 120px; }
+
+        /* --- TABELA EM CARDS (MOBILE) --- */
+        .table-container { 
+            background: transparent; border: none; box-shadow: none; padding: 0;
+        }
+        table, thead, tbody, th, td, tr { display: block; }
+        
+        /* Esconde Cabeçalho */
+        thead tr { position: absolute; top: -9999px; left: -9999px; }
+        
+        /* Estilo do Cartão (Linha) - CORRIGIDO TAMANHO */
+        tr {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            padding: 15px;
+            width: 100%; /* Garante largura total */
+            box-sizing: border-box; /* Previne estourar a tela */
+        }
+        
+        table { min-width: 0; width: 100%; }
+
+        /* Estilo da Célula com Grid (Sem buraco) */
+        td {
+            border: none;
+            border-bottom: 1px solid #f3f4f6;
+            position: relative;
+            padding: 12px 0;
+            
+            /* GRID: Coluna 1 (Rótulo) e Coluna 2 (Valor) */
+            display: grid;
+            grid-template-columns: 80px 1fr; /* Rótulo fixo 80px, Valor ocupa o resto */
+            align-items: center;
+            text-align: left; /* Alinhamento corrigido */
+            gap: 15px;
+            font-size: 14px;
+        }
+        
+        td:last-child { border-bottom: none; display: flex; justify-content: flex-end; padding-top: 15px; }
+
+        /* Rótulos */
+        td::before {
+            content: attr(data-label); 
+            font-weight: 700; color: #6b7280; font-size: 11px; text-transform: uppercase;
+        }
+
+        /* Mapeamento de Labels - Dashboard */
+        #view-dashboard td:nth-of-type(1)::before { content: "Cliente"; }
+        #view-dashboard td:nth-of-type(2)::before { content: "Local"; }
+        #view-dashboard td:nth-of-type(3)::before { content: "Serviço"; }
+        #view-dashboard td:nth-of-type(4)::before { content: "Data"; }
+        #view-dashboard td:nth-of-type(5)::before { content: "Cód"; }
+        #view-dashboard td:nth-of-type(6)::before { content: "Docs"; }
+        #view-dashboard td:nth-of-type(7)::before { content: ""; display: none; } 
+
+        /* Mapeamento de Labels - Histórico */
+        #view-historico td:nth-of-type(1)::before { content: "Cliente"; }
+        #view-historico td:nth-of-type(2)::before { content: "Local"; }
+        #view-historico td:nth-of-type(3)::before { content: "Data"; }
+        #view-historico td:nth-of-type(4)::before { content: "Serviço"; }
+        #view-historico td:nth-of-type(5)::before { content: "Cód"; }
+        #view-historico td:nth-of-type(6)::before { content: "Docs"; }
+        #view-historico td:nth-of-type(7)::before { content: ""; display: none; }
+    }
+
+  </style>
+</head>
+<body>
+ 
+  <div id="toast">Mensagem...</div>
+ 
+  <div id="tela-login">
+    <div class="card-login">
+      <h2 style="color: #004481; margin-bottom: 5px;">SISTEMA</h2>
+      <p style="color:#6b7280; margin-bottom:24px; font-size: 14px;">Acesso Restrito</p>
+      <input type="text" id="loginUser" class="input-login" placeholder="Usuário">
+      <input type="password" id="loginPass" class="input-login" placeholder="Senha">
+      <button onclick="fazerLogin()" id="btnLogin" style="width:100%; padding:12px; margin-top:20px; background:#004481; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; height:48px; display:flex; align-items:center; justify-content:center; transition:0.2s;">
+        ACESSAR SISTEMA
+      </button>
+    </div>
+  </div>
+ 
+  <div id="app-container">
+    <div class="navbar">
+      <h1><span class="material-icons" style="color:#004481;">assignment_turned_in</span> Gestão de Serviços</h1>
+      <div style="display:flex; align-items:center;">
+        <span style="font-size: 13px; color:#4b5563;">Olá, <strong id="displayUsuario" style="color:#111827;">...</strong></span>
+        <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+      </div>
+    </div>
+ 
+    <div class="content">
+ 
+      <div id="view-dashboard">
+        <div class="dash-tabs">
+          <button class="tab-btn active" id="tabImovel" onclick="mudarAbaDashboard('Imovel')"><span class="material-icons" style="font-size:18px;">home</span> Imóveis</button>
+          <button class="tab-btn" id="tabVeiculo" onclick="mudarAbaDashboard('Veiculo')"><span class="material-icons" style="font-size:18px;">directions_car</span> Veículos</button>
+        </div>
+        
+        <div class="metrics-container">
+          <div class="card-metric">
+            <span id="lblTotal">Total Registrado</span>
+            <strong id="dashTotal">0</strong>
+          </div>
+        </div>
+        
+        <div class="action-bar">
+          <button class="btn-action btn-historico" onclick="abrirHistorico()"><span class="material-icons" style="font-size:18px;">manage_search</span> Histórico</button>
+          <button class="btn-action btn-novo" onclick="abrirModalSelecao()"><span class="material-icons" style="font-size:18px;">add_circle</span> Novo Registro</button>
+        </div>
+        
+        <div class="table-container">
+          <h3 style="margin-top:0; color:#111827; font-size:16px;">Últimos Registros</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Endereço/Placa</th>
+                <th>Serviço</th>
+                <th>Data</th>
+                <th style="width: 80px; text-align: center;">Código</th>
+                <th style="width: 100px; text-align: center;">Docs</th>
+                <th style="width: 80px; text-align: center;">Ações</th> </tr>
+            </thead>
+            <tbody id="tabelaRecentes">
+              <tr><td colspan="7" style="text-align:center; color:#6b7280;">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <div id="view-historico">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico: <span id="tituloHistorico" style="color:#004481;">Imóveis</span></h2>
+          <button onclick="fecharHistorico()" class="btn-action btn-historico">Voltar</button>
+        </div>
+        
+        <div class="filters-bar">
+          <div class="filter-group"><input type="text" id="filtroCliente" placeholder="Cliente..."></div>
+          <div class="filter-group" id="containerFiltroEndereco"><input type="text" id="filtroEndereco" placeholder="Endereço..."></div>
+          <div class="filter-group" id="containerFiltroPlaca" style="display:none;"><input type="text" id="filtroPlaca" placeholder="Placa..."></div>
+          <div class="filter-group"><input type="text" id="filtroServico" placeholder="Serviço..."></div>
+          <div class="filter-group" style="max-width: 160px;"><input type="date" id="filtroData"></div>
+          <button class="btn-action btn-novo" onclick="paginaAtual=1; carregarHistorico()" style="padding:10px 16px;">Filtrar</button>
+          <button class="btn-action btn-historico" onclick="limparFiltros()" style="padding:10px 16px;">Limpar</button>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th id="thIdentificacao">Endereço</th>
+                <th>Data</th>
+                <th>Serviço</th>
+                <th style="width: 80px; text-align: center;">Código</th> <th style="text-align:center;">Docs</th>
+                <th style="text-align:center;">Ações</th> 
+              </tr>
+            </thead>
+            <tbody id="tabelaHistorico">
+              <tr><td colspan="7">Carregando dados...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination-bar">
+            <button class="page-btn" id="btnAnt" onclick="mudarPagina(-1)">Anterior</button>
+            <span id="infoPagina" style="font-size:14px; font-weight:600; color:#4b5563;">1 de 1</span>
+            <button class="page-btn" id="btnProx" onclick="mudarPagina(1)">Próximo</button>
+          </div>
+        </div>
+      </div>
+ 
+      <div id="view-formulario">
+        <div class="form-card">
+          <div class="form-header">
+            <h2 id="tituloFormulario">Novo Registro</h2>
+            <p>Preencha os dados abaixo para salvar no sistema.</p>
+          </div>
+          
+          <form id="formulario">
+            
+            <div class="form-section-title">Dados Principais</div>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Cliente</label>
+                <div class="input-group-row">
+                    <input type="text" id="campo1" class="form-input" placeholder="Nome do Cliente" required>
+                    <button type="button" class="btn-importar" onclick="abrirModalClientes()" id="btnImportarCliente" title="Importar da lista">
+                        <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
+                    </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label id="lblCampo2">Endereço</label>
+                <input type="text" id="campo2" class="form-input" required>
+              </div>
+            </div>
+ 
+            <div class="form-section-title">Execução</div>
+ 
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Data Realização</label>
+                <input type="date" id="campo5" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label>Horário (Entrada / Saída)</label>
+                <div class="input-group-row">
+                  <input type="time" id="campo3" class="form-input" required>
+                  <input type="time" id="campo4" class="form-input">
+                </div>
+              </div>
+            </div>
+ 
+            <div class="form-section-title">Garantia & Colaboradores</div>
+ 
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Garantia</label>
+                <select id="selectGarantia" class="form-select">
+                  <option value="30">30 dias</option>
+                  <option value="60">60 dias</option>
+                  <option value="90">90 dias</option>
+                  <option value="180">180 dias</option>
+                  <option value="360">360 dias</option>
+                  <option value="720">720 dias</option>
+                  <option value="Outro">Outro...</option>
+                </select>
+                <input type="number" id="campo6_manual" class="form-input" style="margin-top:5px; display:none;" placeholder="Digite os dias...">
+              </div>
+              
+              <div class="form-group">
+                <label>Validade (Calculada)</label>
+                <input type="date" id="campo7" class="form-input" readonly>
+              </div>
+              
+              <div class="form-group form-full">
+                <label>Equipe Técnica</label>
+                <div class="multiselect">
+                  <div class="selectBox" onclick="toggleCheckboxes()">
+                    <select class="form-select"><option id="texto-selecao">Selecione os colaboradores...</option></select>
+                    <div class="overSelect"></div>
+                  </div>
+                  <div id="checkboxes"><label style="color:#999; padding:10px;">Carregando lista...</label></div>
+                </div>
+                <input type="text" id="campo8_manual" class="form-input" style="margin-top:5px; display:none;" placeholder="Nome do colaborador extra...">
+              </div>
+            </div>
+ 
+            <div class="form-section-title">Detalhes do Serviço</div>
+ 
+            <div class="form-group">
+              <label>Tipo de Serviço</label>
+              <select id="campo9" class="form-select"></select>
+            </div>
+            
+            <div class="form-group" style="margin-top:10px;">
+              <input type="text" id="descReservatorio" class="form-input" placeholder="Descreva os reservatórios (Ex: 1x 1000L + Cisterna)..." style="display:none;">
+            </div>
+ 
+            <div class="form-actions">
+              <button type="button" class="btn-cancelar" onclick="fecharFormulario()">Cancelar</button>
+              <button type="submit" id="btnSalvarForm" class="btn-salvar">Salvar Registro</button>
+            </div>
+ 
+          </form>
+        </div>
+      </div>
+ 
+    </div>
+  </div>
+ 
+  <div id="modal-selecao" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="margin-top:0; color:#111827;">Novo Registro</h3>
+      <p style="color:#6b7280; font-size:14px; margin-bottom:24px;">Selecione onde deseja salvar:</p>
+      <button class="btn-opcao btn-imovel" onclick="iniciarRegistro('Imovel')"><span class="material-icons">home</span> Imóvel</button>
+      <button class="btn-opcao btn-veiculo" onclick="iniciarRegistro('Veiculo')"><span class="material-icons">directions_car</span> Veículo</button>
+      <button onclick="document.getElementById('modal-selecao').style.display='none'" style="background:transparent; color:#6b7280; border:none; margin-top:16px; cursor:pointer; font-size:14px; text-decoration:underline;">Cancelar</button>
+    </div>
+  </div>
+ 
+  <div id="modal-clientes" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: left;">
+      <h3 style="margin-top:0; color:#111827; text-align: center;">Importar Cliente</h3>
+      <input type="text" id="buscaCliente" class="form-input" placeholder="Buscar nome..." onkeyup="filtrarListaClientes()" style="margin-bottom: 10px;">
+      
+      <div id="listaClientes">
+          <div style="padding:20px; text-align:center; color:#999;">Carregando...</div>
+      </div>
+
+      <div style="text-align: center; margin-top: 16px;">
+          <button onclick="document.getElementById('modal-clientes').style.display='none'" style="background:transparent; color:#6b7280; border:none; cursor:pointer; font-size:14px; text-decoration:underline;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-confirmacao" class="modal-overlay">
+    <div class="modal-confirm-content">
+      <span class="material-icons" style="font-size: 48px; color: #ef4444; margin-bottom: 10px;">warning</span>
+      <h3 style="margin: 0; color: #1f2937;">Tem certeza?</h3>
+      <p style="color: #6b7280; margin: 10px 0 20px 0;">Você vai excluir este registro e todos os arquivos anexados. Isso não pode ser desfeito.</p>
+      
+      <div style="display: flex; gap: 10px; width: 100%;">
+        <button class="btn-confirm-nao" onclick="fecharModalConfirmacao()">Cancelar</button>
+        <button class="btn-confirm-sim" onclick="realizarExclusaoDefinitiva()">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-aviso" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="titulo-aviso" style="margin: 0; color: #1f2937; font-size: 18px;">Aviso</h3>
+      <p id="mensagem-aviso" style="color: #6b7280; margin: 10px 0 20px 0; font-size: 14px;">Mensagem...</p>
+      <button onclick="document.getElementById('modal-aviso').style.display='none'" style="background: #004481; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">OK</button>
+    </div>
+  </div>
+<div id="modal-salvando" class="modal-overlay" style="z-index: 4000; display: none;">
+    <div class="modal-content" style="text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center;">
+      <div class="spinner" style="width: 50px; height: 50px; border-width: 5px; margin-bottom: 20px;"></div>
+      <h3 style="margin: 0; color: #004481; font-size: 18px;">Salvando Registro...</h3>
+      <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">Gerando PDFs e atualizando planilha.</p>
+    </div>
+  </div>
+   <script>
+  // =========================================================================
+  // URL DO SEU WEB APP
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzmS3tmbAt7DpHwm_tZHjV6x1TGSm76AaRhnUooR3ISL2Rua-wBGqSakwS-162QxRBr1Q/exec";
+  // =========================================================================
+  
+  let usuarioLogadoNome = "";
+  let tipoServicoAtual = "Imovel"; 
+  let paginaAtual = 1;
+  let modoEdicao = false;
+  let codigoEdicao = null;
+  
+  let cacheHistorico = []; 
+  let cacheDashboard = []; 
+  let cacheClientes = []; 
+  let codigoParaExcluirTemp = null; 
+ 
+  // --- UI AUXILIARES ---
+  let toastTimeout; 
+  function showToast(mensagem, tipo = 'success') {
+    const t = document.getElementById("toast");
+    if (toastTimeout) clearTimeout(toastTimeout);
+    t.className = "show"; 
+    
+    if (tipo === 'error') {
+        t.style.backgroundColor = "#ef4444";
+    } else {
+        t.style.backgroundColor = "#10b981";
+    }
+    
+    t.innerText = mensagem;
+    toastTimeout = setTimeout(function(){ t.className = t.className.replace("show", "").trim(); }, 3000);
+  }
+ 
+  function toggleLoading(btnId, isLoading, textDefault) {
+    const btn = document.getElementById(btnId);
+    if(!btn) return;
+    if (isLoading) {
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Processando...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = textDefault;
+    }
+  }
+  
+  function mostrarAlerta(titulo, mensagem) {
+    document.getElementById('titulo-aviso').innerText = titulo;
+    document.getElementById('mensagem-aviso').innerText = mensagem;
+    document.getElementById('modal-aviso').style.display = 'flex';
+  }
+ 
+  // --- LOGIN ---
+  document.getElementById('loginUser').addEventListener('keypress', function (e) { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+  document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') fazerLogin(); });
+ 
+  function fazerLogin() {
+    const login = document.getElementById('loginUser').value;
+    const pass = document.getElementById('loginPass').value;
+    if(!login || !pass) { showToast("Preencha login e senha", "error"); return; }
+   
+    toggleLoading('btnLogin', true);
+    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "login", login: login, senha: pass }) })
+    .then(res => res.json())
+    .then(ret => {
+      if (ret.status === "sucesso") {
+        usuarioLogadoNome = ret.nomeUsuario;
+        document.getElementById('displayUsuario').innerText = usuarioLogadoNome;
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        carregarColaboradores();
+        carregarDashboard();
+      } else {
+        showToast(ret.mensagem, "error"); 
+      }
+    })
+    .catch(err => { showToast("Erro de conexão.", "error"); })
+    .finally(() => { toggleLoading('btnLogin', false, 'ACESSAR SISTEMA'); });
+  }
+ 
+  function fazerLogout() {
+    document.getElementById('app-container').style.display = 'none';
+    usuarioLogadoNome = "";
+    document.getElementById('loginPass').value = "";
+    document.getElementById('loginUser').value = "";
+    document.getElementById('tela-login').style.display = 'flex';
+  }
+ 
+  // --- DASHBOARD ---
+  function mudarAbaDashboard(tipo) {
+    tipoServicoAtual = tipo;
+    document.getElementById('tabImovel').className = tipo === 'Imovel' ? 'tab-btn active' : 'tab-btn';
+    document.getElementById('tabVeiculo').className = tipo === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
+    document.getElementById('lblTotal').innerText = tipo === 'Imovel' ? 'Total de Imóveis' : 'Total de Veículos';
+    document.getElementById('tituloHistorico').innerText = (tipo === 'Imovel' ? 'Imóveis' : 'Veículos');
+    carregarDashboard();
+  }
+ 
+  function carregarDashboard() {
+    const tbody = document.getElementById('tabelaRecentes');
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px; color:#6b7280;'>Atualizando...</td></tr>"; 
+    
+    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "dashboard", tipo: tipoServicoAtual }) })
+    .then(res => res.json())
+    .then(dados => {
+      if(dados.status === "sucesso") {
+        document.getElementById('dashTotal').innerText = dados.total;
+        tbody.innerHTML = "";
+        
+        cacheDashboard = dados.ultimos;
+        
+        if (dados.ultimos.length === 0) { 
+          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:#999; padding:20px;'>Nenhum registro recente.</td></tr>"; 
+        } else {
+          dados.ultimos.forEach((item, index) => {
+             const tr = document.createElement('tr');
+             
+             let dataFormatada = item.data;
+             if(dataFormatada) {
+                 let d = new Date(dataFormatada);
+                 if(!isNaN(d.getTime())) {
+                     dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+                 }
+             }
+
+             let botoesHtml = "";
+             if (item.linkRel && String(item.linkRel).startsWith("http")) botoesHtml += `<a href="${item.linkRel}" target="_blank" class="btn-doc bg-relatorio">PDF</a>`;
+             if (item.linkCert && String(item.linkCert).startsWith("http")) botoesHtml += `<a href="${item.linkCert}" target="_blank" class="btn-doc bg-certificado">CERT</a>`;
+             if (botoesHtml === "") botoesHtml = "<span class='no-file'>--</span>";
+             
+             const codigoVisual = item.codigo ? item.codigo : "--";
+             const safeCodigo = item.codigo ? item.codigo : "";
+
+             let botoesAcao = `
+               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'dashboard')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
+               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
+             `;
+             
+             tr.innerHTML = `
+                <td><strong>${item.cliente}</strong></td>
+                <td>${item.identificacao}</td>
+                <td>${item.servico}</td>
+                <td>${dataFormatada}</td>
+                <td style="text-align: center; font-size: 11px; color: #555;">${codigoVisual}</td>
+                <td style="text-align:center; display:flex; gap:5px; justify-content:center;">${botoesHtml}</td>
+                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
+             `;
+             tbody.appendChild(tr);
+          });
+        }
+      } else {
+        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro: ${dados.mensagem}</td></tr>`; 
+      }
+    })
+    .catch(err => { tbody.innerHTML = "<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>"; });
+  }
+ 
+  // --- HISTÓRICO ---
+  function abrirHistorico() {
+    document.getElementById('view-dashboard').style.display = 'none';
+    document.getElementById('view-historico').style.display = 'block';
+    
+    document.getElementById('tituloHistorico').innerText = (tipoServicoAtual === 'Imovel' ? 'Imóveis' : 'Veículos');
+    document.getElementById('thIdentificacao').innerText = (tipoServicoAtual === 'Imovel' ? 'Endereço' : 'Placa');
+    
+    if (tipoServicoAtual === 'Veiculo') {
+        document.getElementById('containerFiltroPlaca').style.display = 'block';
+        document.getElementById('containerFiltroEndereco').style.display = 'none'; 
+    } else {
+        document.getElementById('containerFiltroPlaca').style.display = 'none';
+        document.getElementById('containerFiltroEndereco').style.display = 'block'; 
+    }
+    window.scrollTo(0,0);
+    paginaAtual = 1;
+    limparFiltros(false); 
+    carregarHistorico();
+  }
+ 
+  function fecharHistorico() {
+    document.getElementById('view-historico').style.display = 'none';
+    document.getElementById('view-dashboard').style.display = 'block';
+  }
+ 
+  function limparFiltros(recarregar = true) {
+    document.getElementById('filtroCliente').value = "";
+    document.getElementById('filtroPlaca').value = "";
+    document.getElementById('filtroEndereco').value = "";
+    document.getElementById('filtroServico').value = "";
+    document.getElementById('filtroData').value = "";
+    if(recarregar) { paginaAtual=1; carregarHistorico(); }
+  }
+ 
+  function mudarPagina(direcao) {
+    paginaAtual += direcao;
+    carregarHistorico();
+  }
+ 
+  function carregarHistorico() {
+    const tbody = document.getElementById('tabelaHistorico');
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
+    
+    const payload = {
+      acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
+      filtroCliente: document.getElementById('filtroCliente').value,
+      filtroPlaca: document.getElementById('filtroPlaca').value,
+      filtroEndereco: document.getElementById('filtroEndereco').value,
+      filtroServico: document.getElementById('filtroServico').value,
+      filtroData: document.getElementById('filtroData').value
+    };
+ 
+    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(payload) })
+    .then(res => res.json())
+    .then(dados => {
+      if(dados.status === "sucesso") {
+        tbody.innerHTML = "";
+        cacheHistorico = dados.dados; 
+        
+        if (dados.dados.length === 0) {
+           tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#999;'>Nenhum registro encontrado.</td></tr>";
+        } else {
+           dados.dados.forEach((r, index) => {
+             const tr = document.createElement('tr');
+             
+             let dataFormatada = r.data;
+             if(dataFormatada) {
+                 let d = new Date(dataFormatada);
+                 if(!isNaN(d.getTime())) {
+                     dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+                 }
+             }
+
+             let botoesDocs = "";
+             if (r.linkRel && String(r.linkRel).startsWith("http")) botoesDocs += `<a href="${r.linkRel}" target="_blank" class="btn-doc bg-relatorio" title="Relatório">Rel</a>`;
+             if (r.linkCert && String(r.linkCert).startsWith("http")) botoesDocs += `<a href="${r.linkCert}" target="_blank" class="btn-doc bg-certificado" title="Certificado">Cert</a>`;
+             if (botoesDocs === "") botoesDocs = "<span class='no-file'>--</span>";
+             
+             const safeCodigo = r.codigo ? r.codigo : "";
+             
+             let botoesAcao = `
+               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'historico')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
+               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
+             `;
+             
+             tr.innerHTML = `
+                <td><strong>${r.cliente}</strong></td>
+                <td>${r.identificacao}</td>
+                <td>${dataFormatada}</td>
+                <td>${r.servico}</td>
+                <td style="text-align: center; font-size: 11px; color: #555;">${safeCodigo}</td>
+                <td style="text-align:center; display:flex; gap:3px; justify-content:center;">${botoesDocs}</td>
+                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
+             `;
+             tbody.appendChild(tr);
+           });
+        }
+        document.getElementById('infoPagina').innerText = `Página ${dados.paginaAtual} de ${dados.totalPaginas}`;
+        document.getElementById('btnAnt').disabled = (dados.paginaAtual <= 1);
+        document.getElementById('btnProx').disabled = (dados.paginaAtual >= dados.totalPaginas);
+      } else {
+        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro ao carregar.</td></tr>`; 
+      }
+    })
+    .catch(err => { tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>`; });
+  }
+ 
+  // --- EXCLUSÃO BLINDADA ---
+  function confirmarExclusao(codigo) {
+    if (!codigo || codigo === "undefined" || codigo === "") {
+        showToast("Registro antigo sem código.", "error");
+        return;
+    }
+    codigoParaExcluirTemp = codigo;
+    document.getElementById('modal-confirmacao').style.display = 'flex';
+  }
+ 
+  function fecharModalConfirmacao() {
+    document.getElementById('modal-confirmacao').style.display = 'none';
+    codigoParaExcluirTemp = null;
+  }
+ 
+  function realizarExclusaoDefinitiva() {
+    if(!codigoParaExcluirTemp) return;
+    const codigoSeguro = codigoParaExcluirTemp;
+    fecharModalConfirmacao();
+    showToast("Processando exclusão...", "show");
+ 
+    fetch(URL_SCRIPT, { 
+        method: "POST", 
+        body: JSON.stringify({ acao: "excluir", tipo: tipoServicoAtual, codigo: codigoSeguro }) 
+    })
+    .then(res => res.json())
+    .then(ret => {
+       if(ret.status === "sucesso") {
+         mostrarAlerta("✅ Sucesso!", "O registro e os arquivos foram excluídos permanentemente.");
+         carregarDashboard();
+         if(document.getElementById('view-historico').style.display === 'block') { carregarHistorico(); }
+       } else {
+         mostrarAlerta("❌ Erro!", "Não foi possível excluir o registro.\nMotivo: " + ret.mensagem);
+       }
+    })
+    .catch(err => {
+        mostrarAlerta("Erro de Conexão", "Verifique sua internet e tente novamente.");
+    });
+  }
+ 
+  // --- LÓGICA DE EDIÇÃO ---
+  function prepararEdicao(index, origem = 'historico') {
+    let lista = (origem === 'dashboard') ? cacheDashboard : cacheHistorico;
+    const item = lista[index];
+    if(!item) return;
+    
+    modoEdicao = true;
+    codigoEdicao = item.codigo; 
+ 
+    document.getElementById('tituloFormulario').innerText = "Editando Registro";
+    document.getElementById('modal-selecao').style.display = 'none';
+    document.getElementById('view-dashboard').style.display = 'none';
+    document.getElementById('view-historico').style.display = 'none';
+    document.getElementById('view-formulario').style.display = 'block';
+    
+    if(document.getElementById('btnImportarCliente')) document.getElementById('btnImportarCliente').style.display = 'none';
+
+    const lblCampo2 = document.getElementById('lblCampo2');
+    const inputCampo2 = document.getElementById('campo2');
+    const selectServico = document.getElementById('campo9');
+    
+    selectServico.innerHTML = ""; 
+    let opcoes = (tipoServicoAtual === 'Veiculo') 
+      ? ["Desinsetização em veículos", "Desinsetização em veículos da RODASUL", "Limpeza e higienização de tanques automotivos", "Modelo alternativo"]
+      : ["Desinsetização", "Desinsetização e desratização", "Descupinização", "Limpeza de Reservatórios", "Modelo alternativo"];
+    
+    opcoes.forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; selectServico.appendChild(option); });
+ 
+    if (tipoServicoAtual === 'Veiculo') { 
+        lblCampo2.innerText = "Placa"; inputCampo2.placeholder = "AAA-0000"; 
+    } else { 
+        lblCampo2.innerText = "Endereço"; inputCampo2.placeholder = "Endereço completo"; 
+    }
+ 
+    document.getElementById('campo1').value = item.cliente;
+    document.getElementById('campo2').value = item.identificacao;
+    
+    let dataISO = "";
+    if (item.data) { dataISO = String(item.data).substring(0, 10); }
+    document.getElementById('campo5').value = dataISO;
+    
+    document.getElementById('campo3').value = item.entrada;
+    document.getElementById('campo4').value = item.saida;
+    
+    const selGarantia = document.getElementById('selectGarantia');
+    const garantiaValor = String(item.garantia).replace(" dias", "").trim();
+    
+    if(["30","60","90","180","360","720"].includes(garantiaValor)) {
+        selGarantia.value = garantiaValor;
+        document.getElementById('campo6_manual').style.display = 'none';
+    } else {
+        selGarantia.value = "Outro";
+        document.getElementById('campo6_manual').style.display = 'block';
+        document.getElementById('campo6_manual').value = garantiaValor;
+    }
+ 
+    if(item.servico.includes("Limpeza de Reservatórios:")) {
+        selectServico.value = "Limpeza de Reservatórios";
+        document.getElementById('descReservatorio').style.display = 'block';
+        let partesServico = item.servico.split(": ");
+        document.getElementById('descReservatorio').value = partesServico.length > 1 ? partesServico[1] : "";
+    } else {
+        selectServico.value = item.servico;
+        document.getElementById('descReservatorio').style.display = 'none';
+    }
+ 
+    const checks = document.querySelectorAll('input[name="colaboradores_check"]');
+    checks.forEach(c => {
+        if (item.colaboradores && item.colaboradores.includes(c.value)) c.checked = true;
+        else c.checked = false;
+    });
+    
+    const listaNomes = item.colaboradores ? item.colaboradores.split(", ") : [];
+    document.getElementById('texto-selecao').innerText = listaNomes.length + " selecionados";
+    calcularValidade();
+  }
+ 
+  // --- FORMULÁRIO ---
+  function abrirModalSelecao() { document.getElementById('modal-selecao').style.display = 'flex'; }
+  function handleInputPlaca(e) { if(tipoServicoAtual === 'Veiculo') { e.target.value = e.target.value.toUpperCase(); } }
+ 
+  function iniciarRegistro(tipo) {
+    tipoServicoAtual = tipo;
+    modoEdicao = false; codigoEdicao = null;
+    document.getElementById('modal-selecao').style.display = 'none';
+    document.getElementById('tituloFormulario').innerText = `Novo Registro - ${tipo === 'Imovel' ? 'IMÓVEL' : 'VEÍCULO'}`;
+    const lblCampo2 = document.getElementById('lblCampo2');
+    const inputCampo2 = document.getElementById('campo2');
+    const btnImportar = document.getElementById('btnImportarCliente');
+    
+    inputCampo2.removeEventListener('input', handleInputPlaca);
+    if (tipo === 'Veiculo') { 
+        lblCampo2.innerText = "Placa"; inputCampo2.placeholder = "AAA-0000"; inputCampo2.addEventListener('input', handleInputPlaca);
+        if(btnImportar) btnImportar.style.display = 'none';
+    } else { 
+        lblCampo2.innerText = "Endereço"; inputCampo2.placeholder = "Endereço completo"; 
+        if(btnImportar) btnImportar.style.display = 'inline-flex';
+    }
+    
+    const selectServico = document.getElementById('campo9');
+    selectServico.innerHTML = ""; 
+    let opcoes = (tipo === 'Veiculo') 
+      ? ["Desinsetização em veículos", "Desinsetização em veículos da RODASUL", "Limpeza e higienização de tanques automotivos", "Modelo alternativo"]
+      : ["Desinsetização", "Desinsetização e desratização", "Descupinização", "Limpeza de Reservatórios", "Modelo alternativo"];
+    
+    opcoes.forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; selectServico.appendChild(option); });
+    
+    document.getElementById('formulario').reset();
+    document.querySelectorAll('input[name="colaboradores_check"]').forEach(c => c.checked = false);
+    document.getElementById('texto-selecao').innerText = "Selecione os colaboradores...";
+    document.getElementById('descReservatorio').style.display = 'none';
+    
+    const hoje = new Date();
+    document.getElementById('campo5').value = hoje.toISOString().split('T')[0];
+
+    document.getElementById('view-dashboard').style.display = 'none';
+    document.getElementById('view-historico').style.display = 'none'; 
+    document.getElementById('view-formulario').style.display = 'block';
+    window.scrollTo(0,0);
+    calcularValidade(); 
+  }
+ 
+  function fecharFormulario() {
+    document.getElementById('formulario').reset();
+    document.getElementById('view-formulario').style.display = 'none';
+    if(modoEdicao) {
+        document.getElementById('view-historico').style.display = 'block';
+    } else {
+        document.getElementById('view-dashboard').style.display = 'block';
+        mudarAbaDashboard(tipoServicoAtual);
+    }
+    modoEdicao = false; codigoEdicao = null;
+  }
+ 
+  document.getElementById('campo9').addEventListener('change', function() {
+    const descInput = document.getElementById('descReservatorio');
+    if (tipoServicoAtual === 'Imovel' && this.value === 'Limpeza de Reservatórios') { 
+        descInput.style.display = 'block'; descInput.required = true; descInput.focus(); 
+    } else { 
+        descInput.style.display = 'none'; descInput.required = false; descInput.value = ''; 
+    }
+  });
+ 
+  document.getElementById("formulario").addEventListener("submit", function (e) {
+    e.preventDefault();
+    
+    // 1. ESCONDE O FORMULÁRIO E MOSTRA O LOADING
+    document.getElementById('view-formulario').style.display = 'none';
+    document.getElementById('modal-salvando').style.display = 'flex';
+    
+    // --- PREPARAÇÃO DOS DADOS ---
+    let garantiaTexto = (document.getElementById('selectGarantia').value === 'Outro') 
+        ? document.getElementById('campo6_manual').value + " dias" 
+        : document.getElementById('selectGarantia').value + " dias";
+    
+    const checkboxes = document.querySelectorAll('input[name="colaboradores_check"]:checked');
+    let listaSel = [];
+    checkboxes.forEach(cb => { 
+        if(cb.value !== 'Outro') listaSel.push(cb.value); 
+        else if(document.getElementById('campo8_manual').value) listaSel.push(document.getElementById('campo8_manual').value); 
+    });
+    
+    let servicoFinal = document.getElementById("campo9").value;
+    const descExtra = document.getElementById('descReservatorio');
+    if (descExtra.style.display === 'block' && descExtra.value.trim() !== "") { 
+        servicoFinal = `Limpeza de Reservatórios: ${descExtra.value}`; 
+    }
+    
+    const dados = {
+      acao: modoEdicao ? "editar" : "registrar", tipo: tipoServicoAtual, usuarioLogado: usuarioLogadoNome, 
+      codigoOriginal: codigoEdicao,
+      campo1: document.getElementById("campo1").value, campo2: document.getElementById("campo2").value, 
+      campo3: document.getElementById("campo3").value, campo4: document.getElementById("campo4").value, 
+      campo5: document.getElementById("campo5").value, campo6: garantiaTexto, 
+      campo7: document.getElementById("campo7").value, campo8: listaSel.join(", "), campo9: servicoFinal
+    };
+    
+    // --- ENVIO ---
+    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(dados) })
+    .then(res => res.json())
+    .then(ret => { 
+        // 2. RETORNO: ESCONDE O LOADING
+        document.getElementById('modal-salvando').style.display = 'none';
+
+        if(ret.status === "sucesso") { 
+           showToast(modoEdicao ? "Registro atualizado!" : "Registro salvo!", "success");
+           
+           // Limpa o formulário e volta para a tela inicial
+           fecharFormulario(); 
+           if(modoEdicao) { carregarHistorico(); } 
+           
+        } else { 
+           // 3. ERRO: MOSTRA O FORMULÁRIO DE VOLTA
+           document.getElementById('view-formulario').style.display = 'block';
+           showToast("Erro: " + ret.mensagem, "error"); 
+        }
+    })
+    .catch(err => { 
+        // ERRO CONEXÃO: TIRA O LOADING E DEVOLVE O FORMULÁRIO
+        document.getElementById('modal-salvando').style.display = 'none';
+        document.getElementById('view-formulario').style.display = 'block'; 
+        showToast("Erro ao enviar dados. Verifique a internet.", "error"); 
+    });
+  });
+ 
+  // --- AUXILIARES ---
+  // --- COLABORADORES (Versão Corrigida para conviver com o App) ---
+  function carregarColaboradores() {
+    // MUITO IMPORTANTE: Usar method: "POST" e body com a ação
+    fetch(URL_SCRIPT, { 
+        method: "POST", 
+        body: JSON.stringify({ acao: "listarColaboradores" }) 
+    })
+    .then(res => res.json())
+    .then(lista => {
+        const divCheck = document.getElementById('checkboxes'); 
+        divCheck.innerHTML = '';
+        
+        if(Array.isArray(lista)){ 
+            lista.forEach((nome, i) => criarOpcao(nome, nome, i)); 
+            criarOpcao("Outro", "Outro (Digitar)", "outro", true); 
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao carregar colaboradores:", err);
+        const divCheck = document.getElementById('checkboxes');
+        divCheck.innerHTML = '<label style="color:red; padding:10px;">Erro ao carregar lista.</label>';
+    });
+  }
+  
+  const selectGarantia = document.getElementById('selectGarantia');
+  const inputManualGarantia = document.getElementById('campo6_manual');
+  const inputDataRealizacao = document.getElementById('campo5');
+  const inputDataValidade = document.getElementById('campo7');
+  
+  selectGarantia.addEventListener('change', () => { 
+      inputManualGarantia.style.display = selectGarantia.value === 'Outro' ? 'block' : 'none'; 
+      calcularValidade(); 
+  });
+  inputManualGarantia.addEventListener('input', calcularValidade);
+  inputDataRealizacao.addEventListener('change', calcularValidade);
+  
+  function calcularValidade() {
+    let dias = selectGarantia.value === 'Outro' ? parseInt(inputManualGarantia.value) : parseInt(selectGarantia.value);
+    const partesData = inputDataRealizacao.value.split('-'); 
+    if(dias && partesData.length === 3) {
+        const d = new Date(parseInt(partesData[0]), parseInt(partesData[1]) - 1, parseInt(partesData[2]));
+        d.setDate(d.getDate() + dias);
+        inputDataValidade.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+  }
+ 
+  function toggleCheckboxes() { const div = document.getElementById('checkboxes'); div.style.display = div.style.display === 'block' ? 'none' : 'block'; }
+  function criarOpcao(val, txt, id, isOutro) {
+      const div = document.getElementById('checkboxes'); const lbl = document.createElement('label'); const chk = document.createElement('input');
+      chk.type='checkbox'; chk.value=val; chk.name='colaboradores_check'; chk.id='c_'+id;
+      chk.addEventListener('change', () => {
+        if(isOutro) document.getElementById('campo8_manual').style.display = chk.checked ? 'block' : 'none';
+        const q = document.querySelectorAll('input[name="colaboradores_check"]:checked').length;
+        document.getElementById('texto-selecao').innerText = q ? q + " selecionados" : "Selecione os colaboradores...";
+      });
+      lbl.appendChild(chk); lbl.appendChild(document.createTextNode(txt)); div.appendChild(lbl);
+  }
+  document.addEventListener('click', function(e) { const ms = document.querySelector('.multiselect'); if (!ms.contains(e.target)) document.getElementById('checkboxes').style.display = 'none'; });
+
+  // === LÓGICA DE IMPORTAÇÃO DE CLIENTES ===
+  function abrirModalClientes() {
+      document.getElementById('modal-clientes').style.display = 'flex';
+      const divLista = document.getElementById('listaClientes');
+      divLista.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">Carregando lista...</div>';
+      
+      fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "listarClientes" }) })
+      .then(res => res.json())
+      .then(ret => {
+          if (ret.status === "sucesso") {
+              cacheClientes = ret.dados;
+              renderizarListaClientes(cacheClientes);
+          } else {
+              divLista.innerHTML = '<div style="padding:10px; color:red;">Erro ao carregar lista.</div>';
+          }
+      })
+      .catch(e => {
+          divLista.innerHTML = '<div style="padding:10px; color:red;">Erro de conexão.</div>';
+      });
+  }
+
+  function renderizarListaClientes(lista) {
+      const divLista = document.getElementById('listaClientes');
+      divLista.innerHTML = '';
+      if(lista.length === 0) {
+          divLista.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum cliente encontrado.</div>';
+          return;
+      }
+      lista.forEach((c, index) => {
+          const div = document.createElement('div');
+          div.className = 'item-cliente';
+          div.onclick = function() { selecionarCliente(c); };
+          div.innerHTML = `<strong>${c.nome}</strong><br><small style="color:#6b7280;">${c.endereco}</small>`;
+          divLista.appendChild(div);
+      });
+  }
+
+  function filtrarListaClientes() {
+      const termo = document.getElementById('buscaCliente').value.toLowerCase();
+      const filtrados = cacheClientes.filter(c => c.nome.toLowerCase().includes(termo));
+      renderizarListaClientes(filtrados);
+  }
+
+  function selecionarCliente(cliente) {
+      document.getElementById('campo1').value = cliente.nome;
+      document.getElementById('campo2').value = cliente.endereco;
+      if(cliente.entrada) document.getElementById('campo3').value = cliente.entrada;
+      if(cliente.saida) document.getElementById('campo4').value = cliente.saida;
+      document.getElementById('modal-clientes').style.display = 'none';
+      showToast("Dados importados!", "success");
+  }
+
+  </script>
+</body>
+</html>
