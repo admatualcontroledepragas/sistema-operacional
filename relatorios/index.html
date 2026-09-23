@@ -1,1226 +1,1161 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestão</title>
-  
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
- 
-  <style>
-    /* --- CSS GERAL --- */
-    /* Fundo transparente para se integrar ao Google Sites */
-    body { font-family: 'Inter', sans-serif; background: transparent; margin: 0; padding: 0; color: #1f2937; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Serviços - Comunicados</title>
     
-    /* === CONTROLE DE VISIBILIDADE (SPA) === */
-    #view-dashboard { display: block; animation: fadein 0.3s; }
-    #view-historico { display: none; animation: fadein 0.3s; }
-    #view-formulario { display: none; animation: fadein 0.3s; }
- 
-    /* SPINNER */
-    .spinner {
-      display: inline-block; width: 18px; height: 18px;
-      border: 3px solid rgba(0, 68, 129, 0.3); border-radius: 50%; border-top-color: #004481;
-      animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 8px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
- 
-    /* TOAST */
-    #toast {
-      visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center;
-      border-radius: 8px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px;
-      transform: translateX(-50%); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight: 600;
-      width: 80%;
-    }
-    #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-    #toast.success { background-color: #10b981; }
-    #toast.error { background-color: #ef4444; }
-    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
- 
-    /* ========================================= */
-    /* === AJUSTE SOLICITADO: LOGIN === */
-    /* ========================================= */
-    #tela-login { 
-      display: flex; flex-direction: column; align-items: center; 
-      justify-content: flex-start; padding-top: 60px; 
-      height: 100vh; 
-      background: transparent; /* Fundo externo transparente */
-    }
-    .card-login { 
-      background: white; /* Cartão BRANCO */
-      padding: 30px; 
-      border-radius: 16px; 
-      width: 85%; max-width: 380px; 
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Com Sombra */
-      text-align: center; 
-    }
-    .input-login {
-      width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
-      box-sizing: border-box; background: #f9fafb; transition: 0.3s; font-size: 16px; 
-    }
-    .input-login:focus { border-color: #004481; background: #fff; outline: none; }
+    <!-- Link para o Manifest do PWA -->
+    <link rel="manifest" href="../manifest.json">
     
-    /* APP PRINCIPAL */
-    #app-container { display: none; }
-    
-    .navbar { 
-      background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; 
-      border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .navbar h1 { margin: 0; font-size: 18px; color: #004481; display: flex; align-items: center; gap: 8px; font-weight: 700; }
-    .btn-sair { color: #ef4444; font-weight: 600; cursor: pointer; margin-left: 15px; font-size: 14px; transition: 0.2s; white-space: nowrap; }
-    .btn-sair:hover { color: #b91c1c; }
- 
-    .content { padding: 20px; max-width: 1100px; margin: auto; padding-bottom: 80px; }
- 
-    /* DASHBOARD - Botões e Abas */
-    .dash-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.6); padding: 4px; border-radius: 12px; }
-    .tab-btn {
-      flex: 1; padding: 12px; border: none; background: transparent; color: #6b7280; font-weight: 600; 
-      cursor: pointer; border-radius: 8px; font-size: 14px; transition: 0.3s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .tab-btn:hover { color: #374151; background: rgba(255,255,255,0.5); }
-    .tab-btn.active { background: white; color: #004481; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
- 
-    /* ========================================= */
-    /* === AJUSTE SOLICITADO: TELA PRINCIPAL === */
-    /* ========================================= */
-    
-    /* Removemos o fundo branco sólido e sombras pesadas dos containers principais */
-    .metrics-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    
-    .card-metric { 
-        background: rgba(255, 255, 255, 0.85); /* Fundo levemente transparente */
-        padding: 20px; border-radius: 12px; 
-        box-shadow: none; /* Sem sombra */
-        border: 1px solid #e5e7eb;
-        border-left: 6px solid #004481; 
-    }
-    .card-metric span { font-size: 13px; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card-metric strong { font-size: 32px; display: block; margin-top: 5px; color: #111827; }
- 
-    .action-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .btn-action { 
-      border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; 
-      cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; 
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .btn-novo { background-color: #004481; color: white; }
-    .btn-novo:hover { background-color: #003366; transform: translateY(-1px); }
-    .btn-historico { background-color: white; color: #374151; border: 1px solid #d1d5db; }
-    .btn-historico:hover { background-color: #f9fafb; border-color: #9ca3af; }
- 
-    /* TABELAS - CONFIGURAÇÃO DESKTOP PADRÃO */
-    .table-container { 
-        background: rgba(255, 255, 255, 0.85); /* Transparencia leve */
-        border-radius: 12px; padding: 15px; 
-        box-shadow: none; /* Sem sombra */
-        overflow-x: auto; border: 1px solid #e5e7eb; 
-    }
-    table { width: 100%; border-collapse: collapse; min-width: 700px; }
-    th { text-align: left; padding: 14px; border-bottom: 2px solid #e5e7eb; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; white-space: nowrap; }
-    td { padding: 14px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
- 
-    /* FORMULÁRIO */
-    .form-card { 
-        background: white; /* Formulário mantém branco para leitura */
-        padding: 25px; border-radius: 16px; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
-        max-width: 800px; margin: auto; 
-    }
-    .form-header { text-align: center; margin-bottom: 25px; }
-    .form-header h2 { margin: 0; color: #111827; font-size: 20px; }
-    .form-header p { margin: 5px 0 0; color: #6b7280; font-size: 13px; }
-    
-    .form-section-title {
-        font-size: 12px; font-weight: 700; color: #004481; text-transform: uppercase; letter-spacing: 1px;
-        margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;
-    }
- 
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .form-full { grid-column: span 2; }
-    
-    .form-group { margin-bottom: 5px; }
-    .form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; display: block; }
-    
-    .form-input, .form-select {
-        width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;
-        background-color: #fff; font-size: 14px; color: #1f2937; transition: all 0.2s;
-        box-sizing: border-box; appearance: none;
-    }
-    .form-input:focus, .form-select:focus {
-        background-color: #fff; border-color: #004481; outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 68, 129, 0.1);
-    }
-    .form-input:read-only { background-color: #e5e7eb; color: #6b7280; cursor: not-allowed; }
- 
-    .btn-importar {
-        background: #e5e7eb; border: 1px solid #d1d5db; color: #374151; 
-        border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: 600; 
-        font-size: 13px; transition: 0.2s; white-space: nowrap; height: 42px;
-        display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn-importar:hover { background: #d1d5db; }
-
-    .input-group-row { display: flex; gap: 8px; }
-
-    /* Custom Multiselect */
-    .multiselect { position: relative; width: 100%; }
-    .selectBox { position: relative; cursor: pointer; }
-    .selectBox select { width: 100%; font-weight: normal; color: #1f2937; cursor: pointer; }
-    .overSelect { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
-    #checkboxes { 
-        display: none; border: 1px solid #d1d5db; border-radius: 8px; max-height: 200px; 
-        overflow-y: auto; position: absolute; width: 100%; background: white; z-index: 100; 
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-top: 4px;
-    }
-    #checkboxes label { display: block; padding: 10px 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; margin:0; font-weight: normal; }
-    #checkboxes label:hover { background: #f3f4f6; }
-    #checkboxes input { width: auto; margin-right: 12px; accent-color: #004481; transform: scale(1.1); }
-    
-    #descReservatorio { border-color: #f59e0b; background: #fffbeb; }
- 
-    .btn-cancelar { background: white; border: 1px solid #d1d5db; color: #374151; }
-    .btn-cancelar:hover { background: #f3f4f6; }
-    .btn-salvar { background: #004481; color: white; border: none; }
-    .btn-salvar:hover { background: #003366; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    .form-actions { display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end; }
-    .form-actions button { padding: 14px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
- 
-    /* FILTROS E HISTÓRICO */
-    .filters-bar { background: rgba(255,255,255,0.85); padding: 16px; border-radius: 12px; box-shadow: none; border: 1px solid #e5e7eb; display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
-    .filter-group { flex: 1; min-width: 150px; }
-    .filter-group input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
- 
-    /* MODAIS */
-    .modal-overlay { 
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0,0,0,0.5); z-index: 3000; backdrop-filter: blur(2px);
-      align-items: flex-start; justify-content: center; padding-top: 80px; overflow-y: auto;
-    }
-    .modal-content, .modal-confirm-content { 
-        background: white; padding: 25px; border-radius: 16px; 
-        text-align: center; width: 85%; max-width: 340px; 
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
-        margin-bottom: 50px;
-    }
-    
-    .btn-opcao { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 16px; margin: 12px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; color: white; }
-    .btn-imovel { background: linear-gradient(135deg, #004481 0%, #003366 100%); }
-    .btn-imovel:hover { opacity: 0.95; transform: translateY(-1px); }
-    .btn-veiculo { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
-    .btn-veiculo:hover { opacity: 0.95; transform: translateY(-1px); }
- 
-    .btn-doc { 
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px; 
-      padding: 6px 12px; border-radius: 6px; text-decoration: none; 
-      font-size: 11px; font-weight: 700; color: white; transition: 0.2s; letter-spacing: 0.5px;
-    }
-    .btn-doc:hover { opacity: 0.9; transform: translateY(-1px); }
-    .bg-relatorio { background-color: #4b5563; }
-    .bg-certificado { background-color: #d97706; }
-    .no-file { color: #9ca3af; font-size: 11px; font-style: italic; }
- 
-    .btn-table-action {
-        background: transparent; border: none; cursor: pointer; color: #6b7280; 
-        padding: 8px; border-radius: 50%; transition: 0.2s; display: inline-flex;
-    }
-    .btn-table-action:hover { background: #f3f4f6; color: #111827; }
-    .btn-edit:hover { color: #2563eb; background: #eff6ff; }
-    .btn-delete:hover { color: #dc2626; background: #fef2f2; }
- 
-    .btn-confirm-sim { background: #ef4444; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1; }
-    .btn-confirm-sim:hover { background: #dc2626; }
-    .btn-confirm-nao { background: #e5e7eb; color: #374151; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1; }
-    .btn-confirm-nao:hover { background: #d1d5db; }
-
-    #listaClientes {
-        max-height: 250px; overflow-y: auto; text-align: left; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
-    }
-    .item-cliente {
-        padding: 12px 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; font-size: 14px; color: #374151;
-        transition: 0.2s;
-    }
-    .item-cliente:hover { background: #f9fafb; color: #004481; font-weight: 600; }
-    .item-cliente:last-child { border-bottom: none; }
-
-    /* ========================================= */
-    /* === AJUSTES MOBILE (Até 600px) === */
-    /* ========================================= */
-    @media (max-width: 600px) {
-        .navbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 15px; }
-        .navbar div { width: 100%; justify-content: space-between; }
-        
-        .form-grid { grid-template-columns: 1fr; gap: 10px; }
-        .form-full { grid-column: span 1; }
-        
-        .action-bar { flex-direction: column; }
-        .btn-action { width: 100%; justify-content: center; }
-        .form-actions { flex-direction: column; }
-        .form-actions button { width: 100%; }
-        
-        .input-group-row { flex-direction: column; gap: 10px; }
-        .btn-importar { width: 100%; justify-content: center; }
-        
-        .modal-content { width: 90%; padding: 20px; }
-        .modal-overlay { padding-top: 40px; }
-        
-        .dash-tabs { flex-wrap: wrap; }
-        .tab-btn { min-width: 120px; }
-
-        /* --- TABELA EM CARDS (MOBILE) --- */
-        .table-container { 
-            background: transparent; border: none; box-shadow: none; padding: 0;
+    <!-- Porteiro Visual: Verifica se o usuário passou pelo menu principal -->
+    <script>
+        if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+            window.location.href = "../index.html";
         }
-        table, thead, tbody, th, td, tr { display: block; }
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #021f59;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --bg-body: transparent; 
+            --bg-container: #e9ecef; 
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg-body); color: var(--text-color); padding: 20px; }
+
+        /* ================================
+           BLOQUEADOR DE TELA GLOBAL
+           ================================ */
+        #global-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent;
+            z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #global-loader.hidden { display: none !important; }
         
-        /* Esconde Cabeçalho */
-        thead tr { position: absolute; top: -9999px; left: -9999px; }
-        
-        /* Estilo do Cartão (Linha) - CORRIGIDO TAMANHO */
-        tr {
+        .loader-box {
             background: white;
+            padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            border: 1px solid #e5e7eb;
-            padding: 15px;
-            width: 100%; /* Garante largura total */
-            box-sizing: border-box; /* Previne estourar a tela */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; align-items: center;
         }
         
-        table { min-width: 0; width: 100%; }
-
-        /* Estilo da Célula com Grid (Sem buraco) */
-        td {
-            border: none;
-            border-bottom: 1px solid #f3f4f6;
-            position: relative;
-            padding: 12px 0;
-            
-            /* GRID: Coluna 1 (Rótulo) e Coluna 2 (Valor) */
-            display: grid;
-            grid-template-columns: 80px 1fr; /* Rótulo fixo 80px, Valor ocupa o resto */
-            align-items: center;
-            text-align: left; /* Alinhamento corrigido */
-            gap: 15px;
-            font-size: 14px;
+        .spinner {
+            border: 4px solid #e2e8f0; border-top: 4px solid var(--primary-color);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+            margin-bottom: 10px;
         }
+        .spinner-text { font-size: 15px; font-weight: 600; color: var(--primary-color); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ================================
+           ESTILOS DO PAINEL
+           ================================ */
+        .dashboard-container { width: 100%; max-width: 1200px; margin: 0 auto; }
+        .top-bar-actions { display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 15px; }
+        .panel-box { background: var(--bg-container); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-height: 70vh; }
+        .panel-header { margin-bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; }
+        .panel-header-top { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .panel-header h2 { font-size: 20px; color: #2c3e50; }
+
+        .tab-container { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; overflow-y: hidden; width: 100%; border-bottom: 1px solid #ccc; height: 45px; align-items: flex-end; scrollbar-width: none; -ms-overflow-style: none; }
+        .tab-container::-webkit-scrollbar { display: none; }
+        .tab-btn { background: transparent; border: none; padding: 8px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; transition: all 0.3s; white-space: nowrap; margin-bottom: -1px; height: auto; }
+        .tab-btn:hover { color: var(--primary-color); }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
+        .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; border: none; }
+        .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        td:last-child { border-bottom: none; display: flex; justify-content: flex-end; padding-top: 15px; }
+        .btn-historico { background-color: #ffffff; color: #333; border: 1px solid #ccc; }
+        .btn-novo { background-color: var(--primary-color); color: white; }
+        .btn-block { width: 100%; margin-top: 15px; }
+        .btn-importar { display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e2e8f0; border: 1px solid #cbd5e1; color: #374151; font-weight: 600; font-size: 14px; border-radius: 6px; padding: 0 16px; cursor: pointer; transition: background-color 0.2s; height: 100%; }
+        .btn-importar:hover { background-color: #cbd5e1; }
 
-        /* Rótulos */
-        td::before {
-            content: attr(data-label); 
-            font-weight: 700; color: #6b7280; font-size: 11px; text-transform: uppercase;
-        }
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; background: transparent; table-layout: fixed; }
+        th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid #d1d5db; font-size: 14px; vertical-align: middle; }
+        th { color: #6b7280; font-weight: bold; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
+        tr:hover { background-color: rgba(255,255,255,0.4); } 
+        .actions { display: flex; gap: 5px; align-items: center; justify-content: flex-start; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: #6b7280; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.2s; }
+        .icon-btn:hover { transform: scale(1.1); color: var(--primary-color); }
+        .icon-btn.delete:hover { color: var(--error-color); }
+        .icon-btn.share:hover { color: #28a745; }
 
-        /* Mapeamento de Labels - Dashboard */
-        #view-dashboard td:nth-of-type(1)::before { content: "Cliente"; }
-        #view-dashboard td:nth-of-type(2)::before { content: "Local"; }
-        #view-dashboard td:nth-of-type(3)::before { content: "Serviço"; }
-        #view-dashboard td:nth-of-type(4)::before { content: "Data"; }
-        #view-dashboard td:nth-of-type(5)::before { content: "Cód"; }
-        #view-dashboard td:nth-of-type(6)::before { content: "Docs"; }
-        #view-dashboard td:nth-of-type(7)::before { content: ""; display: none; } 
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .row-top { display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 15px; margin-bottom: 15px; }
+        .row-middle { display: grid; grid-template-columns: 2.5fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 768px) { .row-top, .row-middle, .form-grid { grid-template-columns: 1fr; } }
 
-        /* Mapeamento de Labels - Histórico */
-        #view-historico td:nth-of-type(1)::before { content: "Cliente"; }
-        #view-historico td:nth-of-type(2)::before { content: "Local"; }
-        #view-historico td:nth-of-type(3)::before { content: "Data"; }
-        #view-historico td:nth-of-type(4)::before { content: "Serviço"; }
-        #view-historico td:nth-of-type(5)::before { content: "Cód"; }
-        #view-historico td:nth-of-type(6)::before { content: "Docs"; }
-        #view-historico td:nth-of-type(7)::before { content: ""; display: none; }
-    }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .centered-group { align-items: center; text-align: center; }
+        .form-group label.title-label { font-size: 13px; font-weight: 600; color: var(--primary-color); text-align: left; width: 100%; }
 
-  </style>
+        input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; outline: none; transition: border-color 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary-color); }
+        input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+        textarea { resize: vertical; min-height: 80px; }
+        .time-group { display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
+        .time-group span { font-size: 14px; font-weight: 500; }
+
+        .servicos-checkboxes-geral, .servicos-checkboxes { display: flex; flex-wrap: wrap; gap: 10px 20px; background: #f8f9fa; border: 1px solid #eee; border-radius: 6px; padding: 10px; height: 100%; align-content: flex-start; }
+        .servicos-checkboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .option-lbl { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #444; cursor: pointer; }
+        .lbl-outro { flex-direction: column; align-items: flex-start; width: 100%; grid-column: 1 / -1; }
+        input[type="checkbox"], input[type="radio"] { width: 14px; height: 14px; margin: 0; cursor: pointer; }
+        .input-outro { margin-top: 5px; padding: 6px; font-size: 12px; width: 100%; }
+
+        .promo-section { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 10px; margin-bottom: 15px; }
+        .promo-card { background-color: white; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.3s ease; }
+        .promo-card.active { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(2, 31, 89, 0.15); background-color: #fcfdfe; }
+        .promo-card-title { font-size: 15px; font-weight: bold; color: var(--primary-color); text-align: center; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .input-money-group { display: flex; align-items: center; gap: 8px; }
+        .input-money-group span { font-weight: bold; color: #555; }
+        .pragas-display { background: #f8f9fa; border: 1px solid #eee; border-radius: 6px; padding: 10px; font-size: 12px; color: #444; min-height: 60px; display: flex; flex-direction: column; text-align: left; }
+        .pragas-display strong { color: var(--primary-color); margin-bottom: 4px; }
+        
+        .checkbox-section { grid-column: 1 / -1; margin-bottom: 15px; background-color: #f0f4f8; border-radius: 8px; padding: 15px; border: 1px dashed var(--primary-color); }
+        .checkbox-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333; cursor: pointer; }
+        .checkbox-item.item-outro { flex-direction: column; align-items: flex-start; grid-column: 1 / -1; }
+
+        .editor-container { border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; background: white; transition: border-color 0.3s; }
+        .editor-container:focus-within { border-color: var(--primary-color); }
+        .editor-toolbar { background: #f8f9fa; border-bottom: 1px solid var(--border-color); padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .editor-toolbar-group { display: flex; gap: 5px; }
+        .editor-btn { background: none; border: 1px solid transparent; border-radius: 4px; cursor: pointer; padding: 4px 10px; font-size: 14px; color: #444; font-family: serif; }
+        .editor-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
+        .btn-modelo { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px; color: var(--primary-color); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .editor-content { padding: 10px; min-height: 100px; font-size: 14px; outline: none; text-align: left; background: white; }
+        .editor-content[data-placeholder]:empty:before { content: attr(data-placeholder); color: #999; pointer-events: none; display: block; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .modal-box.lg { max-width: 950px; max-height: 90vh; overflow-y: auto; text-align: left; }
+        .modal-box.md { max-width: 600px; max-height: 90vh; overflow-y: auto; text-align: left; }
+        .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .btn-cancel { background-color: #e9ecef; color: #333; }
+        .btn-cancel:hover { background-color: #cbd5e1; }
+
+        .filtros-historico { display: flex; gap: 10px; flex-wrap: wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 15px; align-items: flex-end; }
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .page-info { font-size: 14px; font-weight: 600; color: #555; }
+
+        .list-group-import { max-height: 350px; overflow-y: auto; margin-top: 15px; border: 1px solid #eee; border-radius: 8px; text-align: left; }
+        .list-item-import { padding: 12px 15px; border-bottom: 1px solid #f1f1f1; cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .list-item-import:hover { background: #f8f9fa; }
+        .list-item-import strong { display: block; color: var(--primary-color); font-size: 14px; }
+        .list-item-import span { font-size: 11px; color: #777; }
+        .btn-select-import { font-size: 11px; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; border: none; cursor: pointer; font-weight: 600; color: var(--primary-color); }
+        .list-item-import:hover .btn-select-import { background: var(--primary-color); color: white; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 5000; }
+        .toast { min-width: 250px; padding: 15px; border-radius: 4px; color: white; margin-bottom: 10px; opacity: 0; transform: translateX(100%); transition: all 0.3s ease-in-out; display: flex; align-items: center; justify-content: space-between; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--error-color); }
+    </style>
 </head>
 <body>
- 
-  <div id="toast">Mensagem...</div>
- 
-  <div id="tela-login">
-    <div class="card-login">
-      <h2 style="color: #004481; margin-bottom: 5px;">SISTEMA</h2>
-      <p style="color:#6b7280; margin-bottom:24px; font-size: 14px;">Acesso Restrito</p>
-      <input type="text" id="loginUser" class="input-login" placeholder="Usuário">
-      <input type="password" id="loginPass" class="input-login" placeholder="Senha">
-      <button onclick="fazerLogin()" id="btnLogin" style="width:100%; padding:12px; margin-top:20px; background:#004481; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; height:48px; display:flex; align-items:center; justify-content:center; transition:0.2s;">
-        ACESSAR SISTEMA
-      </button>
+
+    <div id="toast-container"></div>
+
+    <!-- BLOQUEADOR DE TELA COM CAIXA ELEGANTE E FUNDO INVISÍVEL -->
+    <div id="global-loader" class="hidden">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="global-loader-text">Aguarde...</div>
+        </div>
     </div>
-  </div>
- 
-  <div id="app-container">
-    <div class="navbar">
-      <h1><span class="material-icons" style="color:#004481;">assignment_turned_in</span> Gestão de Serviços</h1>
-      <div style="display:flex; align-items:center;">
-        <span style="font-size: 13px; color:#4b5563;">Olá, <strong id="displayUsuario" style="color:#111827;">...</strong></span>
-        <span class="btn-sair" onclick="fazerLogout()">Sair</span>
-      </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div id="app-container" class="dashboard-container" style="display: block;">
+        
+        <div class="top-bar-actions">
+            <!-- Botão extra para retornar ao menu do portal -->
+            <button class="btn btn-historico" style="margin-right: auto; color: var(--error-color); border-color: var(--error-color);" onclick="window.location.href='../index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Voltar ao Menu
+            </button>
+            <button class="btn btn-historico" onclick="abrirModalHistorico()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                Histórico
+            </button>
+            <button class="btn btn-novo" onclick="abrirModalSelecaoNovo()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Novo Comunicado
+            </button>
+        </div>
+
+        <div class="panel-box">
+            <div class="panel-header">
+                <div class="panel-header-top">
+                    <h2>Últimos Comunicados</h2>
+                </div>
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="setFiltroPrincipal('Dedetizacao', this)">Dedetização</button>
+                    <button class="tab-btn" onclick="setFiltroPrincipal('Limpeza', this)">Limpeza de Reservatório</button>
+                    <button class="tab-btn" onclick="setFiltroPrincipal('Termo', this)">Termonebulização</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Data</th>
+                            <th style="width: 40%;">Cliente</th>
+                            <th style="width: 20%;">Serviço</th>
+                            <th style="width: 20%;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo-ultimos">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
- 
-    <div class="content">
- 
-      <div id="view-dashboard">
-        <div class="dash-tabs">
-          <button class="tab-btn active" id="tabImovel" onclick="mudarAbaDashboard('Imovel')"><span class="material-icons" style="font-size:18px;">home</span> Imóveis</button>
-          <button class="tab-btn" id="tabVeiculo" onclick="mudarAbaDashboard('Veiculo')"><span class="material-icons" style="font-size:18px;">directions_car</span> Veículos</button>
-        </div>
-        
-        <div class="metrics-container">
-          <div class="card-metric">
-            <span id="lblTotal">Total Registrado</span>
-            <strong id="dashTotal">0</strong>
-          </div>
-        </div>
-        
-        <div class="action-bar">
-          <button class="btn-action btn-historico" onclick="abrirHistorico()"><span class="material-icons" style="font-size:18px;">manage_search</span> Histórico</button>
-          <button class="btn-action btn-novo" onclick="abrirModalSelecao()"><span class="material-icons" style="font-size:18px;">add_circle</span> Novo Registro</button>
-        </div>
-        
-        <div class="table-container">
-          <h3 style="margin-top:0; color:#111827; font-size:16px;">Últimos Registros</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Endereço/Placa</th>
-                <th>Serviço</th>
-                <th>Data</th>
-                <th style="width: 80px; text-align: center;">Código</th>
-                <th style="width: 100px; text-align: center;">Docs</th>
-                <th style="width: 80px; text-align: center;">Ações</th> </tr>
-            </thead>
-            <tbody id="tabelaRecentes">
-              <tr><td colspan="7" style="text-align:center; color:#6b7280;">Carregando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
- 
-      <div id="view-historico">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico: <span id="tituloHistorico" style="color:#004481;">Imóveis</span></h2>
-          <button onclick="fecharHistorico()" class="btn-action btn-historico">Voltar</button>
-        </div>
-        
-        <div class="filters-bar">
-          <div class="filter-group"><input type="text" id="filtroCliente" placeholder="Cliente..."></div>
-          <div class="filter-group" id="containerFiltroEndereco"><input type="text" id="filtroEndereco" placeholder="Endereço..."></div>
-          <div class="filter-group" id="containerFiltroPlaca" style="display:none;"><input type="text" id="filtroPlaca" placeholder="Placa..."></div>
-          <div class="filter-group"><input type="text" id="filtroServico" placeholder="Serviço..."></div>
-          <div class="filter-group" style="max-width: 160px;"><input type="date" id="filtroData"></div>
-          <button class="btn-action btn-novo" onclick="paginaAtual=1; carregarHistorico()" style="padding:10px 16px;">Filtrar</button>
-          <button class="btn-action btn-historico" onclick="limparFiltros()" style="padding:10px 16px;">Limpar</button>
-        </div>
-        
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th id="thIdentificacao">Endereço</th>
-                <th>Data</th>
-                <th>Serviço</th>
-                <th style="width: 80px; text-align: center;">Código</th> <th style="text-align:center;">Docs</th>
-                <th style="text-align:center;">Ações</th> 
-              </tr>
-            </thead>
-            <tbody id="tabelaHistorico">
-              <tr><td colspan="7">Carregando dados...</td></tr>
-            </tbody>
-          </table>
-          <div class="pagination-bar">
-            <button class="page-btn" id="btnAnt" onclick="mudarPagina(-1)">Anterior</button>
-            <span id="infoPagina" style="font-size:14px; font-weight:600; color:#4b5563;">1 de 1</span>
-            <button class="page-btn" id="btnProx" onclick="mudarPagina(1)">Próximo</button>
-          </div>
-        </div>
-      </div>
- 
-      <div id="view-formulario">
-        <div class="form-card">
-          <div class="form-header">
-            <h2 id="tituloFormulario">Novo Registro</h2>
-            <p>Preencha os dados abaixo para salvar no sistema.</p>
-          </div>
-          
-          <form id="formulario">
-            
-            <div class="form-section-title">Dados Principais</div>
-            
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Cliente</label>
-                <div class="input-group-row">
-                    <input type="text" id="campo1" class="form-input" placeholder="Nome do Cliente" required>
-                    <button type="button" class="btn-importar" onclick="abrirModalClientes()" id="btnImportarCliente" title="Importar da lista">
-                        <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
-                    </button>
-                </div>
-              </div>
-              <div class="form-group">
-                <label id="lblCampo2">Endereço</label>
-                <input type="text" id="campo2" class="form-input" required>
-              </div>
+    
+    <!-- MODAIS DO SISTEMA -->
+    <div id="modal-selecao" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Novo Comunicado</h3>
+            <p style="font-size: 14px; color: #555;">Selecione o modelo do formulário que deseja preencher:</p>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                <button class="btn btn-novo" onclick="prepararFormularioNovo('modal-dedetizacao')">Dedetização</button>
+                <button class="btn btn-novo" style="background-color: #17a2b8;" onclick="prepararFormularioNovo('modal-limpeza')">Limpeza de Reservatório</button>
+                <button class="btn btn-novo" style="background-color: #f39c12; color: #333;" onclick="prepararFormularioNovo('modal-termo')">Termonebulização</button>
             </div>
- 
-            <div class="form-section-title">Execução</div>
- 
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Data Realização</label>
-                <input type="date" id="campo5" class="form-input" required>
-              </div>
-              <div class="form-group">
-                <label>Horário (Entrada / Saída)</label>
-                <div class="input-group-row">
-                  <input type="time" id="campo3" class="form-input" required>
-                  <input type="time" id="campo4" class="form-input">
-                </div>
-              </div>
+            <button class="btn btn-cancel btn-block" onclick="fecharModal('modal-selecao')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL DEDETIZAÇÃO -->
+    <div id="modal-dedetizacao" class="modal-overlay">
+        <div class="modal-box lg">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="color: var(--primary-color);" id="titulo-modal-dedetizacao">Comunicado - Dedetização</h3>
+                <button class="icon-btn" onclick="fecharModal('modal-dedetizacao')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
- 
-            <div class="form-section-title">Garantia & Colaboradores</div>
- 
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Garantia</label>
-                <select id="selectGarantia" class="form-select">
-                  <option value="30">30 dias</option>
-                  <option value="60">60 dias</option>
-                  <option value="90">90 dias</option>
-                  <option value="180">180 dias</option>
-                  <option value="360">360 dias</option>
-                  <option value="720">720 dias</option>
-                  <option value="Outro">Outro...</option>
-                </select>
-                <input type="number" id="campo6_manual" class="form-input" style="margin-top:5px; display:none;" placeholder="Digite os dias...">
-              </div>
-              
-              <div class="form-group">
-                <label>Validade (Calculada)</label>
-                <input type="date" id="campo7" class="form-input" readonly>
-              </div>
-              
-              <div class="form-group form-full">
-                <label>Equipe Técnica</label>
-                <div class="multiselect">
-                  <div class="selectBox" onclick="toggleCheckboxes()">
-                    <select class="form-select"><option id="texto-selecao">Selecione os colaboradores...</option></select>
-                    <div class="overSelect"></div>
-                  </div>
-                  <div id="checkboxes"><label style="color:#999; padding:10px;">Carregando lista...</label></div>
+            <form id="form-dedetizacao">
+                <div class="row-top">
+                    <div class="form-group">
+                        <label class="title-label" for="cliente">Nome do Cliente</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="cliente" required style="flex: 1;">
+                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Dedetizacao')" title="Importar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1325 20.176 10.1983 17.8576 10.0135C17.4334 6.61916 14.5369 4 11 4C7.13401 4 4 7.13401 4 11C4 11.1442 4.00438 11.2874 4.01294 11.4294C2.30214 12.0628 1 13.7388 1 15.5C1 17.9853 3.01472 20 5.5 20H17.5V19Z" fill="#374151"/><path d="M11 16L8 13H10V10H12V13H14L11 16Z" fill="#e2e8f0"/></svg> Importar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group centered-group">
+                        <label class="title-label" for="data">Data do Serviço</label>
+                        <input type="date" id="data" required style="max-width: 150px;">
+                    </div>
+                    <div class="form-group centered-group">
+                        <label class="title-label">Previsão de Horário</label>
+                        <div class="time-group">
+                            <input type="time" id="hora-inicio" required style="width: 100px; padding: 8px;">
+                            <span>às</span>
+                            <input type="time" id="hora-fim" required style="width: 100px; padding: 8px;">
+                        </div>
+                    </div>
                 </div>
-                <input type="text" id="campo8_manual" class="form-input" style="margin-top:5px; display:none;" placeholder="Nome do colaborador extra...">
-              </div>
+                
+                <div class="row-middle">
+                    <div class="form-group">
+                        <label class="title-label">Tipo de Serviço (Geral)</label>
+                        <div class="servicos-checkboxes-geral">
+                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desinsetização"> Desinsetização</label>
+                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desratização"> Desratização</label>
+                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Descupinização"> Descupinização</label>
+                            <label class="option-lbl lbl-outro">
+                                <div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-geral-cb" value="Outro" id="serv-geral-outro-cb"> Outro</div>
+                                <input type="text" id="serv-geral-outro-txt" class="input-outro hidden" placeholder="Qual serviço?">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="title-label">Vendedor Responsável</label>
+                        <div class="servicos-checkboxes" style="height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 15px;">
+                            <label class="option-lbl"><input type="radio" name="vendedor" value="Heitor Diego" checked> Heitor Diego</label>
+                            <label class="option-lbl"><input type="radio" name="vendedor" value="Gabriel Valero"> Gabriel Valero</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="promo-section">
+                    <div class="promo-card active" id="card-1" onclick="ativarCard(1)">
+                        <div class="promo-card-title">Promocional 01</div>
+                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-1" step="0.01" min="0" placeholder="0.00"></div>
+                        <div class="form-group">
+                            <label class="title-label">Imóvel</label>
+                            <select id="imovel-1" class="imovel-select"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                            <input type="text" id="imovel-outro-txt-1" class="input-outro hidden" placeholder="Qual imóvel?">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Serviços</label>
+                            <div class="servicos-checkboxes">
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desinsetização"> Desinsetização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desratização"> Desratização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Descupinização"> Descupinização</label>
+                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-1" value="Outro" id="serv-outro-cb-1"> Outro</div><input type="text" id="serv-outro-txt-1" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                            </div>
+                        </div>
+                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-1">Nenhuma praga selecionada.</span></div>
+                    </div>
+                    <div class="promo-card" id="card-2" onclick="ativarCard(2)">
+                        <div class="promo-card-title">Promocional 02</div>
+                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-2" step="0.01" min="0" placeholder="0.00"></div>
+                        <div class="form-group">
+                            <label class="title-label">Imóvel</label>
+                            <select id="imovel-2" class="imovel-select"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                            <input type="text" id="imovel-outro-txt-2" class="input-outro hidden" placeholder="Qual imóvel?">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Serviços</label>
+                            <div class="servicos-checkboxes">
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desinsetização"> Desinsetização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desratização"> Desratização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Descupinização"> Descupinização</label>
+                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-2" value="Outro" id="serv-outro-cb-2"> Outro</div><input type="text" id="serv-outro-txt-2" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                            </div>
+                        </div>
+                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-2">Nenhuma praga selecionada.</span></div>
+                    </div>
+                    <div class="promo-card" id="card-3" onclick="ativarCard(3)">
+                        <div class="promo-card-title">Promocional 03</div>
+                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-3" step="0.01" min="0" placeholder="0.00"></div>
+                        <div class="form-group">
+                            <label class="title-label">Imóvel</label>
+                            <select id="imovel-3" class="imovel-select"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                            <input type="text" id="imovel-outro-txt-3" class="input-outro hidden" placeholder="Qual imóvel?">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Serviços</label>
+                            <div class="servicos-checkboxes">
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desinsetização"> Desinsetização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desratização"> Desratização</label>
+                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Descupinização"> Descupinização</label>
+                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-3" value="Outro" id="serv-outro-cb-3"> Outro</div><input type="text" id="serv-outro-txt-3" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                            </div>
+                        </div>
+                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-3">Nenhuma praga selecionada.</span></div>
+                    </div>
+                </div>
+
+                <div class="checkbox-section">
+                    <div class="form-group">
+                        <label class="title-label" id="titulo-pragas-dinamico" style="font-size: 16px;">Pragas contempladas promocional 01</label>
+                        <div class="checkbox-container">
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="BARATAS"> BARATAS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="FORMIGAS"> FORMIGAS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CUPINS"> CUPINS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ROEDORES"> ROEDORES</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSCAS"> MOSCAS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSQUITOS"> MOSQUITOS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARRAPATOS"> CARRAPATOS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="PULGAS"> PULGAS</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ESCORPIÕES"> ESCORPIÕES</label>
+                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARAMUJOS"> CARAMUJOS</label>
+                            <label class="checkbox-item item-outro"><div style="display: flex; gap: 8px;"><input type="checkbox" class="praga-cb" value="OUTROS" id="praga-outros-cb"> OUTROS</div><input type="text" id="praga-outros-txt" class="input-outro hidden" placeholder="Especifique a praga..."></label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-novo btn-block" id="btn-salvar-dedetizacao">Salvar Comunicado</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LIMPEZA -->
+    <div id="modal-limpeza" class="modal-overlay">
+        <div class="modal-box md">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="color: #17a2b8;" id="titulo-modal-limpeza">Comunicado - Limpeza de Reservatório</h3>
+                <button class="icon-btn" onclick="fecharModal('modal-limpeza')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
- 
-            <div class="form-section-title">Detalhes do Serviço</div>
- 
+            <form id="form-limpeza">
+                <div class="row-top" style="grid-template-columns: 2fr 1fr;">
+                    <div class="form-group">
+                        <label class="title-label">Nome do Cliente</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="cliente-limp" required style="flex: 1;">
+                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Limpeza')" title="Importar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1325 20.176 10.1983 17.8576 10.0135C17.4334 6.61916 14.5369 4 11 4C7.13401 4 4 7.13401 4 11C4 11.1442 4.00438 11.2874 4.01294 11.4294C2.30214 12.0628 1 13.7388 1 15.5C1 17.9853 3.01472 20 5.5 20H17.5V19Z" fill="#374151"/><path d="M11 16L8 13H10V10H12V13H14L11 16Z" fill="#e2e8f0"/></svg> Importar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group"><label class="title-label">Data do Serviço</label><input type="date" id="data-limp" required></div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="title-label">Vendedor Responsável</label>
+                    <div class="servicos-checkboxes">
+                        <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Heitor Diego" checked> Heitor Diego</label>
+                        <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Gabriel Valero"> Gabriel Valero</label>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="title-label">Observações</label>
+                    <div class="editor-container">
+                        <div class="editor-toolbar">
+                            <div class="editor-toolbar-group">
+                                <button type="button" class="editor-btn" onclick="document.execCommand('bold', false, null)" title="Negrito (Ctrl+B)"><strong>B</strong></button>
+                                <button type="button" class="editor-btn" onclick="document.execCommand('italic', false, null)" title="Itálico (Ctrl+I)"><em>I</em></button>
+                                <button type="button" class="editor-btn" onclick="document.execCommand('underline', false, null)" title="Sublinhado (Ctrl+U)"><u>U</u></button>
+                            </div>
+                            <button type="button" class="editor-btn btn-modelo" onclick="inserirModeloLimpeza()" title="Preencher com texto padrão">📝 Inserir Modelo</button>
+                        </div>
+                        <div id="obs-limp" class="editor-content" contenteditable="true" data-placeholder="Detalhes do serviço..."></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-novo btn-block" style="background-color: #17a2b8;" id="btn-salvar-limpeza">Salvar Comunicado</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TERMONEBULIZAÇÃO -->
+    <div id="modal-termo" class="modal-overlay">
+        <div class="modal-box md">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="color: #f39c12;" id="titulo-modal-termo">Comunicado - Termonebulização</h3>
+                <button class="icon-btn" onclick="fecharModal('modal-termo')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <form id="form-termo">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="title-label">Nome do Cliente</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="cliente-termo" required style="flex: 1;">
+                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Termo')" title="Importar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1325 20.176 10.1983 17.8576 10.0135C17.4334 6.61916 14.5369 4 11 4C7.13401 4 4 7.13401 4 11C4 11.1442 4.00438 11.2874 4.01294 11.4294C2.30214 12.0628 1 13.7388 1 15.5C1 17.9853 3.01472 20 5.5 20H17.5V19Z" fill="#374151"/><path d="M11 16L8 13H10V10H12V13H14L11 16Z" fill="#e2e8f0"/></svg> Importar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group"><label class="title-label">Data do Serviço</label><input type="date" id="data-termo" required></div>
+                    <div class="form-group"><label class="title-label">Previsão de Horário</label>
+                        <div class="time-group" style="justify-content: flex-start;"><input type="time" id="hora-inicio-termo" required style="padding: 8px;"><span>às</span><input type="time" id="hora-fim-termo" required style="padding: 8px;"></div>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="title-label">Vendedor Responsável</label>
+                    <div class="servicos-checkboxes">
+                        <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Heitor Diego" checked> Heitor Diego</label>
+                        <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Gabriel Valero"> Gabriel Valero</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-novo btn-block" style="background-color: #f39c12; color: #333;" id="btn-salvar-termo">Salvar Comunicado</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL HISTÓRICO -->
+    <div id="modal-historico" class="modal-overlay">
+        <div class="modal-box lg">
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: var(--primary-color);">Histórico de Comunicados</h3>
+                    <button class="icon-btn" onclick="fecharModal('modal-historico')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                <div class="tab-container" style="border:none; margin-top:10px;">
+                    <button class="tab-btn active" onclick="setFiltroHistorico('Dedetizacao', this)">Dedetização</button>
+                    <button class="tab-btn" onclick="setFiltroHistorico('Limpeza', this)">Limpeza de Reservatório</button>
+                    <button class="tab-btn" onclick="setFiltroHistorico('Termo', this)">Termonebulização</button>
+                </div>
+            </div>
+
+            <div class="filtros-historico">
+                <div style="flex: 1; min-width: 150px;">
+                    <label class="title-label" style="font-size: 11px;">BUSCAR CLIENTE</label>
+                    <input type="text" id="filtro-cliente" placeholder="Digite o nome..." onkeyup="dispararBuscaHistorico()" style="padding: 8px;">
+                </div>
+                <div>
+                    <label class="title-label" style="font-size: 11px;">DATA INICIAL</label>
+                    <input type="date" id="filtro-data-inicio" onchange="dispararBuscaHistorico()" style="padding: 8px;">
+                </div>
+                <div>
+                    <label class="title-label" style="font-size: 11px;">DATA FINAL</label>
+                    <input type="date" id="filtro-data-fim" onchange="dispararBuscaHistorico()" style="padding: 8px;">
+                </div>
+                <button class="btn btn-historico" onclick="limparFiltrosHistorico()" style="padding: 8px 15px;" title="Limpar Filtros">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="table-container" style="margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Data</th>
+                            <th style="width: 40%;">Cliente</th>
+                            <th style="width: 20%;">Serviço</th>
+                            <th style="width: 20%;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo-historico">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <button class="btn btn-historico" id="btn-prev-page" onclick="mudarPagina(-1)">Anterior</button>
+                <span class="page-info" id="page-info">Página 1 de 1</span>
+                <button class="btn btn-historico" id="btn-next-page" onclick="mudarPagina(1)">Próxima</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EXCLUSÃO -->
+    <div class="modal-overlay" id="modal-exclusao">
+        <div class="modal-box">
+            <h3>Confirmar Exclusão</h3>
+            <p style="margin-top: 10px;">Tem certeza que deseja excluir este comunicado permanentemente?</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="fecharModal('modal-exclusao')">Cancelar</button>
+                <button class="btn delete" id="btn-confirmar-exclusao" style="background-color: var(--error-color); color: white;">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPORTAÇÃO INTELIGENTE -->
+    <div class="modal-overlay" id="modal-importacao" style="z-index: 1050;">
+        <div class="modal-box md" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="color: var(--primary-color);">Importar Cliente</h3>
+                <button class="icon-btn" onclick="fecharModal('modal-importacao')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
             <div class="form-group">
-              <label>Tipo de Serviço</label>
-              <select id="campo9" class="form-select"></select>
+                <input type="text" id="input-busca-importacao" placeholder="🔍 Digite o nome do cliente..." onkeyup="filtrarListaImportacao()" style="padding: 12px; font-size: 15px;">
             </div>
-            
-            <div class="form-group" style="margin-top:10px;">
-              <input type="text" id="descReservatorio" class="form-input" placeholder="Descreva os reservatórios (Ex: 1x 1000L + Cisterna)..." style="display:none;">
+            <div class="list-group-import" id="lista-clientes-importacao">
             </div>
- 
-            <div class="form-actions">
-              <button type="button" class="btn-cancelar" onclick="fecharFormulario()">Cancelar</button>
-              <button type="submit" id="btnSalvarForm" class="btn-salvar">Salvar Registro</button>
-            </div>
- 
-          </form>
         </div>
-      </div>
- 
     </div>
-  </div>
- 
-  <div id="modal-selecao" class="modal-overlay">
-    <div class="modal-content">
-      <h3 style="margin-top:0; color:#111827;">Novo Registro</h3>
-      <p style="color:#6b7280; font-size:14px; margin-bottom:24px;">Selecione onde deseja salvar:</p>
-      <button class="btn-opcao btn-imovel" onclick="iniciarRegistro('Imovel')"><span class="material-icons">home</span> Imóvel</button>
-      <button class="btn-opcao btn-veiculo" onclick="iniciarRegistro('Veiculo')"><span class="material-icons">directions_car</span> Veículo</button>
-      <button onclick="document.getElementById('modal-selecao').style.display='none'" style="background:transparent; color:#6b7280; border:none; margin-top:16px; cursor:pointer; font-size:14px; text-decoration:underline;">Cancelar</button>
-    </div>
-  </div>
- 
-  <div id="modal-clientes" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px; text-align: left;">
-      <h3 style="margin-top:0; color:#111827; text-align: center;">Importar Cliente</h3>
-      <input type="text" id="buscaCliente" class="form-input" placeholder="Buscar nome..." onkeyup="filtrarListaClientes()" style="margin-bottom: 10px;">
-      
-      <div id="listaClientes">
-          <div style="padding:20px; text-align:center; color:#999;">Carregando...</div>
-      </div>
 
-      <div style="text-align: center; margin-top: 16px;">
-          <button onclick="document.getElementById('modal-clientes').style.display='none'" style="background:transparent; color:#6b7280; border:none; cursor:pointer; font-size:14px; text-decoration:underline;">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-confirmacao" class="modal-overlay">
-    <div class="modal-confirm-content">
-      <span class="material-icons" style="font-size: 48px; color: #ef4444; margin-bottom: 10px;">warning</span>
-      <h3 style="margin: 0; color: #1f2937;">Tem certeza?</h3>
-      <p style="color: #6b7280; margin: 10px 0 20px 0;">Você vai excluir este registro e todos os arquivos anexados. Isso não pode ser desfeito.</p>
-      
-      <div style="display: flex; gap: 10px; width: 100%;">
-        <button class="btn-confirm-nao" onclick="fecharModalConfirmacao()">Cancelar</button>
-        <button class="btn-confirm-sim" onclick="realizarExclusaoDefinitiva()">Sim, Excluir</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-aviso" class="modal-overlay">
-    <div class="modal-content">
-      <h3 id="titulo-aviso" style="margin: 0; color: #1f2937; font-size: 18px;">Aviso</h3>
-      <p id="mensagem-aviso" style="color: #6b7280; margin: 10px 0 20px 0; font-size: 14px;">Mensagem...</p>
-      <button onclick="document.getElementById('modal-aviso').style.display='none'" style="background: #004481; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">OK</button>
-    </div>
-  </div>
-<div id="modal-salvando" class="modal-overlay" style="z-index: 4000; display: none;">
-    <div class="modal-content" style="text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center;">
-      <div class="spinner" style="width: 50px; height: 50px; border-width: 5px; margin-bottom: 20px;"></div>
-      <h3 style="margin: 0; color: #004481; font-size: 18px;">Salvando Registro...</h3>
-      <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">Gerando PDFs e atualizando planilha.</p>
-    </div>
-  </div>
-   <script>
-  // =========================================================================
-  // URL DO SEU WEB APP
-  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzmS3tmbAt7DpHwm_tZHjV6x1TGSm76AaRhnUooR3ISL2Rua-wBGqSakwS-162QxRBr1Q/exec";
-  // =========================================================================
-  
-  let usuarioLogadoNome = "";
-  let tipoServicoAtual = "Imovel"; 
-  let paginaAtual = 1;
-  let modoEdicao = false;
-  let codigoEdicao = null;
-  
-  let cacheHistorico = []; 
-  let cacheDashboard = []; 
-  let cacheClientes = []; 
-  let codigoParaExcluirTemp = null; 
- 
-  // --- UI AUXILIARES ---
-  let toastTimeout; 
-  function showToast(mensagem, tipo = 'success') {
-    const t = document.getElementById("toast");
-    if (toastTimeout) clearTimeout(toastTimeout);
-    t.className = "show"; 
-    
-    if (tipo === 'error') {
-        t.style.backgroundColor = "#ef4444";
-    } else {
-        t.style.backgroundColor = "#10b981";
-    }
-    
-    t.innerText = mensagem;
-    toastTimeout = setTimeout(function(){ t.className = t.className.replace("show", "").trim(); }, 3000);
-  }
- 
-  function toggleLoading(btnId, isLoading, textDefault) {
-    const btn = document.getElementById(btnId);
-    if(!btn) return;
-    if (isLoading) {
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div> Processando...';
-    } else {
-      btn.disabled = false;
-      btn.innerHTML = textDefault;
-    }
-  }
-  
-  function mostrarAlerta(titulo, mensagem) {
-    document.getElementById('titulo-aviso').innerText = titulo;
-    document.getElementById('mensagem-aviso').innerText = mensagem;
-    document.getElementById('modal-aviso').style.display = 'flex';
-  }
- 
-  // --- LOGIN ---
-  document.getElementById('loginUser').addEventListener('keypress', function (e) { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
-  document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') fazerLogin(); });
- 
-  function fazerLogin() {
-    const login = document.getElementById('loginUser').value;
-    const pass = document.getElementById('loginPass').value;
-    if(!login || !pass) { showToast("Preencha login e senha", "error"); return; }
-   
-    toggleLoading('btnLogin', true);
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "login", login: login, senha: pass }) })
-    .then(res => res.json())
-    .then(ret => {
-      if (ret.status === "sucesso") {
-        usuarioLogadoNome = ret.nomeUsuario;
-        document.getElementById('displayUsuario').innerText = usuarioLogadoNome;
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        carregarColaboradores();
-        carregarDashboard();
-      } else {
-        showToast(ret.mensagem, "error"); 
-      }
-    })
-    .catch(err => { showToast("Erro de conexão.", "error"); })
-    .finally(() => { toggleLoading('btnLogin', false, 'ACESSAR SISTEMA'); });
-  }
- 
-  function fazerLogout() {
-    document.getElementById('app-container').style.display = 'none';
-    usuarioLogadoNome = "";
-    document.getElementById('loginPass').value = "";
-    document.getElementById('loginUser').value = "";
-    document.getElementById('tela-login').style.display = 'flex';
-  }
- 
-  // --- DASHBOARD ---
-  function mudarAbaDashboard(tipo) {
-    tipoServicoAtual = tipo;
-    document.getElementById('tabImovel').className = tipo === 'Imovel' ? 'tab-btn active' : 'tab-btn';
-    document.getElementById('tabVeiculo').className = tipo === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
-    document.getElementById('lblTotal').innerText = tipo === 'Imovel' ? 'Total de Imóveis' : 'Total de Veículos';
-    document.getElementById('tituloHistorico').innerText = (tipo === 'Imovel' ? 'Imóveis' : 'Veículos');
-    carregarDashboard();
-  }
- 
-  function carregarDashboard() {
-    const tbody = document.getElementById('tabelaRecentes');
-    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px; color:#6b7280;'>Atualizando...</td></tr>"; 
-    
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "dashboard", tipo: tipoServicoAtual }) })
-    .then(res => res.json())
-    .then(dados => {
-      if(dados.status === "sucesso") {
-        document.getElementById('dashTotal').innerText = dados.total;
-        tbody.innerHTML = "";
+    <script>
+        // ==========================================
+        // COLE SUA URL DO GOOGLE APPS SCRIPT AQUI 👇
+        // ==========================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbzmTFdVGtg3bEGevNcRiguYx2MV6bslEMe9RT_R-pWt3b9DolS0c6mApLr_a-0ccim9aQ/exec"; 
         
-        cacheDashboard = dados.ultimos;
+        let idParaExcluir = null;
+        let cardAtivo = 1;
+        let idEmEdicao = null;
         
-        if (dados.ultimos.length === 0) { 
-          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:#999; padding:20px;'>Nenhum registro recente.</td></tr>"; 
-        } else {
-          dados.ultimos.forEach((item, index) => {
-             const tr = document.createElement('tr');
-             
-             let dataFormatada = item.data;
-             if(dataFormatada) {
-                 let d = new Date(dataFormatada);
-                 if(!isNaN(d.getTime())) {
-                     dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
-                 }
-             }
+        let filtroAtualPrincipal = 'Dedetizacao';
+        let filtroAtualHistorico = 'Dedetizacao';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalPagesCache = 1; 
 
-             let botoesHtml = "";
-             if (item.linkRel && String(item.linkRel).startsWith("http")) botoesHtml += `<a href="${item.linkRel}" target="_blank" class="btn-doc bg-relatorio">PDF</a>`;
-             if (item.linkCert && String(item.linkCert).startsWith("http")) botoesHtml += `<a href="${item.linkCert}" target="_blank" class="btn-doc bg-certificado">CERT</a>`;
-             if (botoesHtml === "") botoesHtml = "<span class='no-file'>--</span>";
-             
-             const codigoVisual = item.codigo ? item.codigo : "--";
-             const safeCodigo = item.codigo ? item.codigo : "";
+        let tipoImportacaoAtual = '';
+        let listaUnicaParaImportacao = [];
 
-             let botoesAcao = `
-               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'dashboard')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
-               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
-             `;
-             
-             tr.innerHTML = `
-                <td><strong>${item.cliente}</strong></td>
-                <td>${item.identificacao}</td>
-                <td>${item.servico}</td>
-                <td>${dataFormatada}</td>
-                <td style="text-align: center; font-size: 11px; color: #555;">${codigoVisual}</td>
-                <td style="text-align:center; display:flex; gap:5px; justify-content:center;">${botoesHtml}</td>
-                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
-             `;
-             tbody.appendChild(tr);
-          });
-        }
-      } else {
-        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro: ${dados.mensagem}</td></tr>`; 
-      }
-    })
-    .catch(err => { tbody.innerHTML = "<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>"; });
-  }
- 
-  // --- HISTÓRICO ---
-  function abrirHistorico() {
-    document.getElementById('view-dashboard').style.display = 'none';
-    document.getElementById('view-historico').style.display = 'block';
-    
-    document.getElementById('tituloHistorico').innerText = (tipoServicoAtual === 'Imovel' ? 'Imóveis' : 'Veículos');
-    document.getElementById('thIdentificacao').innerText = (tipoServicoAtual === 'Imovel' ? 'Endereço' : 'Placa');
-    
-    if (tipoServicoAtual === 'Veiculo') {
-        document.getElementById('containerFiltroPlaca').style.display = 'block';
-        document.getElementById('containerFiltroEndereco').style.display = 'none'; 
-    } else {
-        document.getElementById('containerFiltroPlaca').style.display = 'none';
-        document.getElementById('containerFiltroEndereco').style.display = 'block'; 
-    }
-    window.scrollTo(0,0);
-    paginaAtual = 1;
-    limparFiltros(false); 
-    carregarHistorico();
-  }
- 
-  function fecharHistorico() {
-    document.getElementById('view-historico').style.display = 'none';
-    document.getElementById('view-dashboard').style.display = 'block';
-  }
- 
-  function limparFiltros(recarregar = true) {
-    document.getElementById('filtroCliente').value = "";
-    document.getElementById('filtroPlaca').value = "";
-    document.getElementById('filtroEndereco').value = "";
-    document.getElementById('filtroServico').value = "";
-    document.getElementById('filtroData').value = "";
-    if(recarregar) { paginaAtual=1; carregarHistorico(); }
-  }
- 
-  function mudarPagina(direcao) {
-    paginaAtual += direcao;
-    carregarHistorico();
-  }
- 
-  function carregarHistorico() {
-    const tbody = document.getElementById('tabelaHistorico');
-    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
-    
-    const payload = {
-      acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
-      filtroCliente: document.getElementById('filtroCliente').value,
-      filtroPlaca: document.getElementById('filtroPlaca').value,
-      filtroEndereco: document.getElementById('filtroEndereco').value,
-      filtroServico: document.getElementById('filtroServico').value,
-      filtroData: document.getElementById('filtroData').value
-    };
- 
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(payload) })
-    .then(res => res.json())
-    .then(dados => {
-      if(dados.status === "sucesso") {
-        tbody.innerHTML = "";
-        cacheHistorico = dados.dados; 
+        const memoriaPragas = { 1: [], 2: [], 3: [] };
+        const memoriaPragasOutrosTxt = { 1: "", 2: "", 3: "" };
+
+        // Dispara o carregamento dos dados iniciais assim que o aplicativo abre
+        window.onload = function() {
+            aplicarFiltroPrincipal();
+        };
+
+        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function abrirModalSelecaoNovo() { idEmEdicao = null; abrirModal('modal-selecao'); }
         
-        if (dados.dados.length === 0) {
-           tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#999;'>Nenhum registro encontrado.</td></tr>";
-        } else {
-           dados.dados.forEach((r, index) => {
-             const tr = document.createElement('tr');
-             
-             let dataFormatada = r.data;
-             if(dataFormatada) {
-                 let d = new Date(dataFormatada);
-                 if(!isNaN(d.getTime())) {
-                     dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
-                 }
-             }
-
-             let botoesDocs = "";
-             if (r.linkRel && String(r.linkRel).startsWith("http")) botoesDocs += `<a href="${r.linkRel}" target="_blank" class="btn-doc bg-relatorio" title="Relatório">Rel</a>`;
-             if (r.linkCert && String(r.linkCert).startsWith("http")) botoesDocs += `<a href="${r.linkCert}" target="_blank" class="btn-doc bg-certificado" title="Certificado">Cert</a>`;
-             if (botoesDocs === "") botoesDocs = "<span class='no-file'>--</span>";
-             
-             const safeCodigo = r.codigo ? r.codigo : "";
-             
-             let botoesAcao = `
-               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'historico')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
-               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
-             `;
-             
-             tr.innerHTML = `
-                <td><strong>${r.cliente}</strong></td>
-                <td>${r.identificacao}</td>
-                <td>${dataFormatada}</td>
-                <td>${r.servico}</td>
-                <td style="text-align: center; font-size: 11px; color: #555;">${safeCodigo}</td>
-                <td style="text-align:center; display:flex; gap:3px; justify-content:center;">${botoesDocs}</td>
-                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
-             `;
-             tbody.appendChild(tr);
-           });
+        function prepararFormularioNovo(idModal) {
+            fecharModal('modal-selecao');
+            idEmEdicao = null;
+            document.getElementById('form-dedetizacao').reset();
+            document.getElementById('form-limpeza').reset();
+            document.getElementById('form-termo').reset();
+            document.getElementById('obs-limp').innerHTML = '';
+            document.getElementById('titulo-modal-dedetizacao').innerText = 'Novo Comunicado - Dedetização';
+            document.getElementById('titulo-modal-limpeza').innerText = 'Novo Comunicado - Limpeza';
+            document.getElementById('titulo-modal-termo').innerText = 'Novo Comunicado - Termonebulização';
+            document.getElementById('btn-salvar-dedetizacao').innerText = 'Salvar Comunicado';
+            document.getElementById('btn-salvar-limpeza').innerText = 'Salvar Comunicado';
+            document.getElementById('btn-salvar-termo').innerText = 'Salvar Comunicado';
+            
+            servGeralOutrasOpcoes.forEach(cb => cb.disabled = false); document.getElementById('serv-geral-outro-txt').classList.add('hidden');
+            [1, 2, 3].forEach(id => { memoriaPragas[id] = []; memoriaPragasOutrosTxt[id] = ""; document.getElementById(`serv-outro-txt-${id}`).classList.add('hidden'); document.getElementById(`imovel-outro-txt-${id}`).classList.add('hidden'); });
+            document.getElementById('praga-outros-txt').classList.add('hidden');
+            document.getElementById('display-pragas-1').innerText = "Nenhuma praga selecionada."; document.getElementById('display-pragas-2').innerText = "Nenhuma praga selecionada."; document.getElementById('display-pragas-3').innerText = "Nenhuma praga selecionada.";
+            
+            abrirModal(idModal); 
+            if(idModal === 'modal-dedetizacao') { ativarCard(1); }
         }
-        document.getElementById('infoPagina').innerText = `Página ${dados.paginaAtual} de ${dados.totalPaginas}`;
-        document.getElementById('btnAnt').disabled = (dados.paginaAtual <= 1);
-        document.getElementById('btnProx').disabled = (dados.paginaAtual >= dados.totalPaginas);
-      } else {
-        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro ao carregar.</td></tr>`; 
-      }
-    })
-    .catch(err => { tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>`; });
-  }
- 
-  // --- EXCLUSÃO BLINDADA ---
-  function confirmarExclusao(codigo) {
-    if (!codigo || codigo === "undefined" || codigo === "") {
-        showToast("Registro antigo sem código.", "error");
-        return;
-    }
-    codigoParaExcluirTemp = codigo;
-    document.getElementById('modal-confirmacao').style.display = 'flex';
-  }
- 
-  function fecharModalConfirmacao() {
-    document.getElementById('modal-confirmacao').style.display = 'none';
-    codigoParaExcluirTemp = null;
-  }
- 
-  function realizarExclusaoDefinitiva() {
-    if(!codigoParaExcluirTemp) return;
-    const codigoSeguro = codigoParaExcluirTemp;
-    fecharModalConfirmacao();
-    showToast("Processando exclusão...", "show");
- 
-    fetch(URL_SCRIPT, { 
-        method: "POST", 
-        body: JSON.stringify({ acao: "excluir", tipo: tipoServicoAtual, codigo: codigoSeguro }) 
-    })
-    .then(res => res.json())
-    .then(ret => {
-       if(ret.status === "sucesso") {
-         mostrarAlerta("✅ Sucesso!", "O registro e os arquivos foram excluídos permanentemente.");
-         carregarDashboard();
-         if(document.getElementById('view-historico').style.display === 'block') { carregarHistorico(); }
-       } else {
-         mostrarAlerta("❌ Erro!", "Não foi possível excluir o registro.\nMotivo: " + ret.mensagem);
-       }
-    })
-    .catch(err => {
-        mostrarAlerta("Erro de Conexão", "Verifique sua internet e tente novamente.");
-    });
-  }
- 
-  // --- LÓGICA DE EDIÇÃO ---
-  function prepararEdicao(index, origem = 'historico') {
-    let lista = (origem === 'dashboard') ? cacheDashboard : cacheHistorico;
-    const item = lista[index];
-    if(!item) return;
-    
-    modoEdicao = true;
-    codigoEdicao = item.codigo; 
- 
-    document.getElementById('tituloFormulario').innerText = "Editando Registro";
-    document.getElementById('modal-selecao').style.display = 'none';
-    document.getElementById('view-dashboard').style.display = 'none';
-    document.getElementById('view-historico').style.display = 'none';
-    document.getElementById('view-formulario').style.display = 'block';
-    
-    if(document.getElementById('btnImportarCliente')) document.getElementById('btnImportarCliente').style.display = 'none';
 
-    const lblCampo2 = document.getElementById('lblCampo2');
-    const inputCampo2 = document.getElementById('campo2');
-    const selectServico = document.getElementById('campo9');
-    
-    selectServico.innerHTML = ""; 
-    let opcoes = (tipoServicoAtual === 'Veiculo') 
-      ? ["Desinsetização em veículos", "Desinsetização em veículos da RODASUL", "Limpeza e higienização de tanques automotivos", "Modelo alternativo"]
-      : ["Desinsetização", "Desinsetização e desratização", "Descupinização", "Limpeza de Reservatórios", "Modelo alternativo"];
-    
-    opcoes.forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; selectServico.appendChild(option); });
- 
-    if (tipoServicoAtual === 'Veiculo') { 
-        lblCampo2.innerText = "Placa"; inputCampo2.placeholder = "AAA-0000"; 
-    } else { 
-        lblCampo2.innerText = "Endereço"; inputCampo2.placeholder = "Endereço completo"; 
-    }
- 
-    document.getElementById('campo1').value = item.cliente;
-    document.getElementById('campo2').value = item.identificacao;
-    
-    let dataISO = "";
-    if (item.data) { dataISO = String(item.data).substring(0, 10); }
-    document.getElementById('campo5').value = dataISO;
-    
-    document.getElementById('campo3').value = item.entrada;
-    document.getElementById('campo4').value = item.saida;
-    
-    const selGarantia = document.getElementById('selectGarantia');
-    const garantiaValor = String(item.garantia).replace(" dias", "").trim();
-    
-    if(["30","60","90","180","360","720"].includes(garantiaValor)) {
-        selGarantia.value = garantiaValor;
-        document.getElementById('campo6_manual').style.display = 'none';
-    } else {
-        selGarantia.value = "Outro";
-        document.getElementById('campo6_manual').style.display = 'block';
-        document.getElementById('campo6_manual').value = garantiaValor;
-    }
- 
-    if(item.servico.includes("Limpeza de Reservatórios:")) {
-        selectServico.value = "Limpeza de Reservatórios";
-        document.getElementById('descReservatorio').style.display = 'block';
-        let partesServico = item.servico.split(": ");
-        document.getElementById('descReservatorio').value = partesServico.length > 1 ? partesServico[1] : "";
-    } else {
-        selectServico.value = item.servico;
-        document.getElementById('descReservatorio').style.display = 'none';
-    }
- 
-    const checks = document.querySelectorAll('input[name="colaboradores_check"]');
-    checks.forEach(c => {
-        if (item.colaboradores && item.colaboradores.includes(c.value)) c.checked = true;
-        else c.checked = false;
-    });
-    
-    const listaNomes = item.colaboradores ? item.colaboradores.split(", ") : [];
-    document.getElementById('texto-selecao').innerText = listaNomes.length + " selecionados";
-    calcularValidade();
-  }
- 
-  // --- FORMULÁRIO ---
-  function abrirModalSelecao() { document.getElementById('modal-selecao').style.display = 'flex'; }
-  function handleInputPlaca(e) { if(tipoServicoAtual === 'Veiculo') { e.target.value = e.target.value.toUpperCase(); } }
- 
-  function iniciarRegistro(tipo) {
-    tipoServicoAtual = tipo;
-    modoEdicao = false; codigoEdicao = null;
-    document.getElementById('modal-selecao').style.display = 'none';
-    document.getElementById('tituloFormulario').innerText = `Novo Registro - ${tipo === 'Imovel' ? 'IMÓVEL' : 'VEÍCULO'}`;
-    const lblCampo2 = document.getElementById('lblCampo2');
-    const inputCampo2 = document.getElementById('campo2');
-    const btnImportar = document.getElementById('btnImportarCliente');
-    
-    inputCampo2.removeEventListener('input', handleInputPlaca);
-    if (tipo === 'Veiculo') { 
-        lblCampo2.innerText = "Placa"; inputCampo2.placeholder = "AAA-0000"; inputCampo2.addEventListener('input', handleInputPlaca);
-        if(btnImportar) btnImportar.style.display = 'none';
-    } else { 
-        lblCampo2.innerText = "Endereço"; inputCampo2.placeholder = "Endereço completo"; 
-        if(btnImportar) btnImportar.style.display = 'inline-flex';
-    }
-    
-    const selectServico = document.getElementById('campo9');
-    selectServico.innerHTML = ""; 
-    let opcoes = (tipo === 'Veiculo') 
-      ? ["Desinsetização em veículos", "Desinsetização em veículos da RODASUL", "Limpeza e higienização de tanques automotivos", "Modelo alternativo"]
-      : ["Desinsetização", "Desinsetização e desratização", "Descupinização", "Limpeza de Reservatórios", "Modelo alternativo"];
-    
-    opcoes.forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; selectServico.appendChild(option); });
-    
-    document.getElementById('formulario').reset();
-    document.querySelectorAll('input[name="colaboradores_check"]').forEach(c => c.checked = false);
-    document.getElementById('texto-selecao').innerText = "Selecione os colaboradores...";
-    document.getElementById('descReservatorio').style.display = 'none';
-    
-    const hoje = new Date();
-    document.getElementById('campo5').value = hoje.toISOString().split('T')[0];
-
-    document.getElementById('view-dashboard').style.display = 'none';
-    document.getElementById('view-historico').style.display = 'none'; 
-    document.getElementById('view-formulario').style.display = 'block';
-    window.scrollTo(0,0);
-    calcularValidade(); 
-  }
- 
-  function fecharFormulario() {
-    document.getElementById('formulario').reset();
-    document.getElementById('view-formulario').style.display = 'none';
-    if(modoEdicao) {
-        document.getElementById('view-historico').style.display = 'block';
-    } else {
-        document.getElementById('view-dashboard').style.display = 'block';
-        mudarAbaDashboard(tipoServicoAtual);
-    }
-    modoEdicao = false; codigoEdicao = null;
-  }
- 
-  document.getElementById('campo9').addEventListener('change', function() {
-    const descInput = document.getElementById('descReservatorio');
-    if (tipoServicoAtual === 'Imovel' && this.value === 'Limpeza de Reservatórios') { 
-        descInput.style.display = 'block'; descInput.required = true; descInput.focus(); 
-    } else { 
-        descInput.style.display = 'none'; descInput.required = false; descInput.value = ''; 
-    }
-  });
- 
-  document.getElementById("formulario").addEventListener("submit", function (e) {
-    e.preventDefault();
-    
-    // 1. ESCONDE O FORMULÁRIO E MOSTRA O LOADING
-    document.getElementById('view-formulario').style.display = 'none';
-    document.getElementById('modal-salvando').style.display = 'flex';
-    
-    // --- PREPARAÇÃO DOS DADOS ---
-    let garantiaTexto = (document.getElementById('selectGarantia').value === 'Outro') 
-        ? document.getElementById('campo6_manual').value + " dias" 
-        : document.getElementById('selectGarantia').value + " dias";
-    
-    const checkboxes = document.querySelectorAll('input[name="colaboradores_check"]:checked');
-    let listaSel = [];
-    checkboxes.forEach(cb => { 
-        if(cb.value !== 'Outro') listaSel.push(cb.value); 
-        else if(document.getElementById('campo8_manual').value) listaSel.push(document.getElementById('campo8_manual').value); 
-    });
-    
-    let servicoFinal = document.getElementById("campo9").value;
-    const descExtra = document.getElementById('descReservatorio');
-    if (descExtra.style.display === 'block' && descExtra.value.trim() !== "") { 
-        servicoFinal = `Limpeza de Reservatórios: ${descExtra.value}`; 
-    }
-    
-    const dados = {
-      acao: modoEdicao ? "editar" : "registrar", tipo: tipoServicoAtual, usuarioLogado: usuarioLogadoNome, 
-      codigoOriginal: codigoEdicao,
-      campo1: document.getElementById("campo1").value, campo2: document.getElementById("campo2").value, 
-      campo3: document.getElementById("campo3").value, campo4: document.getElementById("campo4").value, 
-      campo5: document.getElementById("campo5").value, campo6: garantiaTexto, 
-      campo7: document.getElementById("campo7").value, campo8: listaSel.join(", "), campo9: servicoFinal
-    };
-    
-    // --- ENVIO ---
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(dados) })
-    .then(res => res.json())
-    .then(ret => { 
-        // 2. RETORNO: ESCONDE O LOADING
-        document.getElementById('modal-salvando').style.display = 'none';
-
-        if(ret.status === "sucesso") { 
-           showToast(modoEdicao ? "Registro atualizado!" : "Registro salvo!", "success");
-           
-           // Limpa o formulário e volta para a tela inicial
-           fecharFormulario(); 
-           if(modoEdicao) { carregarHistorico(); } 
-           
-        } else { 
-           // 3. ERRO: MOSTRA O FORMULÁRIO DE VOLTA
-           document.getElementById('view-formulario').style.display = 'block';
-           showToast("Erro: " + ret.mensagem, "error"); 
+        async function aplicarFiltroPrincipal() { 
+            const res = await fetchAPI('listar', { aba: filtroAtualPrincipal, limite: 5 }, "Carregando comunicados...");
+            if (res.sucesso) { desenharLinhas(res.registros, 'tabela-corpo-ultimos'); }
         }
-    })
-    .catch(err => { 
-        // ERRO CONEXÃO: TIRA O LOADING E DEVOLVE O FORMULÁRIO
-        document.getElementById('modal-salvando').style.display = 'none';
-        document.getElementById('view-formulario').style.display = 'block'; 
-        showToast("Erro ao enviar dados. Verifique a internet.", "error"); 
-    });
-  });
- 
-  // --- AUXILIARES ---
-  // --- COLABORADORES (Versão Corrigida para conviver com o App) ---
-  function carregarColaboradores() {
-    // MUITO IMPORTANTE: Usar method: "POST" e body com a ação
-    fetch(URL_SCRIPT, { 
-        method: "POST", 
-        body: JSON.stringify({ acao: "listarColaboradores" }) 
-    })
-    .then(res => res.json())
-    .then(lista => {
-        const divCheck = document.getElementById('checkboxes'); 
-        divCheck.innerHTML = '';
+
+        function setFiltroPrincipal(filtro, btnElement) {
+            filtroAtualPrincipal = filtro; const container = btnElement.parentElement;
+            container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btnElement.classList.add('active');
+            aplicarFiltroPrincipal();
+        }
+
+        function abrirModalHistorico() { abrirModal('modal-historico'); dispararBuscaHistorico(); }
+
+        function setFiltroHistorico(filtro, btnElement) {
+            filtroAtualHistorico = filtro; const container = btnElement.parentElement;
+            container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btnElement.classList.add('active');
+            dispararBuscaHistorico();
+        }
+
+        function limparFiltrosHistorico() {
+            document.getElementById('filtro-cliente').value = '';
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
+            dispararBuscaHistorico();
+        }
+
+        function dispararBuscaHistorico() {
+            currentPage = 1; 
+            aplicarFiltrosEBusca();
+        }
+
+        async function aplicarFiltrosEBusca() {
+            const searchCliente = document.getElementById('filtro-cliente').value;
+            const dataInicioStr = document.getElementById('filtro-data-inicio').value;
+            const dataFimStr = document.getElementById('filtro-data-fim').value;
+
+            const res = await fetchAPI('listar', { 
+                aba: filtroAtualHistorico, 
+                limite: itemsPerPage, 
+                pagina: currentPage,
+                busca: searchCliente,
+                dataInicio: dataInicioStr,
+                dataFim: dataFimStr
+            }, "Buscando histórico...");
+            
+            if (res.sucesso) {
+                desenharLinhas(res.registros, 'tabela-corpo-historico');
+                
+                totalPagesCache = Math.ceil(res.total / itemsPerPage) || 1;
+                document.getElementById('page-info').innerText = `Página ${currentPage} de ${totalPagesCache}`;
+                document.getElementById('btn-prev-page').disabled = (currentPage === 1);
+                document.getElementById('btn-next-page').disabled = (currentPage >= totalPagesCache);
+            }
+        }
+
+        function mudarPagina(direcao) {
+            currentPage += direcao;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPagesCache) currentPage = totalPagesCache;
+            aplicarFiltrosEBusca(); 
+        }
+
+        async function abrirModalImportacao(tipoServico) {
+            tipoImportacaoAtual = tipoServico;
+            document.getElementById('input-busca-importacao').value = '';
+            
+            let abaParaBackend = tipoServico;
+            const res = await fetchAPI('listar', { aba: abaParaBackend, limite: 100 }, "Carregando clientes para importação..."); 
+            
+            if(res.sucesso) {
+                let registrosDoTipo = res.registros;
+                listaUnicaParaImportacao = [];
+                let nomesVistos = new Set();
+                
+                registrosDoTipo.forEach(reg => {
+                    let nomeLower = (reg.cliente || '').trim().toLowerCase();
+                    if (nomeLower && !nomesVistos.has(nomeLower)) {
+                        nomesVistos.add(nomeLower);
+                        listaUnicaParaImportacao.push(reg);
+                    }
+                });
+                renderizarListaImportacao(listaUnicaParaImportacao);
+                abrirModal('modal-importacao');
+            }
+        }
+
+        function renderizarListaImportacao(lista) {
+            const container = document.getElementById('lista-clientes-importacao');
+            container.innerHTML = '';
+            
+            if(lista.length === 0) {
+                container.innerHTML = '<div style="padding: 15px; text-align: center; color: #777;">Nenhum cliente encontrado no histórico para este serviço.</div>';
+                return;
+            }
+
+            lista.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item-import';
+                div.innerHTML = `
+                    <div>
+                        <strong>${item.cliente}</strong>
+                        <span>Último serviço: ${item.data || '-'}</span>
+                    </div>
+                    <button class="btn-select-import" onclick="executarImportacao('${item.id}')">Selecionar</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filtrarListaImportacao() {
+            const query = document.getElementById('input-busca-importacao').value.toLowerCase().trim();
+            const filtrados = listaUnicaParaImportacao.filter(item => (item.cliente || '').toLowerCase().includes(query));
+            renderizarListaImportacao(filtrados);
+        }
+
+        async function executarImportacao(id) {
+            fecharModal('modal-importacao');
+            let tipoStringNoBackend = '';
+            if (tipoImportacaoAtual === 'Dedetizacao') tipoStringNoBackend = 'Dedetização';
+            else if (tipoImportacaoAtual === 'Limpeza') tipoStringNoBackend = 'Limpeza de Reservatório';
+            else if (tipoImportacaoAtual === 'Termo') tipoStringNoBackend = 'Termonebulização';
+            await aplicarEngenhariaReversa(id, tipoStringNoBackend, true);
+        }
         
-        if(Array.isArray(lista)){ 
-            lista.forEach((nome, i) => criarOpcao(nome, nome, i)); 
-            criarOpcao("Outro", "Outro (Digitar)", "outro", true); 
+        async function aplicarEngenhariaReversa(id, tipo, isImportacao = false) {
+            const res = await fetchAPI('buscar_registro', { id: id, tipo: tipo }, "Extraindo dados completos...");
+            if (!res.sucesso) { showToast(res.mensagem, 'error'); return; }
+            
+            const dados = res.dados;
+            
+            if (tipo === 'Dedetização' || tipo === 'Dedetizacao') {
+                if(!isImportacao) {
+                    idEmEdicao = id;
+                    document.getElementById('titulo-modal-dedetizacao').innerText = 'Editando Comunicado - Dedetização';
+                    document.getElementById('btn-salvar-dedetizacao').innerText = 'Atualizar Comunicado';
+                } else {
+                    idEmEdicao = null; 
+                    document.getElementById('data').value = ''; 
+                }
+                
+                document.getElementById('cliente').value = dados.cliente || '';
+                if(!isImportacao) { document.getElementById('data').value = dados.data || ''; }
+                
+                if (dados.previsao) {
+                    const prev = dados.previsao.split(' às ');
+                    document.getElementById('hora-inicio').value = prev[0] ? prev[0].trim() : '';
+                    document.getElementById('hora-fim').value = prev[1] ? prev[1].trim() : '';
+                }
+                
+                let radioVend = document.querySelector(`input[name="vendedor"][value="${dados.vendedor}"]`);
+                if(radioVend) radioVend.checked = true;
+                
+                document.querySelectorAll('.servico-geral-cb').forEach(cb => { cb.checked = false; cb.disabled = false; });
+                document.getElementById('serv-geral-outro-txt').classList.add('hidden');
+                if (dados.servicoGeralStr) {
+                    let strGeral = dados.servicoGeralStr.replace('os serviços de ', '').replace('o serviço de ', '').trim();
+                    let itensGeral = strGeral.split(/ e |, /).map(x => x.trim().toLowerCase());
+                    let hasOutroGeral = false;
+                    itensGeral.forEach(item => {
+                        let cb = Array.from(document.querySelectorAll('.servico-geral-cb')).find(el => el.value.toLowerCase() === item);
+                        if(cb) cb.checked = true; else hasOutroGeral = item;
+                    });
+                    if(hasOutroGeral) {
+                        document.getElementById('serv-geral-outro-cb').checked = true;
+                        document.getElementById('serv-geral-outro-txt').value = hasOutroGeral;
+                        document.getElementById('serv-geral-outro-txt').classList.remove('hidden');
+                        document.querySelectorAll('.servico-geral-cb:not(#serv-geral-outro-cb)').forEach(cb => cb.disabled = true);
+                    }
+                }
+                
+                function preencherPromoReversa(idCard, textoStr) {
+                    document.getElementById(`valor-${idCard}`).value = '';
+                    document.getElementById(`imovel-${idCard}`).value = 'Apartamento';
+                    document.getElementById(`imovel-outro-txt-${idCard}`).classList.add('hidden');
+                    document.querySelectorAll(`.servico-cb-${idCard}`).forEach(cb => cb.checked = false);
+                    memoriaPragas[idCard] = [];
+                    memoriaPragasOutrosTxt[idCard] = "";
+                    document.getElementById(`serv-outro-txt-${idCard}`).classList.add('hidden');
+                    document.getElementById(`serv-outro-cb-${idCard}`).checked = false;
+                    
+                    if(!textoStr) { atualizarVisorPragas(idCard); return; }
+                    
+                    const regex = /Valor promocional do serviço de (.*?) por (.*?) para (.*?): R\$ ([\d,]+)/;
+                    const match = textoStr.match(regex);
+                    if(match) {
+                        let servs = match[1]; let imovel = match[2]; let prags = match[3]; let val = match[4].replace(',', '.');
+                        document.getElementById(`valor-${idCard}`).value = val;
+                        
+                        let imovCap = imovel.charAt(0).toUpperCase() + imovel.slice(1);
+                        let imovSel = document.getElementById(`imovel-${idCard}`);
+                        if(imovCap === 'Apartamento' || imovCap === 'Casa') { imovSel.value = imovCap; } 
+                        else { imovSel.value = 'Outro'; document.getElementById(`imovel-outro-txt-${idCard}`).classList.remove('hidden'); document.getElementById(`imovel-outro-txt-${idCard}`).value = imovel; }
+                        
+                        let sItens = servs.split(/ e |, /).map(x => x.trim().toLowerCase());
+                        let hOutroS = false;
+                        sItens.forEach(item => {
+                            let cb = Array.from(document.querySelectorAll(`.servico-cb-${idCard}`)).find(el => el.value.toLowerCase() === item);
+                            if(cb) cb.checked = true; else hOutroS = item;
+                        });
+                        if(hOutroS) { document.getElementById(`serv-outro-cb-${idCard}`).checked = true; document.getElementById(`serv-outro-txt-${idCard}`).value = hOutroS; document.getElementById(`serv-outro-txt-${idCard}`).classList.remove('hidden'); }
+                        
+                        let pItens = prags.split(/ e |, /).map(x => x.trim().toUpperCase());
+                        let hOutraP = false;
+                        const pConhecidas = ["BARATAS","FORMIGAS","CUPINS","ROEDORES","MOSCAS","MOSQUITOS","CARRAPATOS","PULGAS","ESCORPIÕES","CARAMUJOS"];
+                        pItens.forEach(p => {
+                            if(pConhecidas.includes(p)) { memoriaPragas[idCard].push(p); } 
+                            else { memoriaPragas[idCard].push("OUTROS"); memoriaPragasOutrosTxt[idCard] = p; hOutraP = true; }
+                        });
+                        if(hOutraP) { document.getElementById('praga-outros-txt').classList.remove('hidden'); }
+                    }
+                    atualizarVisorPragas(idCard);
+                }
+                
+                preencherPromoReversa(1, dados.promo1Str);
+                preencherPromoReversa(2, dados.promo2Str);
+                preencherPromoReversa(3, dados.promo3Str);
+                
+                if(!isImportacao) abrirModal('modal-dedetizacao');
+                ativarCard(1);
+                if(isImportacao) showToast("Dados preenchidos. Informe a Data.", "success");
+            } 
+            else if (tipo === 'Limpeza de Reservatório') {
+                if(!isImportacao) {
+                    idEmEdicao = id;
+                    document.getElementById('titulo-modal-limpeza').innerText = 'Editando Comunicado - Limpeza';
+                    document.getElementById('btn-salvar-limpeza').innerText = 'Atualizar Comunicado';
+                } else {
+                    idEmEdicao = null;
+                    document.getElementById('data-limp').value = '';
+                }
+                
+                document.getElementById('cliente-limp').value = dados.cliente || '';
+                if(!isImportacao) document.getElementById('data-limp').value = dados.data || '';
+                document.getElementById('obs-limp').innerHTML = dados.observacao || '';
+                
+                let radioVend = document.querySelector(`input[name="vendedor-limp"][value="${dados.vendedor}"]`);
+                if(radioVend) radioVend.checked = true;
+                
+                if(!isImportacao) abrirModal('modal-limpeza');
+                if(isImportacao) showToast("Dados preenchidos. Informe a Data.", "success");
+            } 
+            else if (tipo === 'Termonebulização') {
+                if(!isImportacao) {
+                    idEmEdicao = id;
+                    document.getElementById('titulo-modal-termo').innerText = 'Editando Comunicado - Termonebulização';
+                    document.getElementById('btn-salvar-termo').innerText = 'Atualizar Comunicado';
+                } else {
+                    idEmEdicao = null;
+                    document.getElementById('data-termo').value = '';
+                }
+                
+                document.getElementById('cliente-termo').value = dados.cliente || '';
+                if(!isImportacao) document.getElementById('data-termo').value = dados.data || '';
+                
+                if (dados.previsao) {
+                    const prev = dados.previsao.split(' às ');
+                    document.getElementById('hora-inicio-termo').value = prev[0] ? prev[0].trim() : '';
+                    document.getElementById('hora-fim-termo').value = prev[1] ? prev[1].trim() : '';
+                }
+                let radioVend = document.querySelector(`input[name="vendedor-termo"][value="${dados.vendedor}"]`);
+                if(radioVend) radioVend.checked = true;
+                
+                if(!isImportacao) abrirModal('modal-termo');
+                if(isImportacao) showToast("Dados preenchidos. Informe a Data.", "success");
+            }
         }
-    })
-    .catch(err => {
-        console.error("Erro ao carregar colaboradores:", err);
-        const divCheck = document.getElementById('checkboxes');
-        divCheck.innerHTML = '<label style="color:red; padding:10px;">Erro ao carregar lista.</label>';
-    });
-  }
-  
-  const selectGarantia = document.getElementById('selectGarantia');
-  const inputManualGarantia = document.getElementById('campo6_manual');
-  const inputDataRealizacao = document.getElementById('campo5');
-  const inputDataValidade = document.getElementById('campo7');
-  
-  selectGarantia.addEventListener('change', () => { 
-      inputManualGarantia.style.display = selectGarantia.value === 'Outro' ? 'block' : 'none'; 
-      calcularValidade(); 
-  });
-  inputManualGarantia.addEventListener('input', calcularValidade);
-  inputDataRealizacao.addEventListener('change', calcularValidade);
-  
-  function calcularValidade() {
-    let dias = selectGarantia.value === 'Outro' ? parseInt(inputManualGarantia.value) : parseInt(selectGarantia.value);
-    const partesData = inputDataRealizacao.value.split('-'); 
-    if(dias && partesData.length === 3) {
-        const d = new Date(parseInt(partesData[0]), parseInt(partesData[1]) - 1, parseInt(partesData[2]));
-        d.setDate(d.getDate() + dias);
-        inputDataValidade.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-  }
- 
-  function toggleCheckboxes() { const div = document.getElementById('checkboxes'); div.style.display = div.style.display === 'block' ? 'none' : 'block'; }
-  function criarOpcao(val, txt, id, isOutro) {
-      const div = document.getElementById('checkboxes'); const lbl = document.createElement('label'); const chk = document.createElement('input');
-      chk.type='checkbox'; chk.value=val; chk.name='colaboradores_check'; chk.id='c_'+id;
-      chk.addEventListener('change', () => {
-        if(isOutro) document.getElementById('campo8_manual').style.display = chk.checked ? 'block' : 'none';
-        const q = document.querySelectorAll('input[name="colaboradores_check"]:checked').length;
-        document.getElementById('texto-selecao').innerText = q ? q + " selecionados" : "Selecione os colaboradores...";
-      });
-      lbl.appendChild(chk); lbl.appendChild(document.createTextNode(txt)); div.appendChild(lbl);
-  }
-  document.addEventListener('click', function(e) { const ms = document.querySelector('.multiselect'); if (!ms.contains(e.target)) document.getElementById('checkboxes').style.display = 'none'; });
 
-  // === LÓGICA DE IMPORTAÇÃO DE CLIENTES ===
-  function abrirModalClientes() {
-      document.getElementById('modal-clientes').style.display = 'flex';
-      const divLista = document.getElementById('listaClientes');
-      divLista.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">Carregando lista...</div>';
-      
-      fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "listarClientes" }) })
-      .then(res => res.json())
-      .then(ret => {
-          if (ret.status === "sucesso") {
-              cacheClientes = ret.dados;
-              renderizarListaClientes(cacheClientes);
-          } else {
-              divLista.innerHTML = '<div style="padding:10px; color:red;">Erro ao carregar lista.</div>';
-          }
-      })
-      .catch(e => {
-          divLista.innerHTML = '<div style="padding:10px; color:red;">Erro de conexão.</div>';
-      });
-  }
+        async function editarRegistro(id, tipo) {
+            fecharModal('modal-historico');
+            await aplicarEngenhariaReversa(id, tipo, false);
+        }
 
-  function renderizarListaClientes(lista) {
-      const divLista = document.getElementById('listaClientes');
-      divLista.innerHTML = '';
-      if(lista.length === 0) {
-          divLista.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum cliente encontrado.</div>';
-          return;
-      }
-      lista.forEach((c, index) => {
-          const div = document.createElement('div');
-          div.className = 'item-cliente';
-          div.onclick = function() { selecionarCliente(c); };
-          div.innerHTML = `<strong>${c.nome}</strong><br><small style="color:#6b7280;">${c.endereco}</small>`;
-          divLista.appendChild(div);
-      });
-  }
+        function abrirLinkPdf(link) {
+            if (!link || link === "undefined" || link.includes("Erro") || link === "") {
+                showToast("PDF indisponível para este comunicado.", "error");
+                return;
+            }
+            window.open(link, '_blank');
+        }
 
-  function filtrarListaClientes() {
-      const termo = document.getElementById('buscaCliente').value.toLowerCase();
-      const filtrados = cacheClientes.filter(c => c.nome.toLowerCase().includes(termo));
-      renderizarListaClientes(filtrados);
-  }
+        async function baixarPDF(id, tipo) {
+            try {
+                showToast("Baixando PDF do Drive...", "success");
+                const res = await fetchAPI('iniciarCompartilhamentoPDF', { id: id, tipo: tipo }, "Baixando PDF do Drive...");
+                
+                if (!res.sucesso) { showToast(res.mensagem, "error"); return; }
 
-  function selecionarCliente(cliente) {
-      document.getElementById('campo1').value = cliente.nome;
-      document.getElementById('campo2').value = cliente.endereco;
-      if(cliente.entrada) document.getElementById('campo3').value = cliente.entrada;
-      if(cliente.saida) document.getElementById('campo4').value = cliente.saida;
-      document.getElementById('modal-clientes').style.display = 'none';
-      showToast("Dados importados!", "success");
-  }
+                const base64Data = res.base64;
+                const contentType = 'application/pdf';
+                const byteCharacters = atob(base64Data);
+                const byteArrays = [];
 
-  </script>
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                    const slice = byteCharacters.slice(offset, offset + 512);
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) { byteNumbers[i] = slice.charCodeAt(i); }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                const blob = new Blob(byteArrays, { type: contentType });
+                const nomeDoArquivo = res.nomeArquivo || "Documento.pdf";
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nomeDoArquivo;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast("Download concluído!", "success");
+
+            } catch (error) { showToast("Erro ao baixar arquivo.", "error"); }
+        }
+
+        function desenharLinhas(registros, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            if (registros.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum comunicado encontrado.</td></tr>'; return; }
+
+            registros.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="white-space: nowrap;">${item.data || '-'}</td>
+                    <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.cliente || '-'}">
+                        <strong>${item.cliente || '-'}</strong>
+                    </td>
+                    <td style="white-space: nowrap;">${item.servico || '-'}</td>
+                    <td style="white-space: nowrap; width: 140px;">
+                        <div class="actions">
+                            <button class="icon-btn" onclick="abrirLinkPdf('${item.linkPdf}')" title="Abrir">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </button>
+                            <button class="icon-btn share" onclick="baixarPDF('${item.id}', '${item.servico}')" title="Baixar PDF">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </button>
+                            <button class="icon-btn" onclick="editarRegistro('${item.id}', '${item.servico}')" title="Editar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <button class="icon-btn delete" onclick="abrirModalExclusao('${item.id}')" title="Excluir">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function inserirModeloLimpeza() {
+            const editor = document.getElementById('obs-limp');
+            const textoPadrao = `Informamos que, no período das <strong>XX horas às XX horas</strong>, serão realizadas a limpeza e higienização das cisternas, sem comprometimento no fornecimento de água.<br><br>Posteriormente, das <strong>XX horas às XX horas</strong>, será executada a limpeza das caixas d’água, ocasião em que haverá interrupção temporária no abastecimento de água do condomínio por algumas horas.`;
+            
+            if (editor.innerHTML.trim() !== '' && editor.innerHTML.trim() !== '<br>') {
+                if(!confirm("Atenção: A caixa de texto já possui conteúdo. Deseja substituí-lo pelo modelo padrão?")) return;
+            }
+            editor.innerHTML = textoPadrao; editor.focus();
+        }
+
+        const servGeralOutroCb = document.getElementById('serv-geral-outro-cb');
+        const servGeralOutroTxt = document.getElementById('serv-geral-outro-txt');
+        const servGeralOutrasOpcoes = document.querySelectorAll('.servico-geral-cb:not(#serv-geral-outro-cb)');
+
+        servGeralOutroCb.addEventListener('change', function() {
+            if (this.checked) {
+                servGeralOutrasOpcoes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                servGeralOutroTxt.classList.remove('hidden'); servGeralOutroTxt.focus();
+            } else {
+                servGeralOutrasOpcoes.forEach(cb => { cb.disabled = false; });
+                servGeralOutroTxt.classList.add('hidden'); servGeralOutroTxt.value = '';
+            }
+        });
+
+        [1, 2, 3].forEach(id => {
+            document.getElementById(`imovel-${id}`).addEventListener('change', function() {
+                const txtInput = document.getElementById(`imovel-outro-txt-${id}`);
+                if (this.value === "Outro") { txtInput.classList.remove('hidden'); txtInput.focus(); } 
+                else { txtInput.classList.add('hidden'); txtInput.value = ''; }
+            });
+
+            document.getElementById(`serv-outro-cb-${id}`).addEventListener('change', function() {
+                const txtInput = document.getElementById(`serv-outro-txt-${id}`);
+                if (this.checked) { txtInput.classList.remove('hidden'); txtInput.focus(); } 
+                else { txtInput.classList.add('hidden'); txtInput.value = ''; }
+            });
+        });
+
+        document.querySelectorAll('.servico-cb-1, .servico-cb-2, .servico-cb-3').forEach(cb => {
+            cb.addEventListener('change', function() {
+                let idCard = this.classList.contains('servico-cb-1') ? 1 : (this.classList.contains('servico-cb-2') ? 2 : 3);
+                const servico = this.value;
+                const isChecked = this.checked;
+                let pragasAfetadas = [];
+                if (servico === 'Desratização') pragasAfetadas = ['ROEDORES'];
+                else if (servico === 'Descupinização') pragasAfetadas = ['CUPINS'];
+                else if (servico === 'Desinsetização') pragasAfetadas = ['BARATAS', 'FORMIGAS'];
+
+                pragasAfetadas.forEach(praga => {
+                    if (isChecked) { if (!memoriaPragas[idCard].includes(praga)) memoriaPragas[idCard].push(praga); } 
+                    else { const index = memoriaPragas[idCard].indexOf(praga); if (index > -1) memoriaPragas[idCard].splice(index, 1); }
+                });
+
+                if (idCard === cardAtivo) { document.querySelectorAll('.praga-cb').forEach(pragaCb => { pragaCb.checked = memoriaPragas[idCard].includes(pragaCb.value); }); }
+                atualizarVisorPragas(idCard);
+            });
+        });
+
+        function ativarCard(idCard) {
+            cardAtivo = idCard;
+            document.querySelectorAll('.promo-card').forEach(card => card.classList.remove('active'));
+            document.getElementById('card-' + idCard).classList.add('active');
+            
+            document.querySelectorAll('.praga-cb').forEach(cb => { cb.checked = memoriaPragas[idCard].includes(cb.value); });
+            const txtOutrosPragas = document.getElementById('praga-outros-txt');
+            if (memoriaPragas[idCard].includes("OUTROS")) {
+                txtOutrosPragas.classList.remove('hidden'); txtOutrosPragas.value = memoriaPragasOutrosTxt[idCard];
+            } else { txtOutrosPragas.classList.add('hidden'); txtOutrosPragas.value = ""; }
+        }
+
+        document.querySelectorAll('.praga-cb').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const pragaNome = this.value;
+                if (this.checked) {
+                    if (!memoriaPragas[cardAtivo].includes(pragaNome)) memoriaPragas[cardAtivo].push(pragaNome);
+                    if (pragaNome === "OUTROS") { document.getElementById('praga-outros-txt').classList.remove('hidden'); document.getElementById('praga-outros-txt').focus(); }
+                } else {
+                    const index = memoriaPragas[cardAtivo].indexOf(pragaNome);
+                    if (index > -1) memoriaPragas[cardAtivo].splice(index, 1);
+                    if (pragaNome === "OUTROS") { document.getElementById('praga-outros-txt').classList.add('hidden'); document.getElementById('praga-outros-txt').value = ""; memoriaPragasOutrosTxt[cardAtivo] = ""; }
+                }
+                atualizarVisorPragas(cardAtivo);
+            });
+        });
+
+        document.getElementById('praga-outros-txt').addEventListener('input', function() { memoriaPragasOutrosTxt[cardAtivo] = this.value; atualizarVisorPragas(cardAtivo); });
+
+        function atualizarVisorPragas(idCard) {
+            const display = document.getElementById('display-pragas-' + idCard);
+            let pragasParaMostrar = [...memoriaPragas[idCard]];
+            const indexOutros = pragasParaMostrar.indexOf("OUTROS");
+            if (indexOutros > -1 && memoriaPragasOutrosTxt[idCard].trim() !== "") { pragasParaMostrar[indexOutros] = memoriaPragasOutrosTxt[idCard]; }
+            display.innerText = pragasParaMostrar.length > 0 ? pragasParaMostrar.join(', ') : "Nenhuma praga selecionada.";
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function toggleLoader(show, text = "Processando, aguarde...") {
+            const loader = document.getElementById('global-loader');
+            const loaderText = document.getElementById('global-loader-text');
+            if (show) {
+                loaderText.innerText = text;
+                loader.classList.remove('hidden');
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+
+        async function fetchAPI(action, dados = {}, mensagemLoader = "Processando, aguarde...") {
+            try {
+                toggleLoader(true, mensagemLoader);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+                const response = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: action, dados: dados }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const result = await response.json();
+                
+                toggleLoader(false);
+                return result;
+                
+            } catch (error) { 
+                toggleLoader(false); 
+                if (error.name === 'AbortError') {
+                    showToast("O servidor demorou muito para responder. Verifique o histórico se a ação foi concluída.", "error");
+                } else {
+                    showToast("Falha na conexão com o servidor. Verifique sua internet.", "error"); 
+                }
+                return { sucesso: false }; 
+            }
+        }
+
+        function obterServicosGerais() { return Array.from(document.querySelectorAll('.servico-geral-cb:checked')).map(cb => { if (cb.value === "Outro") return document.getElementById('serv-geral-outro-txt').value.trim() || "Outro"; return cb.value; }).join(', '); }
+        function obterImovelDoCard(idCard) { const select = document.getElementById(`imovel-${idCard}`); if (select.value === "Outro") return document.getElementById(`imovel-outro-txt-${idCard}`).value.trim() || "Outro"; return select.value; }
+        function obterServicosDoCard(idCard) { return Array.from(document.querySelectorAll(`.servico-cb-${idCard}:checked`)).map(cb => { if (cb.value === "Outro") return document.getElementById(`serv-outro-txt-${idCard}`).value.trim() || "Outro"; return cb.value; }).join(', '); }
+        function obterPragasDoCard(idCard) { let pragas = [...memoriaPragas[idCard]]; const indexOutros = pragas.indexOf("OUTROS"); if (indexOutros > -1) pragas[indexOutros] = memoriaPragasOutrosTxt[idCard].trim() || "OUTROS"; return pragas.join(', '); }
+
+        document.getElementById('form-dedetizacao').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSalvar = document.getElementById('btn-salvar-dedetizacao');
+            btnSalvar.disabled = true; btnSalvar.textContent = "Processando...";
+            const dados = {
+                id: idEmEdicao, cliente: document.getElementById('cliente').value, data: document.getElementById('data').value,
+                previsao: `${document.getElementById('hora-inicio').value} às ${document.getElementById('hora-fim').value}`,
+                servico: obterServicosGerais(), vendedor: document.querySelector('input[name="vendedor"]:checked').value,
+                promo1: { valor: document.getElementById('valor-1').value, imovel: obterImovelDoCard(1), servicos: obterServicosDoCard(1), pragas: obterPragasDoCard(1) },
+                promo2: { valor: document.getElementById('valor-2').value, imovel: obterImovelDoCard(2), servicos: obterServicosDoCard(2), pragas: obterPragasDoCard(2) },
+                promo3: { valor: document.getElementById('valor-3').value, imovel: obterImovelDoCard(3), servicos: obterServicosDoCard(3), pragas: obterPragasDoCard(3) }
+            };
+            const res = await fetchAPI('salvar_dedetizacao', dados, "Salvando e Gerando PDF..."); 
+            if (res.sucesso) { showToast(res.mensagem, 'success'); fecharModal('modal-dedetizacao'); idEmEdicao = null; aplicarFiltroPrincipal(); dispararBuscaHistorico(); } 
+            else { showToast("Erro ao salvar: " + res.mensagem, 'error'); }
+            btnSalvar.disabled = false; btnSalvar.textContent = "Salvar Comunicado";
+        });
+
+        document.getElementById('form-limpeza').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSalvar = document.getElementById('btn-salvar-limpeza');
+            btnSalvar.disabled = true; btnSalvar.textContent = "Processando...";
+            const dados = { 
+                id: idEmEdicao, cliente: document.getElementById('cliente-limp').value, data: document.getElementById('data-limp').value, 
+                vendedor: document.querySelector('input[name="vendedor-limp"]:checked').value, observacao: document.getElementById('obs-limp').innerHTML 
+            };
+            const res = await fetchAPI('salvar_limpeza', dados, "Salvando e Gerando PDF..."); 
+            if (res.sucesso) { showToast(res.mensagem, 'success'); fecharModal('modal-limpeza'); idEmEdicao = null; aplicarFiltroPrincipal(); dispararBuscaHistorico(); } 
+            else { showToast("Erro ao salvar: " + res.mensagem, 'error'); }
+            btnSalvar.disabled = false; btnSalvar.textContent = "Salvar Comunicado";
+        });
+
+        document.getElementById('form-termo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSalvar = document.getElementById('btn-salvar-termo');
+            btnSalvar.disabled = true; btnSalvar.textContent = "Processando...";
+            const dados = { 
+                id: idEmEdicao, cliente: document.getElementById('cliente-termo').value, data: document.getElementById('data-termo').value, 
+                previsao: `${document.getElementById('hora-inicio-termo').value} às ${document.getElementById('hora-fim-termo').value}`, 
+                vendedor: document.querySelector('input[name="vendedor-termo"]:checked').value 
+            };
+            const res = await fetchAPI('salvar_termo', dados, "Salvando e Gerando PDF..."); 
+            if (res.sucesso) { showToast(res.mensagem, 'success'); fecharModal('modal-termo'); idEmEdicao = null; aplicarFiltroPrincipal(); dispararBuscaHistorico(); } 
+            else { showToast("Erro ao salvar: " + res.mensagem, 'error'); }
+            btnSalvar.disabled = false; btnSalvar.textContent = "Salvar Comunicado";
+        });
+
+        function abrirModalExclusao(id) { idParaExcluir = id; abrirModal('modal-exclusao'); }
+        document.getElementById('btn-confirmar-exclusao').addEventListener('click', async () => {
+            if (!idParaExcluir) return;
+            fecharModal('modal-exclusao');
+            const res = await fetchAPI('excluir', { id: idParaExcluir }, "Excluindo Comunicado e PDF...");
+            if (res.sucesso) { showToast(res.mensagem, 'success'); aplicarFiltroPrincipal(); dispararBuscaHistorico(); } 
+            else { showToast("Erro ao excluir: " + res.mensagem, 'error'); }
+        });
+    </script>
 </body>
 </html>
