@@ -1,16 +1,24 @@
-const CACHE_NAME = 'portal-atual-v3'; // Mude sempre a versão aqui quando alterar o código
+const CACHE_NAME = 'portal-atual-v5'; // Versão atualizada com os ficheiros separados
 
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
+  
+  // Sistema de Comunicados
   './comunicados/index.html',
-  './relatorios/index.html'
+  './comunicados/style.css',
+  './comunicados/script.js',
+  
+  // Sistema de Relatórios e Certificados
+  './relatorios/index.html',
+  './relatorios/style.css',
+  './relatorios/script.js'
 ];
 
-// Instalação do Service Worker
+// Instalação do Service Worker e ativação imediata
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Força a ativação imediata do novo Service Worker
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -19,14 +27,14 @@ self.addEventListener('install', event => {
   );
 });
 
-// Ativação e limpeza de caches antigos
+// Ativação e limpeza de caches antigos para evitar lixo na memória
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName); // Apaga a cache antiga para não acumular lixo
+            return caches.delete(cacheName);
           }
         })
       );
@@ -34,7 +42,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Interceptação de rede com prioridade para buscar a versão mais recente
+// Interceptação de rede priorizando sempre os ficheiros mais recentes
 self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request).catch(() => {
