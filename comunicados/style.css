@@ -155,24 +155,31 @@ input[type="checkbox"], input[type="radio"] { width: 14px; height: 14px; margin:
 @media (max-width: 768px) {
     body { padding: 10px; }
     
-    /* Botões do topo empilhados */
     .top-bar-actions { flex-direction: column; gap: 10px; }
     .top-bar-actions .btn { width: 100%; justify-content: center; }
     
-    /* Grades do formulário ajustadas */
     .row-top, .row-middle, .form-grid { grid-template-columns: 1fr; }
-    .btn-importar { width: 100%; justify-content: center; margin-top: 5px; height: 40px; }
     
-    /* Modais aproveitam mais tela */
+    /* 1. Correção: Evitar que o botão Importar amasse o Nome do Cliente */
+    .form-group > div[style*="gap: 10px"] { flex-wrap: wrap; }
+    .form-group > div[style*="gap: 10px"] input { flex: 1 1 100% !important; }
+    .btn-importar { width: 100%; justify-content: center; margin-top: 5px; height: 45px; }
+    
+    /* 2. Correção: Formatação Previsão de Horário (Idêntico ao Relatórios) */
+    .time-group { width: 100%; justify-content: space-between; gap: 10px !important; }
+    .time-group input[type="time"] { width: 100% !important; flex: 1; padding: 10px; }
+    .time-group span { display: none; } /* Oculta a palavra "às" */
+
+    /* Modais aproveitam mais a largura da tela */
     .modal-box { width: 95%; padding: 15px; max-height: 95vh; }
     .modal-box.lg, .modal-box.md { max-width: 100%; }
     
-    /* Filtros do histórico organizados na vertical */
+    /* Filtros do histórico organizados em coluna */
     .filtros-historico { flex-direction: column; gap: 12px; align-items: stretch; }
     .filtros-historico > div { width: 100%; }
     .filtros-historico .btn { width: 100%; }
 
-    /* --- TABELA TRANSFORMADA EM CARTÕES --- */
+    /* --- TABELAS TRANSFORMADAS EM CARTÕES --- */
     .panel-box { padding: 15px; background: transparent; box-shadow: none; }
     .table-container { background: transparent; border: none; box-shadow: none; padding: 0; }
     table, thead, tbody, th, td, tr { display: block; }
@@ -204,30 +211,36 @@ input[type="checkbox"], input[type="radio"] { width: 14px; height: 14px; margin:
         text-align: left; 
         gap: 15px;
         font-size: 14px;
-        /* Sobrescreve estilos inline aplicados pelo Javascript (como text-ellipsis) */
         white-space: normal !important; 
         max-width: 100% !important;
     }
     
+    /* 3. Correção: Ações centralizadas e ícones desamassados */
     td:last-child { 
         border-bottom: none; 
         display: flex; 
-        justify-content: flex-end; 
+        justify-content: center; /* Centraliza horizontalmente */
+        align-items: center;     /* Centraliza verticalmente */
         padding-top: 15px; 
+        padding-bottom: 5px;
     }
     
-    /* Centraliza e aumenta os ícones de ação no mobile */
-    .actions { justify-content: flex-end; width: 100%; gap: 15px; }
+    .actions { 
+        justify-content: center; /* Força os ícones a ficarem ao meio */
+        width: 100%; 
+        gap: 20px; /* Maior espaçamento entre os ícones para evitar toques acidentais */
+        flex-wrap: wrap; 
+    }
+    .actions .icon-btn { padding: 8px; } /* Aumenta um pouco a área de clique */
     .actions .icon-btn svg { width: 22px; height: 22px; }
 
-    /* Rótulos inseridos automaticamente via CSS antes do conteúdo da célula */
     td::before {
         font-weight: 700; color: #6b7280; font-size: 11px; text-transform: uppercase;
     }
 
-    /* Mapeando os rótulos de acordo com a ordem da tabela de Comunicados */
+    /* Rótulos inseridos automaticamente no telemóvel */
     td:nth-of-type(1)::before { content: "Data"; }
     td:nth-of-type(2)::before { content: "Cliente"; }
     td:nth-of-type(3)::before { content: "Serviço"; }
-    td:nth-of-type(4)::before { content: ""; display: none; } /* Linha das ações não precisa de rótulo */
+    td:nth-of-type(4)::before { content: ""; display: none; }
 }
