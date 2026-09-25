@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #004481; /* Cor oficial unificada (Azul Escuro) */
+    --primary-color: #004481;
     --success-color: #10b981;
     --error-color: #ef4444;
     --bg-body: transparent; 
@@ -37,7 +37,7 @@ body { background-color: var(--bg-body); color: var(--text-color); margin: 0; pa
 /* ================================
    AÇÕES, QUADRINHOS & MÉTRICAS
    ================================ */
-.action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid #e5e7eb; }
+.action-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
 .btn-action { border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .btn-novo { background-color: var(--primary-color); color: white; }
 .btn-novo:hover { background-color: #003366; transform: translateY(-1px); }
@@ -163,11 +163,13 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
     .navbar div { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
     .btn-voltar-portal { margin-right: 0; width: 100%; justify-content: center; }
     
-    .action-bar { flex-direction: column; gap: 10px; padding-bottom: 15px; }
+    .action-bar { flex-direction: column; gap: 10px; padding-bottom: 10px; margin-bottom: 10px; }
     .action-bar .btn-action { width: 100%; justify-content: center; }
     
-    .dash-tabs { flex-wrap: wrap; }
-    .tab-btn { min-width: 120px; }
+    /* Abas em linha única sem quebrar e sem esticar desnecessariamente */
+    .dash-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .dash-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { min-width: auto; white-space: nowrap; padding: 10px 12px; font-size: 13px; flex: 1; }
     
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
     
@@ -209,22 +211,38 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
     
     td::before { font-weight: 700; color: #6b7280; font-size: 11px; text-transform: uppercase; }
     
-    /* NOVA ORDEM DO CARTÃO: 1º Cliente, 2º Serviço, 3º Data */
     td:nth-of-type(1)::before { content: "Cliente"; }
     td:nth-of-type(2)::before { content: "Serviço"; }
     td:nth-of-type(3)::before { content: "Data"; }
     td:nth-of-type(4)::before { content: ""; display: none; }
 
-    /* AÇÕES CENTRALIZADAS */
+    /* AÇÕES CENTRALIZADAS E REAJUSTADAS */
     td:last-child { 
-        border-bottom: none; display: flex; justify-content: center; align-items: center;
-        padding-top: 15px; padding-bottom: 5px;
+        border-bottom: none; 
+        display: block; /* Força o bloco para preencher toda a largura e ignorar grids anteriores */
+        width: 100%; 
+        padding-top: 15px; 
+        padding-bottom: 5px;
+        text-align: center;
     }
     
     .actions { 
-        display: flex; flex-direction: row; justify-content: center; align-items: center;
-        width: 100%; flex-wrap: nowrap; gap: 20px; 
+        display: flex; 
+        flex-direction: row; 
+        justify-content: center; 
+        align-items: center;
+        width: 100%; 
+        gap: 15px; 
+        margin: 0;
+        padding: 0;
     }
-    .actions .icon-btn { padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; } 
+    
+    .actions .icon-btn { 
+        padding: 8px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    } 
     .actions .icon-btn svg { width: 22px; height: 22px; }
 }
