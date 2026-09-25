@@ -24,7 +24,7 @@
 
     <div id="app-container" class="dashboard-container">
         
-        <!-- NAVBAR GERAL (SEMPRE VISÍVEL) -->
+        <!-- NAVBAR GERAL -->
         <div class="navbar">
             <h1><span class="material-icons" style="color:#004481;">campaign</span> Comunicados</h1>
             <div style="display:flex; align-items:center;">
@@ -42,14 +42,12 @@
             <!-- VIEW 1: DASHBOARD PRINCIPAL                -->
             <!-- ========================================== -->
             <div id="view-dashboard">
-                <!-- 1. QUADRINHOS DE NAVEGAÇÃO -->
                 <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center; overflow: visible;">
                     <button class="tab-btn active" onclick="setFiltroPrincipal('Dedetizacao', this)"><span class="material-icons" style="font-size:18px;">pest_control</span> Dedetização</button>
                     <button class="tab-btn" onclick="setFiltroPrincipal('Limpeza', this)"><span class="material-icons" style="font-size:18px;">water_drop</span> Limpeza</button>
                     <button class="tab-btn" onclick="setFiltroPrincipal('Termo', this)"><span class="material-icons" style="font-size:18px;">air</span> Fumacê</button>
                 </div>
 
-                <!-- 2. CARTÃO DE MÉTRICAS -->
                 <div class="metrics-container">
                     <div class="card-metric">
                         <span id="lblTotal" style="text-transform: uppercase; font-size: 12px;">Total de Comunicados</span>
@@ -57,7 +55,6 @@
                     </div>
                 </div>
 
-                <!-- 3. AÇÕES -->
                 <div class="action-bar">
                     <button class="btn-action btn-historico" onclick="abrirViewHistorico()">
                         <span class="material-icons" style="font-size:18px;">manage_search</span> Histórico
@@ -67,7 +64,6 @@
                     </button>
                 </div>
 
-                <!-- 4. TABELA -->
                 <div class="table-container">
                     <h3 style="margin-top:0; color:#111827; font-size:16px; margin-bottom:15px;">Últimos Comunicados</h3>
                     <table>
@@ -101,22 +97,26 @@
                     <button class="tab-btn" onclick="setFiltroHistorico('Termo', this)">Fumacê</button>
                 </div>
 
-                <div class="filtros-bar">
-                    <div class="filter-group">
-                        <label class="title-label" style="font-size: 11px;">BUSCAR CLIENTE</label>
-                        <input type="text" id="filtro-cliente" placeholder="Digite o nome..." onkeyup="dispararBuscaHistorico()">
+                <!-- NOVO PAINEL DE FILTROS -->
+                <div class="filtros-card">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Buscar Cliente</label>
+                            <input type="text" id="filtro-cliente" class="form-input" placeholder="Cliente...">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Inicial</label>
+                            <input type="date" id="filtro-data-inicio" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Final</label>
+                            <input type="date" id="filtro-data-fim" class="form-input">
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label class="title-label" style="font-size: 11px;">DATA INICIAL</label>
-                        <input type="date" id="filtro-data-inicio" onchange="dispararBuscaHistorico()">
+                    <div class="filter-buttons-container">
+                        <button class="btn-action btn-novo" onclick="dispararBuscaHistorico()">Filtrar</button>
+                        <button class="btn-action btn-historico" onclick="limparFiltrosHistorico()">Limpar</button>
                     </div>
-                    <div class="filter-group">
-                        <label class="title-label" style="font-size: 11px;">DATA FINAL</label>
-                        <input type="date" id="filtro-data-fim" onchange="dispararBuscaHistorico()">
-                    </div>
-                    <button class="btn-action btn-historico" onclick="limparFiltrosHistorico()" title="Limpar Filtros" style="height: 42px; margin-top: auto;">
-                        <span class="material-icons">filter_alt_off</span>
-                    </button>
                 </div>
 
                 <div class="table-container" style="margin-top: 15px;">
@@ -365,7 +365,7 @@
         </div>
     </div>
     
-    <!-- MODAIS QUE CONTINUAM COMO POP-UPS (Ações rápidas) -->
+    <!-- MODAIS PEQUENOS (Avisos/Seleção) -->
     <!-- MODAL SELEÇÃO NOVO -->
     <div id="modal-selecao" class="modal-overlay">
         <div class="modal-box">
@@ -401,7 +401,7 @@
                 <button class="icon-btn" onclick="fecharModal('modal-importacao')"><span class="material-icons">close</span></button>
             </div>
             <div class="form-group">
-                <input type="text" id="input-busca-importacao" placeholder="🔍 Digite o nome do cliente..." onkeyup="filtrarListaImportacao()">
+                <input type="text" id="input-busca-importacao" class="form-input" placeholder="🔍 Digite o nome do cliente..." onkeyup="filtrarListaImportacao()">
             </div>
             <div class="list-group-import" id="lista-clientes-importacao"></div>
         </div>
