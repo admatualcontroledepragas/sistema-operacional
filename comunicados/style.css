@@ -212,34 +212,35 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
     td:nth-of-type(3)::before { content: "Data"; }
     td:nth-of-type(4)::before { display: none; }
 
-    /* AÇÕES CENTRALIZADAS E REAJUSTADAS - FORÇA BRUTA */
+/* AÇÕES CENTRALIZADAS (Força Bruta para Flexbox) */
     td:last-child { 
-        border-bottom: none; 
-        display: block !important; 
+        border-bottom: none !important; 
+        display: flex !important; 
         width: 100% !important; 
-        padding-top: 15px !important; 
-        padding-bottom: 5px !important;
-        text-align: center !important;
+        padding: 15px 0 5px 0 !important; 
+        justify-content: center !important; /* Centra o conteúdo horizontalmente */
+        align-items: center !important; /* Centra verticalmente */
     }
     
     .actions { 
         display: flex !important; 
-        flex-direction: row !important; 
+        flex-direction: row !important; /* Força os ícones a ficarem lado a lado */
         justify-content: center !important; 
         align-items: center !important;
         width: 100% !important; 
-        gap: 25px !important; 
+        gap: 20px !important; /* Define o espaço horizontal exato entre cada ícone */
         margin: 0 !important;
         padding: 0 !important;
+        flex-wrap: nowrap !important; /* Impede que os botões saltem para uma nova linha */
     }
     
     .actions .icon-btn { 
-        padding: 10px !important; 
+        padding: 8px !important; 
         border-radius: 50% !important; 
         display: flex !important; 
         align-items: center !important; 
         justify-content: center !important; 
         background: transparent !important;
     } 
-    .actions .icon-btn svg { width: 24px !important; height: 24px !important; }
+    .actions .icon-btn svg { width: 22px !important; height: 22px !important; }
 }
