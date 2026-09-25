@@ -1,7 +1,7 @@
-        // ==========================================
+// ==========================================
         // COLE SUA URL DO GOOGLE APPS SCRIPT AQUI 👇
         // ==========================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbzmTFdVGtg3bEGevNcRiguYx2MV6bslEMe9RT_R-pWt3b9DolS0c6mApLr_a-0ccim9aQ/exec"; 
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzmTFdVGtg3bEGevNcRiguYx2MV6bslEMe9RT_R-pWt3b9DolS0c6mApLr_a-0ccim9aQ/exec"; 
         
         let idParaExcluir = null;
         let cardAtivo = 1;
@@ -38,7 +38,7 @@
             document.getElementById('obs-limp').innerHTML = '';
             document.getElementById('titulo-modal-dedetizacao').innerText = 'Novo Comunicado - Dedetização';
             document.getElementById('titulo-modal-limpeza').innerText = 'Novo Comunicado - Limpeza';
-            document.getElementById('titulo-modal-termo').innerText = 'Novo Comunicado - Termonebulização';
+            document.getElementById('titulo-modal-termo').innerText = 'Novo Comunicado - Fumacê';
             document.getElementById('btn-salvar-dedetizacao').innerText = 'Salvar Comunicado';
             document.getElementById('btn-salvar-limpeza').innerText = 'Salvar Comunicado';
             document.getElementById('btn-salvar-termo').innerText = 'Salvar Comunicado';
@@ -53,13 +53,40 @@
         }
 
         async function aplicarFiltroPrincipal() { 
+            const tbody = document.getElementById('tabela-corpo-ultimos');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#6b7280;">Carregando comunicados...</td></tr>';
+            
             const res = await fetchAPI('listar', { aba: filtroAtualPrincipal, limite: 5 }, "Carregando comunicados...");
-            if (res.sucesso) { desenharLinhas(res.registros, 'tabela-corpo-ultimos'); }
+            
+            if (res.sucesso) { 
+                // Atualiza o Número de Totais
+                const dashTotal = document.getElementById('dashTotal');
+                if (dashTotal) {
+                    dashTotal.innerText = res.total || res.registros.length;
+                }
+                
+                desenharLinhas(res.registros, 'tabela-corpo-ultimos'); 
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--error-color);">Erro ao carregar dados.</td></tr>';
+            }
         }
 
         function setFiltroPrincipal(filtro, btnElement) {
             filtroAtualPrincipal = filtro; const container = btnElement.parentElement;
             container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btnElement.classList.add('active');
+            
+            // --- ATUALIZAÇÃO DO NOME NO CARTÃO DE MÉTRICAS ---
+            let tituloMetrica = filtro;
+            if (filtro === "Dedetizacao") tituloMetrica = "Dedetização";
+            if (filtro === "Limpeza") tituloMetrica = "Limpeza";
+            if (filtro === "Termo") tituloMetrica = "Fumacê";
+
+            const lblTotal = document.getElementById('lblTotal');
+            if (lblTotal) {
+                lblTotal.innerText = "Total de " + tituloMetrica;
+            }
+            // -------------------------------------------------
+            
             aplicarFiltroPrincipal();
         }
 
@@ -84,6 +111,9 @@
         }
 
         async function aplicarFiltrosEBusca() {
+            const tbody = document.getElementById('tabela-corpo-historico');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#6b7280;">Buscando histórico...</td></tr>';
+            
             const searchCliente = document.getElementById('filtro-cliente').value;
             const dataInicioStr = document.getElementById('filtro-data-inicio').value;
             const dataFimStr = document.getElementById('filtro-data-fim').value;
@@ -104,6 +134,8 @@
                 document.getElementById('page-info').innerText = `Página ${currentPage} de ${totalPagesCache}`;
                 document.getElementById('btn-prev-page').disabled = (currentPage === 1);
                 document.getElementById('btn-next-page').disabled = (currentPage >= totalPagesCache);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--error-color);">Erro ao carregar dados.</td></tr>';
             }
         }
 
@@ -296,7 +328,7 @@
             else if (tipo === 'Termonebulização') {
                 if(!isImportacao) {
                     idEmEdicao = id;
-                    document.getElementById('titulo-modal-termo').innerText = 'Editando Comunicado - Termonebulização';
+                    document.getElementById('titulo-modal-termo').innerText = 'Editando Comunicado - Fumacê';
                     document.getElementById('btn-salvar-termo').innerText = 'Atualizar Comunicado';
                 } else {
                     idEmEdicao = null;
@@ -372,31 +404,37 @@
         function desenharLinhas(registros, tbodyId) {
             const tbody = document.getElementById(tbodyId);
             tbody.innerHTML = '';
-            if (registros.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum comunicado encontrado.</td></tr>'; return; }
+            if (registros.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Nenhum comunicado encontrado.</td></tr>'; return; }
 
             registros.forEach(item => {
                 const tr = document.createElement('tr');
+                
+                const codigoSeguro = item.id || item.codigo || "";
+                let botoesAcao = `
+                    <button class="icon-btn" onclick="abrirLinkPdf('${item.linkPdf}')" title="Abrir">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </button>
+                    <button class="icon-btn share" onclick="baixarPDF('${item.id}', '${item.servico}')" title="Baixar PDF">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
+                    <button class="icon-btn edit" onclick="editarRegistro('${codigoSeguro}', '${item.servico}')" title="Editar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button class="icon-btn delete" onclick="abrirModalExclusao('${codigoSeguro}')" title="Excluir">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                `;
+
+                // --- NOVA ORDEM DAS COLUNAS DA TABELA ---
+                // 1º Cliente | 2º Serviço | 3º Data | 4º Ações Centralizadas
                 tr.innerHTML = `
-                    <td style="white-space: nowrap;">${item.data || '-'}</td>
                     <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.cliente || '-'}">
                         <strong>${item.cliente || '-'}</strong>
                     </td>
                     <td style="white-space: nowrap;">${item.servico || '-'}</td>
-                    <td style="white-space: nowrap; width: 140px;">
-                        <div class="actions">
-                            <button class="icon-btn" onclick="abrirLinkPdf('${item.linkPdf}')" title="Abrir">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            </button>
-                            <button class="icon-btn share" onclick="baixarPDF('${item.id}', '${item.servico}')" title="Baixar PDF">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            </button>
-                            <button class="icon-btn" onclick="editarRegistro('${item.id}', '${item.servico}')" title="Editar">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            </button>
-                            <button class="icon-btn delete" onclick="abrirModalExclusao('${item.id}')" title="Excluir">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            </button>
-                        </div>
+                    <td style="white-space: nowrap;">${item.data || '-'}</td>
+                    <td class="actions" style="white-space: nowrap; width: 140px;">
+                        ${botoesAcao}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -526,7 +564,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-                const response = await fetch(API_URL, { 
+                const response = await fetch(URL_SCRIPT, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: action, dados: dados }),
                     signal: controller.signal
