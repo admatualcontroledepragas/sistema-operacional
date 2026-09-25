@@ -62,13 +62,14 @@
           <table>
             <thead>
               <tr>
-                <th>Cliente</th>
-                <th>Endereço/Placa</th>
-                <th>Serviço</th>
-                <th>Data</th>
-                <th style="width: 80px; text-align: center;">Código</th>
-                <th style="width: 100px; text-align: center;">Docs</th>
-                <th style="width: 80px; text-align: center;">Ações</th> </tr>
+                <th style="width: 25%;">Cliente</th>
+                <th style="width: 20%;">Endereço/Placa</th>
+                <th style="width: 15%;">Serviço</th>
+                <th style="width: 10%;">Data</th>
+                <th style="width: 10%; text-align: center;">Código</th> <!-- Título alterado de Cód para Código -->
+                <th style="width: 15%; text-align: center;">Docs</th>
+                <th style="width: 5%; text-align: center;">Ações</th> 
+              </tr>
             </thead>
             <tbody id="tabelaRecentes">
               <tr><td colspan="7" style="text-align:center; color:#6b7280;">Carregando...</td></tr>
@@ -97,12 +98,13 @@
           <table>
             <thead>
               <tr>
-                <th>Cliente</th>
-                <th id="thIdentificacao">Endereço</th>
-                <th>Data</th>
-                <th>Serviço</th>
-                <th style="width: 80px; text-align: center;">Código</th> <th style="text-align:center;">Docs</th>
-                <th style="text-align:center;">Ações</th> 
+                <th style="width: 25%;">Cliente</th>
+                <th style="width: 20%;" id="thIdentificacao">Endereço</th>
+                <th style="width: 10%;">Data</th>
+                <th style="width: 15%;">Serviço</th>
+                <th style="width: 10%; text-align: center;">Código</th> <!-- Título alterado de Cód para Código -->
+                <th style="width: 15%; text-align: center;">Docs</th>
+                <th style="width: 5%; text-align: center;">Ações</th> 
               </tr>
             </thead>
             <tbody id="tabelaHistorico">
@@ -222,8 +224,8 @@
     <div class="modal-content">
       <h3 style="margin-top:0; color:#111827;">Novo Registro</h3>
       <p style="color:#6b7280; font-size:14px; margin-bottom:24px;">Selecione onde deseja salvar:</p>
-      <button class="btn-opcao btn-imovel" onclick="iniciarRegistro('Imovel')"><span class="material-icons">home</span> Imóvel</button>
-      <button class="btn-opcao btn-veiculo" onclick="iniciarRegistro('Veiculo')"><span class="material-icons">directions_car</span> Veículo</button>
+      <button class="btn-opcao btn-imovel" onclick="iniciarRegistro('Imovel')"><span class="material-icons">home</span> Imóveis</button>
+      <button class="btn-opcao btn-veiculo" onclick="iniciarRegistro('Veiculo')"><span class="material-icons">directions_car</span> Veículos</button>
       <button onclick="document.getElementById('modal-selecao').style.display='none'" style="background:transparent; color:#6b7280; border:none; margin-top:16px; cursor:pointer; font-size:14px; text-decoration:underline;">Cancelar</button>
     </div>
   </div>
