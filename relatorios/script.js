@@ -74,22 +74,22 @@
   }
  
   function carregarDashboard() {
-    const tbody = document.getElementById('tabelaRecentes');
-    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px; color:#6b7280;'>Atualizando...</td></tr>"; 
-    
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "dashboard", tipo: tipoServicoAtual }) })
-    .then(res => res.json())
-    .then(dados => {
-      if(dados.status === "sucesso") {
-        document.getElementById('dashTotal').innerText = dados.total;
-        tbody.innerHTML = "";
-        
-        cacheDashboard = dados.ultimos;
-        
-        if (dados.ultimos.length === 0) { 
-          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:#999; padding:20px;'>Nenhum registro recente.</td></tr>"; 
-        } else {
-          dados.ultimos.forEach((item, index) => {
+   const tbody = document.getElementById('tabelaRecentes');
+   tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px; color:#6b7280;'>Atualizando...</td></tr>"; 
+   
+   fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify({ acao: "dashboard", tipo: tipoServicoAtual }) })
+   .then(res => res.json())
+   .then(dados => {
+     if(dados.status === "sucesso") {
+       document.getElementById('dashTotal').innerText = dados.total;
+       tbody.innerHTML = "";
+       
+       cacheDashboard = dados.ultimos;
+       
+       if (dados.ultimos.length === 0) { 
+         tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:#999; padding:20px;'>Nenhum registro recente.</td></tr>"; 
+       } else {
+         dados.ultimos.forEach((item, index) => {
              const tr = document.createElement('tr');
              
              let dataFormatada = item.data;
@@ -101,16 +101,20 @@
              }
 
              let botoesHtml = "";
-             if (item.linkRel && String(item.linkRel).startsWith("http")) botoesHtml += `<a href="${item.linkRel}" target="_blank" class="btn-doc bg-relatorio">PDF</a>`;
-             if (item.linkCert && String(item.linkCert).startsWith("http")) botoesHtml += `<a href="${item.linkCert}" target="_blank" class="btn-doc bg-certificado">CERT</a>`;
+             if (item.linkRel && String(item.linkRel).startsWith("http")) botoesHtml += `<a href="${item.linkRel}" target="_blank" class="btn-doc bg-relatorio">RELATÓRIO</a>`;
+             if (item.linkCert && String(item.linkCert).startsWith("http")) botoesHtml += `<a href="${item.linkCert}" target="_blank" class="btn-doc bg-certificado">CERTIFICADO</a>`;
              if (botoesHtml === "") botoesHtml = "<span class='no-file'>--</span>";
              
              const codigoVisual = item.codigo ? item.codigo : "--";
              const safeCodigo = item.codigo ? item.codigo : "";
 
              let botoesAcao = `
-               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'dashboard')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
-               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
+               <button class="icon-btn btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'dashboard')" title="Editar">
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+               </button>
+               <button class="icon-btn btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir">
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+               </button>
              `;
              
              tr.innerHTML = `
@@ -118,19 +122,21 @@
                 <td>${item.identificacao}</td>
                 <td>${item.servico}</td>
                 <td>${dataFormatada}</td>
-                <td style="text-align: center; font-size: 11px; color: #555;">${codigoVisual}</td>
-                <td style="text-align:center; display:flex; gap:5px; justify-content:center;">${botoesHtml}</td>
-                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
+                <td style="text-align: center; color: #1f2937;">${codigoVisual}</td>
+                <td style="text-align:center;">
+                    <div style="display:flex; gap:5px; justify-content:center;">${botoesHtml}</div>
+                </td>
+                <td class="actions" style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
              `;
              tbody.appendChild(tr);
-          });
-        }
-      } else {
-        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro: ${dados.mensagem}</td></tr>`; 
-      }
-    })
-    .catch(err => { tbody.innerHTML = "<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>"; });
-  }
+         });
+       }
+     } else {
+       tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro: ${dados.mensagem}</td></tr>`; 
+     }
+   })
+   .catch(err => { tbody.innerHTML = "<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>"; });
+ }
  
   // --- HISTÓRICO ---
   function abrirHistorico() {
@@ -173,29 +179,29 @@
   }
  
   function carregarHistorico() {
-    const tbody = document.getElementById('tabelaHistorico');
-    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
-    
-    const payload = {
-      acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
-      filtroCliente: document.getElementById('filtroCliente').value,
-      filtroPlaca: document.getElementById('filtroPlaca').value,
-      filtroEndereco: document.getElementById('filtroEndereco').value,
-      filtroServico: document.getElementById('filtroServico').value,
-      filtroData: document.getElementById('filtroData').value
-    };
+   const tbody = document.getElementById('tabelaHistorico');
+   tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
+   
+   const payload = {
+     acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
+     filtroCliente: document.getElementById('filtroCliente').value,
+     filtroPlaca: document.getElementById('filtroPlaca').value,
+     filtroEndereco: document.getElementById('filtroEndereco').value,
+     filtroServico: document.getElementById('filtroServico').value,
+     filtroData: document.getElementById('filtroData').value
+   };
  
-    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(payload) })
-    .then(res => res.json())
-    .then(dados => {
-      if(dados.status === "sucesso") {
-        tbody.innerHTML = "";
-        cacheHistorico = dados.dados; 
-        
-        if (dados.dados.length === 0) {
-           tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#999;'>Nenhum registro encontrado.</td></tr>";
-        } else {
-           dados.dados.forEach((r, index) => {
+   fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(payload) })
+   .then(res => res.json())
+   .then(dados => {
+     if(dados.status === "sucesso") {
+       tbody.innerHTML = "";
+       cacheHistorico = dados.dados; 
+       
+       if (dados.dados.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#999;'>Nenhum registro encontrado.</td></tr>";
+       } else {
+          dados.dados.forEach((r, index) => {
              const tr = document.createElement('tr');
              
              let dataFormatada = r.data;
@@ -207,15 +213,20 @@
              }
 
              let botoesDocs = "";
-             if (r.linkRel && String(r.linkRel).startsWith("http")) botoesDocs += `<a href="${r.linkRel}" target="_blank" class="btn-doc bg-relatorio" title="Relatório">Rel</a>`;
-             if (r.linkCert && String(r.linkCert).startsWith("http")) botoesDocs += `<a href="${r.linkCert}" target="_blank" class="btn-doc bg-certificado" title="Certificado">Cert</a>`;
+             if (r.linkRel && String(r.linkRel).startsWith("http")) botoesDocs += `<a href="${r.linkRel}" target="_blank" class="btn-doc bg-relatorio" title="Abrir Relatório">RELATÓRIO</a>`;
+             if (r.linkCert && String(r.linkCert).startsWith("http")) botoesDocs += `<a href="${r.linkCert}" target="_blank" class="btn-doc bg-certificado" title="Abrir Certificado">CERTIFICADO</a>`;
              if (botoesDocs === "") botoesDocs = "<span class='no-file'>--</span>";
              
              const safeCodigo = r.codigo ? r.codigo : "";
+             const codigoVisual = r.codigo ? r.codigo : "--";
              
              let botoesAcao = `
-               <button class="btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'historico')" title="Editar"><span class="material-icons" style="font-size:18px">edit</span></button>
-               <button class="btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir"><span class="material-icons" style="font-size:18px">delete</span></button>
+               <button class="icon-btn btn-table-action btn-edit" onclick="prepararEdicao(${index}, 'historico')" title="Editar">
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+               </button>
+               <button class="icon-btn btn-table-action btn-delete" onclick="confirmarExclusao('${safeCodigo}')" title="Excluir">
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+               </button>
              `;
              
              tr.innerHTML = `
@@ -223,22 +234,24 @@
                 <td>${r.identificacao}</td>
                 <td>${dataFormatada}</td>
                 <td>${r.servico}</td>
-                <td style="text-align: center; font-size: 11px; color: #555;">${safeCodigo}</td>
-                <td style="text-align:center; display:flex; gap:3px; justify-content:center;">${botoesDocs}</td>
-                <td style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
+                <td style="text-align: center; color: #1f2937;">${codigoVisual}</td>
+                <td style="text-align:center;">
+                    <div style="display:flex; gap:3px; justify-content:center;">${botoesDocs}</div>
+                </td>
+                <td class="actions" style="text-align:center; white-space:nowrap;">${botoesAcao}</td>
              `;
              tbody.appendChild(tr);
            });
-        }
-        document.getElementById('infoPagina').innerText = `Página ${dados.paginaAtual} de ${dados.totalPaginas}`;
-        document.getElementById('btnAnt').disabled = (dados.paginaAtual <= 1);
-        document.getElementById('btnProx').disabled = (dados.paginaAtual >= dados.totalPaginas);
-      } else {
-        tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro ao carregar.</td></tr>`; 
-      }
-    })
-    .catch(err => { tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>`; });
-  }
+       }
+       document.getElementById('infoPagina').innerText = `Página ${dados.paginaAtual} de ${dados.totalPaginas}`;
+       document.getElementById('btnAnt').disabled = (dados.paginaAtual <= 1);
+       document.getElementById('btnProx').disabled = (dados.paginaAtual >= dados.totalPaginas);
+     } else {
+       tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro ao carregar.</td></tr>`; 
+     }
+   })
+   .catch(err => { tbody.innerHTML = `<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>`; });
+ }
  
   // --- EXCLUSÃO BLINDADA ---
   function confirmarExclusao(codigo) {
