@@ -22,9 +22,9 @@
         <div class="loader-box"><div class="spinner"></div><div class="spinner-text" id="global-loader-text">Aguarde...</div></div>
     </div>
 
-    <div id="app-container" class="dashboard-container" style="display: block;">
+    <div id="app-container" class="dashboard-container">
         
-        <!-- NAVBAR -->
+        <!-- NAVBAR GERAL (SEMPRE VISÍVEL) -->
         <div class="navbar">
             <h1><span class="material-icons" style="color:#004481;">campaign</span> Comunicados</h1>
             <div style="display:flex; align-items:center;">
@@ -38,353 +38,345 @@
 
         <div class="content">
             
-            <!-- 1. QUADRINHOS DE NAVEGAÇÃO (No topo) -->
-            <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center; overflow: visible;">
-                <button class="tab-btn active" onclick="setFiltroPrincipal('Dedetizacao', this)"><span class="material-icons" style="font-size:18px;">pest_control</span> Dedetização</button>
-                <button class="tab-btn" onclick="setFiltroPrincipal('Limpeza', this)"><span class="material-icons" style="font-size:18px;">water_drop</span> Limpeza</button>
-                <button class="tab-btn" onclick="setFiltroPrincipal('Termo', this)"><span class="material-icons" style="font-size:18px;">air</span> Fumacê</button>
-            </div>
+            <!-- ========================================== -->
+            <!-- VIEW 1: DASHBOARD PRINCIPAL                -->
+            <!-- ========================================== -->
+            <div id="view-dashboard">
+                <!-- 1. QUADRINHOS DE NAVEGAÇÃO -->
+                <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center; overflow: visible;">
+                    <button class="tab-btn active" onclick="setFiltroPrincipal('Dedetizacao', this)"><span class="material-icons" style="font-size:18px;">pest_control</span> Dedetização</button>
+                    <button class="tab-btn" onclick="setFiltroPrincipal('Limpeza', this)"><span class="material-icons" style="font-size:18px;">water_drop</span> Limpeza</button>
+                    <button class="tab-btn" onclick="setFiltroPrincipal('Termo', this)"><span class="material-icons" style="font-size:18px;">air</span> Fumacê</button>
+                </div>
 
-            <!-- 2. CARTÃO DE MÉTRICAS (Abaixo das abas) -->
-            <div class="metrics-container">
-                <div class="card-metric">
-                    <span id="lblTotal" style="text-transform: uppercase; font-size: 12px;">Total de Comunicados</span>
-                    <strong id="dashTotal">0</strong>
+                <!-- 2. CARTÃO DE MÉTRICAS -->
+                <div class="metrics-container">
+                    <div class="card-metric">
+                        <span id="lblTotal" style="text-transform: uppercase; font-size: 12px;">Total de Comunicados</span>
+                        <strong id="dashTotal">0</strong>
+                    </div>
+                </div>
+
+                <!-- 3. AÇÕES -->
+                <div class="action-bar">
+                    <button class="btn-action btn-historico" onclick="abrirViewHistorico()">
+                        <span class="material-icons" style="font-size:18px;">manage_search</span> Histórico
+                    </button>
+                    <button class="btn-action btn-novo" onclick="abrirModalSelecaoNovo()">
+                        <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Comunicado
+                    </button>
+                </div>
+
+                <!-- 4. TABELA -->
+                <div class="table-container">
+                    <h3 style="margin-top:0; color:#111827; font-size:16px; margin-bottom:15px;">Últimos Comunicados</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Cliente</th>
+                                <th style="width: 20%;">Serviço</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%; text-align:center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-corpo-ultimos"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- 3. AÇÕES (Abaixo das métricas) -->
-            <div class="action-bar">
-                <button class="btn-action btn-historico" onclick="abrirModalHistorico()">
-                    <span class="material-icons" style="font-size:18px;">manage_search</span> Histórico
-                </button>
-                <button class="btn-action btn-novo" onclick="abrirModalSelecaoNovo()">
-                    <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Comunicado
-                </button>
+            <!-- ========================================== -->
+            <!-- VIEW 2: HISTÓRICO COMPLETO                 -->
+            <!-- ========================================== -->
+            <div id="view-historico">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico de Comunicados</h2>
+                    <button onclick="fecharHistorico()" class="btn-action btn-historico">
+                        <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                    </button>
+                </div>
+
+                <div class="dash-tabs" style="border:none; margin-bottom: 0; justify-content: center; flex-wrap: wrap;">
+                    <button class="tab-btn active" onclick="setFiltroHistorico('Dedetizacao', this)">Dedetização</button>
+                    <button class="tab-btn" onclick="setFiltroHistorico('Limpeza', this)">Limpeza</button>
+                    <button class="tab-btn" onclick="setFiltroHistorico('Termo', this)">Fumacê</button>
+                </div>
+
+                <div class="filtros-bar">
+                    <div class="filter-group">
+                        <label class="title-label" style="font-size: 11px;">BUSCAR CLIENTE</label>
+                        <input type="text" id="filtro-cliente" placeholder="Digite o nome..." onkeyup="dispararBuscaHistorico()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="title-label" style="font-size: 11px;">DATA INICIAL</label>
+                        <input type="date" id="filtro-data-inicio" onchange="dispararBuscaHistorico()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="title-label" style="font-size: 11px;">DATA FINAL</label>
+                        <input type="date" id="filtro-data-fim" onchange="dispararBuscaHistorico()">
+                    </div>
+                    <button class="btn-action btn-historico" onclick="limparFiltrosHistorico()" title="Limpar Filtros" style="height: 42px; margin-top: auto;">
+                        <span class="material-icons">filter_alt_off</span>
+                    </button>
+                </div>
+
+                <div class="table-container" style="margin-top: 15px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Cliente</th>
+                                <th style="width: 20%;">Serviço</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%; text-align:center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-corpo-historico"></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container">
+                    <button class="btn-action btn-historico" id="btn-prev-page" onclick="mudarPagina(-1)">Anterior</button>
+                    <span class="page-info" id="page-info">Página 1 de 1</span>
+                    <button class="btn-action btn-historico" id="btn-next-page" onclick="mudarPagina(1)">Próxima</button>
+                </div>
             </div>
 
-            <!-- 4. TABELA -->
-            <div class="table-container">
-                <h3 style="margin-top:0; color:#111827; font-size:16px; margin-bottom:15px;">Últimos Comunicados</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Cliente</th>
-                            <th style="width: 20%;">Serviço</th>
-                            <th style="width: 20%;">Data</th>
-                            <th style="width: 20%; text-align:center;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-corpo-ultimos"></tbody>
-                </table>
+            <!-- ========================================== -->
+            <!-- VIEW 3: FORMULÁRIOS UNIFICADOS             -->
+            <!-- ========================================== -->
+            <div id="view-formulario">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0; font-size: 20px; color:#111827;">Preenchimento</h2>
+                    <button onclick="fecharFormulario()" class="btn-action btn-historico">
+                        <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                    </button>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2 id="titulo-formulario">Novo Comunicado</h2>
+                        <p>Preencha os dados abaixo para salvar no sistema.</p>
+                    </div>
+
+                    <!-- FORMULÁRIO DEDETIZAÇÃO -->
+                    <form id="form-dedetizacao" style="display:none;">
+                        <div class="form-grid">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label" for="cliente">Nome do Cliente</label>
+                                <div class="input-group-row">
+                                    <input type="text" id="cliente" required placeholder="Digite o nome completo...">
+                                    <button type="button" class="btn-importar" onclick="abrirModalImportacao('Dedetizacao')">
+                                        <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label" for="data">Data Realização</label>
+                                <input type="date" id="data" required>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Horário (Entrada / Saída)</label>
+                                <div class="time-group">
+                                    <input type="time" id="hora-inicio" required>
+                                    <input type="time" id="hora-fim" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid" style="margin-top: 15px;">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Tipo de Serviço (Geral)</label>
+                                <div class="servicos-checkboxes-geral">
+                                    <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desinsetização"> Desinsetização</label>
+                                    <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desratização"> Desratização</label>
+                                    <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Descupinização"> Descupinização</label>
+                                    <label class="option-lbl lbl-outro">
+                                        <div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-geral-cb" value="Outro" id="serv-geral-outro-cb"> Outro</div>
+                                        <input type="text" id="serv-geral-outro-txt" class="input-outro hidden" placeholder="Qual serviço?">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Vendedor Responsável</label>
+                                <div class="servicos-checkboxes">
+                                    <label class="option-lbl"><input type="radio" name="vendedor" value="Heitor Diego" checked> Heitor Diego</label>
+                                    <label class="option-lbl"><input type="radio" name="vendedor" value="Gabriel Valero"> Gabriel Valero</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="promo-section">
+                            <div class="promo-card active" id="card-1" onclick="ativarCard(1)">
+                                <div class="promo-card-title">Promocional 01</div>
+                                <div class="input-money-group"><span>R$</span><input type="number" id="valor-1" step="0.01" min="0" placeholder="0.00"></div>
+                                <div class="form-group">
+                                    <label class="title-label">Imóvel</label>
+                                    <select id="imovel-1" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                                    <input type="text" id="imovel-outro-txt-1" class="input-outro hidden" placeholder="Qual imóvel?">
+                                </div>
+                                <div class="form-group">
+                                    <label class="title-label">Serviços</label>
+                                    <div class="servicos-checkboxes">
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desinsetização"> Desinsetização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desratização"> Desratização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Descupinização"> Descupinização</label>
+                                        <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-1" value="Outro" id="serv-outro-cb-1"> Outro</div><input type="text" id="serv-outro-txt-1" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                                    </div>
+                                </div>
+                                <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-1">Nenhuma praga selecionada.</span></div>
+                            </div>
+                            <div class="promo-card" id="card-2" onclick="ativarCard(2)">
+                                <div class="promo-card-title">Promocional 02</div>
+                                <div class="input-money-group"><span>R$</span><input type="number" id="valor-2" step="0.01" min="0" placeholder="0.00"></div>
+                                <div class="form-group">
+                                    <label class="title-label">Imóvel</label>
+                                    <select id="imovel-2" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                                    <input type="text" id="imovel-outro-txt-2" class="input-outro hidden" placeholder="Qual imóvel?">
+                                </div>
+                                <div class="form-group">
+                                    <label class="title-label">Serviços</label>
+                                    <div class="servicos-checkboxes">
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desinsetização"> Desinsetização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desratização"> Desratização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Descupinização"> Descupinização</label>
+                                        <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-2" value="Outro" id="serv-outro-cb-2"> Outro</div><input type="text" id="serv-outro-txt-2" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                                    </div>
+                                </div>
+                                <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-2">Nenhuma praga selecionada.</span></div>
+                            </div>
+                            <div class="promo-card" id="card-3" onclick="ativarCard(3)">
+                                <div class="promo-card-title">Promocional 03</div>
+                                <div class="input-money-group"><span>R$</span><input type="number" id="valor-3" step="0.01" min="0" placeholder="0.00"></div>
+                                <div class="form-group">
+                                    <label class="title-label">Imóvel</label>
+                                    <select id="imovel-3" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
+                                    <input type="text" id="imovel-outro-txt-3" class="input-outro hidden" placeholder="Qual imóvel?">
+                                </div>
+                                <div class="form-group">
+                                    <label class="title-label">Serviços</label>
+                                    <div class="servicos-checkboxes">
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desinsetização"> Desinsetização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desratização"> Desratização</label>
+                                        <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Descupinização"> Descupinização</label>
+                                        <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-3" value="Outro" id="serv-outro-cb-3"> Outro</div><input type="text" id="serv-outro-txt-3" class="input-outro hidden" placeholder="Qual serviço?"></label>
+                                    </div>
+                                </div>
+                                <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-3">Nenhuma praga selecionada.</span></div>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-section">
+                            <div class="form-group">
+                                <label class="title-label" id="titulo-pragas-dinamico" style="font-size: 16px;">Pragas contempladas promocional 01</label>
+                                <div class="checkbox-container">
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="BARATAS"> BARATAS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="FORMIGAS"> FORMIGAS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CUPINS"> CUPINS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ROEDORES"> ROEDORES</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSCAS"> MOSCAS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSQUITOS"> MOSQUITOS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARRAPATOS"> CARRAPATOS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="PULGAS"> PULGAS</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ESCORPIÕES"> ESCORPIÕES</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARAMUJOS"> CARAMUJOS</label>
+                                    <label class="checkbox-item item-outro"><div style="display: flex; gap: 8px;"><input type="checkbox" class="praga-cb" value="OUTROS" id="praga-outros-cb"> OUTROS</div><input type="text" id="praga-outros-txt" class="input-outro hidden" placeholder="Especifique a praga..."></label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px;" id="btn-salvar-dedetizacao">Salvar Comunicado</button>
+                    </form>
+
+                    <!-- FORMULÁRIO LIMPEZA -->
+                    <form id="form-limpeza" style="display:none;">
+                        <div class="form-grid">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Nome do Cliente</label>
+                                <div class="input-group-row">
+                                    <input type="text" id="cliente-limp" required placeholder="Digite o nome completo...">
+                                    <button type="button" class="btn-importar" onclick="abrirModalImportacao('Limpeza')">
+                                        <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Data Realização</label>
+                                <input type="date" id="data-limp" required>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label class="title-label">Vendedor Responsável</label>
+                            <div class="servicos-checkboxes">
+                                <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Heitor Diego" checked> Heitor Diego</label>
+                                <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Gabriel Valero"> Gabriel Valero</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label class="title-label">Observações</label>
+                            <div class="editor-container">
+                                <div class="editor-toolbar">
+                                    <div class="editor-toolbar-group">
+                                        <button type="button" class="editor-btn" onclick="document.execCommand('bold', false, null)"><strong>B</strong></button>
+                                        <button type="button" class="editor-btn" onclick="document.execCommand('italic', false, null)"><em>I</em></button>
+                                        <button type="button" class="editor-btn" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
+                                    </div>
+                                    <button type="button" class="editor-btn btn-modelo" onclick="inserirModeloLimpeza()">📝 Inserir Modelo</button>
+                                </div>
+                                <div id="obs-limp" class="editor-content" contenteditable="true" data-placeholder="Detalhes do serviço..."></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px; background-color: #0ea5e9;" id="btn-salvar-limpeza">Salvar Comunicado</button>
+                    </form>
+
+                    <!-- FORMULÁRIO FUMACÊ -->
+                    <form id="form-termo" style="display:none;">
+                        <div class="form-grid">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Nome do Cliente</label>
+                                <div class="input-group-row">
+                                    <input type="text" id="cliente-termo" required placeholder="Digite o nome completo...">
+                                    <button type="button" class="btn-importar" onclick="abrirModalImportacao('Termo')">
+                                        <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Data Realização</label>
+                                <input type="date" id="data-termo" required>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="title-label">Horário (Entrada / Saída)</label>
+                                <div class="time-group">
+                                    <input type="time" id="hora-inicio-termo" required>
+                                    <input type="time" id="hora-fim-termo" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px; margin-bottom: 15px;">
+                            <label class="title-label">Vendedor Responsável</label>
+                            <div class="servicos-checkboxes">
+                                <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Heitor Diego" checked> Heitor Diego</label>
+                                <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Gabriel Valero"> Gabriel Valero</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px; background-color: #f59e0b; color: #1f2937;" id="btn-salvar-termo">Salvar Comunicado</button>
+                    </form>
+
+                </div>
             </div>
         </div>
     </div>
     
+    <!-- MODAIS QUE CONTINUAM COMO POP-UPS (Ações rápidas) -->
     <!-- MODAL SELEÇÃO NOVO -->
     <div id="modal-selecao" class="modal-overlay">
         <div class="modal-box">
             <h3 style="color: var(--primary-color); margin-bottom: 10px;">Novo Comunicado</h3>
             <p style="font-size: 14px; color: #6b7280;">Selecione o modelo do formulário:</p>
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
-                <button class="btn-action btn-novo" style="padding:15px;" onclick="prepararFormularioNovo('modal-dedetizacao')">Dedetização</button>
-                <button class="btn-action btn-novo" style="background-color: #0ea5e9; padding:15px;" onclick="prepararFormularioNovo('modal-limpeza')">Limpeza de Reservatório</button>
-                <button class="btn-action btn-novo" style="background-color: #f59e0b; padding:15px;" onclick="prepararFormularioNovo('modal-termo')">Fumacê</button>
+                <button class="btn-action btn-novo" style="padding:15px;" onclick="prepararFormularioNovo('Dedetizacao')">Dedetização</button>
+                <button class="btn-action btn-novo" style="background-color: #0ea5e9; padding:15px;" onclick="prepararFormularioNovo('Limpeza')">Limpeza de Reservatório</button>
+                <button class="btn-action btn-novo" style="background-color: #f59e0b; padding:15px;" onclick="prepararFormularioNovo('Termo')">Fumacê</button>
             </div>
             <button class="btn-cancel" style="width: 100%; margin-top: 15px;" onclick="fecharModal('modal-selecao')">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- MODAL DEDETIZAÇÃO -->
-    <div id="modal-dedetizacao" class="modal-overlay">
-        <div class="modal-box lg">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
-                <h3 style="color: var(--primary-color);" id="titulo-modal-dedetizacao">Comunicado - Dedetização</h3>
-                <button class="icon-btn" onclick="fecharModal('modal-dedetizacao')"><span class="material-icons">close</span></button>
-            </div>
-            <form id="form-dedetizacao">
-                
-                <div class="form-grid">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label" for="cliente">Nome do Cliente</label>
-                        <div class="input-group-row">
-                            <input type="text" id="cliente" required placeholder="Digite o nome completo...">
-                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Dedetizacao')">
-                                <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label" for="data">Data Realização</label>
-                        <input type="date" id="data" required>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Horário (Entrada / Saída)</label>
-                        <div class="time-group">
-                            <input type="time" id="hora-inicio" required>
-                            <input type="time" id="hora-fim" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-grid" style="margin-top: 15px;">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Tipo de Serviço (Geral)</label>
-                        <div class="servicos-checkboxes-geral">
-                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desinsetização"> Desinsetização</label>
-                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Desratização"> Desratização</label>
-                            <label class="option-lbl"><input type="checkbox" class="servico-geral-cb" value="Descupinização"> Descupinização</label>
-                            <label class="option-lbl lbl-outro">
-                                <div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-geral-cb" value="Outro" id="serv-geral-outro-cb"> Outro</div>
-                                <input type="text" id="serv-geral-outro-txt" class="input-outro hidden" placeholder="Qual serviço?">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Vendedor Responsável</label>
-                        <div class="servicos-checkboxes">
-                            <label class="option-lbl"><input type="radio" name="vendedor" value="Heitor Diego" checked> Heitor Diego</label>
-                            <label class="option-lbl"><input type="radio" name="vendedor" value="Gabriel Valero"> Gabriel Valero</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="promo-section">
-                    <div class="promo-card active" id="card-1" onclick="ativarCard(1)">
-                        <div class="promo-card-title">Promocional 01</div>
-                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-1" step="0.01" min="0" placeholder="0.00"></div>
-                        <div class="form-group">
-                            <label class="title-label">Imóvel</label>
-                            <select id="imovel-1" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
-                            <input type="text" id="imovel-outro-txt-1" class="input-outro hidden" placeholder="Qual imóvel?">
-                        </div>
-                        <div class="form-group">
-                            <label class="title-label">Serviços</label>
-                            <div class="servicos-checkboxes">
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desinsetização"> Desinsetização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Desratização"> Desratização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-1" value="Descupinização"> Descupinização</label>
-                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-1" value="Outro" id="serv-outro-cb-1"> Outro</div><input type="text" id="serv-outro-txt-1" class="input-outro hidden" placeholder="Qual serviço?"></label>
-                            </div>
-                        </div>
-                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-1">Nenhuma praga selecionada.</span></div>
-                    </div>
-                    <div class="promo-card" id="card-2" onclick="ativarCard(2)">
-                        <div class="promo-card-title">Promocional 02</div>
-                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-2" step="0.01" min="0" placeholder="0.00"></div>
-                        <div class="form-group">
-                            <label class="title-label">Imóvel</label>
-                            <select id="imovel-2" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
-                            <input type="text" id="imovel-outro-txt-2" class="input-outro hidden" placeholder="Qual imóvel?">
-                        </div>
-                        <div class="form-group">
-                            <label class="title-label">Serviços</label>
-                            <div class="servicos-checkboxes">
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desinsetização"> Desinsetização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Desratização"> Desratização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-2" value="Descupinização"> Descupinização</label>
-                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-2" value="Outro" id="serv-outro-cb-2"> Outro</div><input type="text" id="serv-outro-txt-2" class="input-outro hidden" placeholder="Qual serviço?"></label>
-                            </div>
-                        </div>
-                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-2">Nenhuma praga selecionada.</span></div>
-                    </div>
-                    <div class="promo-card" id="card-3" onclick="ativarCard(3)">
-                        <div class="promo-card-title">Promocional 03</div>
-                        <div class="input-money-group"><span>R$</span><input type="number" id="valor-3" step="0.01" min="0" placeholder="0.00"></div>
-                        <div class="form-group">
-                            <label class="title-label">Imóvel</label>
-                            <select id="imovel-3" class="form-input"><option value="Apartamento">Apartamento</option><option value="Casa">Casa</option><option value="Outro">Outro</option></select>
-                            <input type="text" id="imovel-outro-txt-3" class="input-outro hidden" placeholder="Qual imóvel?">
-                        </div>
-                        <div class="form-group">
-                            <label class="title-label">Serviços</label>
-                            <div class="servicos-checkboxes">
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desinsetização"> Desinsetização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Desratização"> Desratização</label>
-                                <label class="option-lbl"><input type="checkbox" class="servico-cb-3" value="Descupinização"> Descupinização</label>
-                                <label class="option-lbl lbl-outro"><div style="display: flex; gap: 5px;"><input type="checkbox" class="servico-cb-3" value="Outro" id="serv-outro-cb-3"> Outro</div><input type="text" id="serv-outro-txt-3" class="input-outro hidden" placeholder="Qual serviço?"></label>
-                            </div>
-                        </div>
-                        <div class="pragas-display"><strong>Pragas contempladas:</strong><span id="display-pragas-3">Nenhuma praga selecionada.</span></div>
-                    </div>
-                </div>
-
-                <div class="checkbox-section">
-                    <div class="form-group">
-                        <label class="title-label" id="titulo-pragas-dinamico" style="font-size: 16px;">Pragas contempladas promocional 01</label>
-                        <div class="checkbox-container">
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="BARATAS"> BARATAS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="FORMIGAS"> FORMIGAS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CUPINS"> CUPINS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ROEDORES"> ROEDORES</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSCAS"> MOSCAS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="MOSQUITOS"> MOSQUITOS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARRAPATOS"> CARRAPATOS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="PULGAS"> PULGAS</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="ESCORPIÕES"> ESCORPIÕES</label>
-                            <label class="checkbox-item"><input type="checkbox" class="praga-cb" value="CARAMUJOS"> CARAMUJOS</label>
-                            <label class="checkbox-item item-outro"><div style="display: flex; gap: 8px;"><input type="checkbox" class="praga-cb" value="OUTROS" id="praga-outros-cb"> OUTROS</div><input type="text" id="praga-outros-txt" class="input-outro hidden" placeholder="Especifique a praga..."></label>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px;" id="btn-salvar-dedetizacao">Salvar Comunicado</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL LIMPEZA -->
-    <div id="modal-limpeza" class="modal-overlay">
-        <div class="modal-box md">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
-                <h3 style="color: #0ea5e9;" id="titulo-modal-limpeza">Comunicado - Limpeza</h3>
-                <button class="icon-btn" onclick="fecharModal('modal-limpeza')"><span class="material-icons">close</span></button>
-            </div>
-            <form id="form-limpeza">
-                
-                <div class="form-grid">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Nome do Cliente</label>
-                        <div class="input-group-row">
-                            <input type="text" id="cliente-limp" required placeholder="Digite o nome completo...">
-                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Limpeza')">
-                                <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Data Realização</label>
-                        <input type="date" id="data-limp" required>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label class="title-label">Vendedor Responsável</label>
-                    <div class="servicos-checkboxes">
-                        <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Heitor Diego" checked> Heitor Diego</label>
-                        <label class="option-lbl"><input type="radio" name="vendedor-limp" value="Gabriel Valero"> Gabriel Valero</label>
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label class="title-label">Observações</label>
-                    <div class="editor-container">
-                        <div class="editor-toolbar">
-                            <div class="editor-toolbar-group">
-                                <button type="button" class="editor-btn" onclick="document.execCommand('bold', false, null)"><strong>B</strong></button>
-                                <button type="button" class="editor-btn" onclick="document.execCommand('italic', false, null)"><em>I</em></button>
-                                <button type="button" class="editor-btn" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
-                            </div>
-                            <button type="button" class="editor-btn btn-modelo" onclick="inserirModeloLimpeza()">📝 Inserir Modelo</button>
-                        </div>
-                        <div id="obs-limp" class="editor-content" contenteditable="true" data-placeholder="Detalhes do serviço..."></div>
-                    </div>
-                </div>
-                <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px; background-color: #0ea5e9;" id="btn-salvar-limpeza">Salvar Comunicado</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL FUMACÊ (Termonebulização) -->
-    <div id="modal-termo" class="modal-overlay">
-        <div class="modal-box md">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
-                <h3 style="color: #f59e0b;" id="titulo-modal-termo">Comunicado - Fumacê</h3>
-                <button class="icon-btn" onclick="fecharModal('modal-termo')"><span class="material-icons">close</span></button>
-            </div>
-            <form id="form-termo">
-                
-                <div class="form-grid">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Nome do Cliente</label>
-                        <div class="input-group-row">
-                            <input type="text" id="cliente-termo" required placeholder="Digite o nome completo...">
-                            <button type="button" class="btn-importar" onclick="abrirModalImportacao('Termo')">
-                                <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Data Realização</label>
-                        <input type="date" id="data-termo" required>
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="title-label">Horário (Entrada / Saída)</label>
-                        <div class="time-group">
-                            <input type="time" id="hora-inicio-termo" required>
-                            <input type="time" id="hora-fim-termo" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 15px; margin-bottom: 15px;">
-                    <label class="title-label">Vendedor Responsável</label>
-                    <div class="servicos-checkboxes">
-                        <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Heitor Diego" checked> Heitor Diego</label>
-                        <label class="option-lbl"><input type="radio" name="vendedor-termo" value="Gabriel Valero"> Gabriel Valero</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn-action btn-novo" style="width: 100%; padding: 15px; background-color: #f59e0b; color: #1f2937;" id="btn-salvar-termo">Salvar Comunicado</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL HISTÓRICO -->
-    <div id="modal-historico" class="modal-overlay">
-        <div class="modal-box lg">
-            <div style="margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: var(--primary-color);">Histórico de Comunicados</h3>
-                    <button class="icon-btn" onclick="fecharModal('modal-historico')"><span class="material-icons">close</span></button>
-                </div>
-                <div class="dash-tabs" style="border:none; margin-top:15px; margin-bottom: 0;">
-                    <button class="tab-btn active" onclick="setFiltroHistorico('Dedetizacao', this)">Dedetização</button>
-                    <button class="tab-btn" onclick="setFiltroHistorico('Limpeza', this)">Limpeza</button>
-                    <button class="tab-btn" onclick="setFiltroHistorico('Termo', this)">Fumacê</button>
-                </div>
-            </div>
-
-            <div class="filtros-bar">
-                <div class="filter-group">
-                    <label class="title-label" style="font-size: 11px;">BUSCAR CLIENTE</label>
-                    <input type="text" id="filtro-cliente" placeholder="Digite o nome..." onkeyup="dispararBuscaHistorico()">
-                </div>
-                <div class="filter-group">
-                    <label class="title-label" style="font-size: 11px;">DATA INICIAL</label>
-                    <input type="date" id="filtro-data-inicio" onchange="dispararBuscaHistorico()">
-                </div>
-                <div class="filter-group">
-                    <label class="title-label" style="font-size: 11px;">DATA FINAL</label>
-                    <input type="date" id="filtro-data-fim" onchange="dispararBuscaHistorico()">
-                </div>
-                <button class="btn-action btn-historico" onclick="limparFiltrosHistorico()" title="Limpar Filtros" style="height: 42px; margin-top: auto;">
-                    <span class="material-icons">filter_alt_off</span>
-                </button>
-            </div>
-
-            <div class="table-container" style="margin-top: 15px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Cliente</th>
-                            <th style="width: 20%;">Serviço</th>
-                            <th style="width: 20%;">Data</th>
-                            <th style="width: 20%; text-align:center;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-corpo-historico"></tbody>
-                </table>
-            </div>
-
-            <div class="pagination-container">
-                <button class="btn-action btn-historico" id="btn-prev-page" onclick="mudarPagina(-1)">Anterior</button>
-                <span class="page-info" id="page-info">Página 1 de 1</span>
-                <button class="btn-action btn-historico" id="btn-next-page" onclick="mudarPagina(1)">Próxima</button>
-            </div>
         </div>
     </div>
 
