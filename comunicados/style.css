@@ -13,6 +13,14 @@
 body { background-color: var(--bg-body); color: var(--text-color); margin: 0; padding: 0; }
 
 /* ================================
+   CONTROLE DE VISIBILIDADE SPA
+   ================================ */
+#view-dashboard { display: block; animation: fadein 0.3s; }
+#view-historico { display: none; animation: fadein 0.3s; }
+#view-formulario { display: none; animation: fadein 0.3s; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* ================================
    NAVBAR E CONTEÚDO GERAL
    ================================ */
 .navbar { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
@@ -72,8 +80,13 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
 .icon-btn.share:hover { color: var(--success-color); background: #f0fdf4; }
 
 /* =========================================================
-   FORMULÁRIOS & INPUTS
+   FORMULÁRIOS & INPUTS SPA
    ========================================================= */
+.form-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 800px; margin: auto; }
+.form-header { text-align: center; margin-bottom: 25px; }
+.form-header h2 { margin: 0; color: #111827; font-size: 20px; }
+.form-header p { margin: 5px 0 0; color: #6b7280; font-size: 13px; }
+
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
 .form-group label.title-label { font-size: 13px; font-weight: 600; color: #374151; text-align: left; width: 100%; margin-bottom: 2px; }
@@ -93,7 +106,6 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-importar { background: #e5e7eb; border: 1px solid #d1d5db; color: #374151; border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
 .btn-importar:hover { background: #d1d5db; }
 
-/* Checkboxes, Editor e Promoções */
 .servicos-checkboxes-geral, .servicos-checkboxes { display: flex; flex-wrap: wrap; gap: 10px 20px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; padding: 12px; height: 100%; align-content: flex-start; }
 .servicos-checkboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .option-lbl { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #444; cursor: pointer; }
@@ -126,11 +138,10 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
 .editor-content[data-placeholder]:empty:before { content: attr(data-placeholder); color: #999; pointer-events: none; display: block; }
 
 /* =========================================================
-   MODAIS, FILTROS & HISTÓRICO
+   MODAIS RESTANTES E FILTROS
    ========================================================= */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: flex-start; justify-content: center; z-index: 3000; backdrop-filter: blur(2px); overflow-y: auto; padding-top: 80px; padding-bottom: 40px; }
 .modal-box { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); margin: auto; }
-.modal-box.lg { max-width: 800px; text-align: left; }
 .modal-box.md { max-width: 600px; text-align: left; }
 .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
 .btn-cancel { background-color: #e9ecef; color: #333; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -168,6 +179,7 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
     .tab-btn { flex: 1 1 auto; min-width: 120px; font-size: 13px; padding: 10px; }
     
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .form-card { padding: 15px; border-radius: 12px; box-shadow: none; border: 1px solid var(--border-color); }
     
     .input-group-row { flex-direction: column; gap: 10px; }
     .input-group-row input { flex: 1 1 100% !important; }
@@ -212,35 +224,20 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin:
     td:nth-of-type(3)::before { content: "Data"; }
     td:nth-of-type(4)::before { display: none; }
 
-/* AÇÕES CENTRALIZADAS (Força Bruta para Flexbox) */
+    /* AÇÕES CENTRALIZADAS E REAJUSTADAS - FORÇA BRUTA */
     td:last-child { 
-        border-bottom: none !important; 
-        display: flex !important; 
-        width: 100% !important; 
-        padding: 15px 0 5px 0 !important; 
-        justify-content: center !important; /* Centra o conteúdo horizontalmente */
-        align-items: center !important; /* Centra verticalmente */
+        border-bottom: none !important; display: flex !important; width: 100% !important; 
+        padding: 15px 0 5px 0 !important; justify-content: center !important; align-items: center !important;
     }
     
     .actions { 
-        display: flex !important; 
-        flex-direction: row !important; /* Força os ícones a ficarem lado a lado */
-        justify-content: center !important; 
-        align-items: center !important;
-        width: 100% !important; 
-        gap: 20px !important; /* Define o espaço horizontal exato entre cada ícone */
-        margin: 0 !important;
-        padding: 0 !important;
-        flex-wrap: nowrap !important; /* Impede que os botões saltem para uma nova linha */
+        display: flex !important; flex-direction: row !important; justify-content: center !important; 
+        align-items: center !important; width: 100% !important; gap: 20px !important; margin: 0 !important; padding: 0 !important; flex-wrap: nowrap !important;
     }
     
     .actions .icon-btn { 
-        padding: 8px !important; 
-        border-radius: 50% !important; 
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important; 
-        background: transparent !important;
+        padding: 8px !important; border-radius: 50% !important; display: flex !important; 
+        align-items: center !important; justify-content: center !important; background: transparent !important;
     } 
     .actions .icon-btn svg { width: 22px !important; height: 22px !important; }
 }
