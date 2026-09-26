@@ -78,20 +78,52 @@
         </div>
       </div>
  
-      <div id="view-historico">
+<div id="view-historico">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico: <span id="tituloHistorico" style="color:#004481;">Imóveis</span></h2>
-          <button onclick="fecharHistorico()" class="btn-action btn-historico">Voltar</button>
+          <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico de Serviços</h2>
+          <button onclick="fecharHistorico()" class="btn-action btn-historico">
+             <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+          </button>
         </div>
         
-        <div class="filters-bar">
-          <div class="filter-group"><input type="text" id="filtroCliente" placeholder="Cliente..."></div>
-          <div class="filter-group" id="containerFiltroEndereco"><input type="text" id="filtroEndereco" placeholder="Endereço..."></div>
-          <div class="filter-group" id="containerFiltroPlaca" style="display:none;"><input type="text" id="filtroPlaca" placeholder="Placa..."></div>
-          <div class="filter-group"><input type="text" id="filtroServico" placeholder="Serviço..."></div>
-          <div class="filter-group" style="max-width: 160px;"><input type="date" id="filtroData"></div>
-          <button class="btn-action btn-novo" onclick="paginaAtual=1; carregarHistorico()" style="padding:10px 16px;">Filtrar</button>
-          <button class="btn-action btn-historico" onclick="limparFiltros()" style="padding:10px 16px;">Limpar</button>
+        <!-- ABAS DENTRO DO HISTÓRICO -->
+        <div class="dash-tabs" style="border:none; margin-bottom: 0; justify-content: center; flex-wrap: wrap;">
+          <button class="tab-btn active" id="tabHistImovel" onclick="mudarAbaHistorico('Imovel')"><span class="material-icons" style="font-size:18px;">home</span> Imóveis</button>
+          <button class="tab-btn" id="tabHistVeiculo" onclick="mudarAbaHistorico('Veiculo')"><span class="material-icons" style="font-size:18px;">directions_car</span> Veículos</button>
+        </div>
+        
+        <!-- NOVO CARTÃO DE FILTROS -->
+        <div class="filtros-card">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Cliente</label>
+              <input type="text" id="filtroCliente" class="form-input" placeholder="Cliente...">
+            </div>
+            <div class="form-group" id="containerFiltroEndereco">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Local</label>
+              <input type="text" id="filtroEndereco" class="form-input" placeholder="Endereço...">
+            </div>
+            <div class="form-group" id="containerFiltroPlaca" style="display:none;">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Local</label>
+              <input type="text" id="filtroPlaca" class="form-input" placeholder="Placa...">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Serviço</label>
+              <input type="text" id="filtroServico" class="form-input" placeholder="Serviço...">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Inicial</label>
+              <input type="date" id="filtroDataInicio" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Final</label>
+              <input type="date" id="filtroDataFim" class="form-input">
+            </div>
+          </div>
+          <div class="filter-buttons-container">
+            <button class="btn-action btn-novo" onclick="paginaAtual=1; carregarHistorico()">Filtrar</button>
+            <button class="btn-action btn-historico" onclick="limparFiltros()">Limpar</button>
+          </div>
         </div>
         
         <div class="table-container">
@@ -102,19 +134,19 @@
                 <th style="width: 20%;" id="thIdentificacao">Endereço</th>
                 <th style="width: 10%;">Data</th>
                 <th style="width: 15%;">Serviço</th>
-                <th style="width: 10%; text-align: center;">Código</th> <!-- Título alterado de Cód para Código -->
+                <th style="width: 10%; text-align: center;">Código</th>
                 <th style="width: 15%; text-align: center;">Docs</th>
                 <th style="width: 5%; text-align: center;">Ações</th> 
               </tr>
             </thead>
             <tbody id="tabelaHistorico">
-              <tr><td colspan="7">Carregando dados...</td></tr>
+              <tr><td colspan="7" style="text-align:center; padding: 20px;">Carregando dados...</td></tr>
             </tbody>
           </table>
-          <div class="pagination-bar">
-            <button class="page-btn" id="btnAnt" onclick="mudarPagina(-1)">Anterior</button>
-            <span id="infoPagina" style="font-size:14px; font-weight:600; color:#4b5563;">1 de 1</span>
-            <button class="page-btn" id="btnProx" onclick="mudarPagina(1)">Próximo</button>
+          <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <button class="btn-action btn-historico" id="btnAnt" onclick="mudarPagina(-1)">Anterior</button>
+            <span id="infoPagina" style="font-size:14px; font-weight:600; color:#4b5563;">Página 1 de 1</span>
+            <button class="btn-action btn-historico" id="btnProx" onclick="mudarPagina(1)">Próxima</button>
           </div>
         </div>
       </div>
