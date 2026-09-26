@@ -138,57 +138,80 @@
    .catch(err => { tbody.innerHTML = "<tr><td colspan='7' style='color:red'>Erro de conexão.</td></tr>"; });
  }
  
-  // --- HISTÓRICO ---
-  function abrirHistorico() {
-    document.getElementById('view-dashboard').style.display = 'none';
-    document.getElementById('view-historico').style.display = 'block';
-    
-    document.getElementById('tituloHistorico').innerText = (tipoServicoAtual === 'Imovel' ? 'Imóveis' : 'Veículos');
-    document.getElementById('thIdentificacao').innerText = (tipoServicoAtual === 'Imovel' ? 'Endereço' : 'Placa');
-    
-    if (tipoServicoAtual === 'Veiculo') {
-        document.getElementById('containerFiltroPlaca').style.display = 'block';
-        document.getElementById('containerFiltroEndereco').style.display = 'none'; 
-    } else {
-        document.getElementById('containerFiltroPlaca').style.display = 'none';
-        document.getElementById('containerFiltroEndereco').style.display = 'block'; 
-    }
-    window.scrollTo(0,0);
-    paginaAtual = 1;
-    limparFiltros(false); 
-    carregarHistorico();
-  }
+// --- HISTÓRICO ---
+ function abrirHistorico() {
+   document.getElementById('view-dashboard').style.display = 'none';
+   document.getElementById('view-historico').style.display = 'block';
+   
+   document.getElementById('tabHistImovel').className = tipoServicoAtual === 'Imovel' ? 'tab-btn active' : 'tab-btn';
+   document.getElementById('tabHistVeiculo').className = tipoServicoAtual === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
+   document.getElementById('thIdentificacao').innerText = (tipoServicoAtual === 'Imovel' ? 'Endereço' : 'Placa');
+   
+   if (tipoServicoAtual === 'Veiculo') {
+       document.getElementById('containerFiltroPlaca').style.display = 'block';
+       document.getElementById('containerFiltroEndereco').style.display = 'none'; 
+   } else {
+       document.getElementById('containerFiltroPlaca').style.display = 'none';
+       document.getElementById('containerFiltroEndereco').style.display = 'block'; 
+   }
+   window.scrollTo(0,0);
+   paginaAtual = 1;
+   limparFiltros(false); 
+   carregarHistorico();
+ }
  
-  function fecharHistorico() {
-    document.getElementById('view-historico').style.display = 'none';
-    document.getElementById('view-dashboard').style.display = 'block';
-  }
+ function fecharHistorico() {
+   document.getElementById('view-historico').style.display = 'none';
+   document.getElementById('view-dashboard').style.display = 'block';
+   mudarAbaDashboard(tipoServicoAtual); // Sincroniza a aba principal
+ }
+
+ function mudarAbaHistorico(tipo) {
+   tipoServicoAtual = tipo;
+   document.getElementById('tabHistImovel').className = tipo === 'Imovel' ? 'tab-btn active' : 'tab-btn';
+   document.getElementById('tabHistVeiculo').className = tipo === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
+   document.getElementById('thIdentificacao').innerText = (tipo === 'Imovel' ? 'Endereço' : 'Placa');
+   
+   if (tipo === 'Veiculo') {
+       document.getElementById('containerFiltroPlaca').style.display = 'block';
+       document.getElementById('containerFiltroEndereco').style.display = 'none'; 
+   } else {
+       document.getElementById('containerFiltroPlaca').style.display = 'none';
+       document.getElementById('containerFiltroEndereco').style.display = 'block'; 
+   }
+   paginaAtual = 1;
+   limparFiltros(false);
+   carregarHistorico();
+ }
  
-  function limparFiltros(recarregar = true) {
-    document.getElementById('filtroCliente').value = "";
-    document.getElementById('filtroPlaca').value = "";
-    document.getElementById('filtroEndereco').value = "";
-    document.getElementById('filtroServico').value = "";
-    document.getElementById('filtroData').value = "";
-    if(recarregar) { paginaAtual=1; carregarHistorico(); }
-  }
+ function limparFiltros(recarregar = true) {
+   document.getElementById('filtroCliente').value = "";
+   document.getElementById('filtroPlaca').value = "";
+   document.getElementById('filtroEndereco').value = "";
+   document.getElementById('filtroServico').value = "";
+   document.getElementById('filtroDataInicio').value = "";
+   document.getElementById('filtroDataFim').value = "";
+   if(recarregar) { paginaAtual=1; carregarHistorico(); }
+ }
  
-  function mudarPagina(direcao) {
-    paginaAtual += direcao;
-    carregarHistorico();
-  }
+ function mudarPagina(direcao) {
+   paginaAtual += direcao;
+   carregarHistorico();
+ }
  
-  function carregarHistorico() {
+ function carregarHistorico() {
    const tbody = document.getElementById('tabelaHistorico');
    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
    
+   // ATUALIZADO: Agora envia Data Inicio e Data Fim separadas para a sua pesquisa
    const payload = {
      acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
      filtroCliente: document.getElementById('filtroCliente').value,
-     filtroPlaca: document.getElementById('filtroPlaca').value,
-     filtroEndereco: document.getElementById('filtroEndereco').value,
+     filtroPlaca: document.getElementById('filtroPlaca') ? document.getElementById('filtroPlaca').value : "",
+     filtroEndereco: document.getElementById('filtroEndereco') ? document.getElementById('filtroEndereco').value : "",
      filtroServico: document.getElementById('filtroServico').value,
-     filtroData: document.getElementById('filtroData').value
+     filtroDataInicio: document.getElementById('filtroDataInicio').value,
+     filtroDataFim: document.getElementById('filtroDataFim').value
    };
  
    fetch(URL_SCRIPT, { method: "POST", body: JSON.stringify(payload) })
@@ -207,9 +230,7 @@
              let dataFormatada = r.data;
              if(dataFormatada) {
                  let d = new Date(dataFormatada);
-                 if(!isNaN(d.getTime())) {
-                     dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
-                 }
+                 if(!isNaN(d.getTime())) dataFormatada = d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
              }
 
              let botoesDocs = "";
