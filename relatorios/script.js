@@ -314,7 +314,7 @@
     });
   }
  
-  // --- LÓGICA DE EDIÇÃO ---
+// --- LÓGICA DE EDIÇÃO ---
   function prepararEdicao(index, origem = 'historico') {
     let lista = (origem === 'dashboard') ? cacheDashboard : cacheHistorico;
     const item = lista[index];
@@ -322,7 +322,7 @@
     
     modoEdicao = true;
     codigoEdicao = item.codigo; 
- 
+
     document.getElementById('tituloFormulario').innerText = "Editando Registro";
     document.getElementById('modal-selecao').style.display = 'none';
     document.getElementById('view-dashboard').style.display = 'none';
@@ -341,13 +341,13 @@
       : ["Desinsetização", "Desinsetização e desratização", "Descupinização", "Limpeza de Reservatórios", "Modelo alternativo"];
     
     opcoes.forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; selectServico.appendChild(option); });
- 
+
     if (tipoServicoAtual === 'Veiculo') { 
         lblCampo2.innerText = "Placa"; inputCampo2.placeholder = "AAA-0000"; 
     } else { 
         lblCampo2.innerText = "Endereço"; inputCampo2.placeholder = "Endereço completo"; 
     }
- 
+
     document.getElementById('campo1').value = item.cliente;
     document.getElementById('campo2').value = item.identificacao;
     
@@ -355,8 +355,10 @@
     if (item.data) { dataISO = String(item.data).substring(0, 10); }
     document.getElementById('campo5').value = dataISO;
     
-    document.getElementById('campo3').value = item.entrada;
-    document.getElementById('campo4').value = item.saida;
+    // === BLINDAGEM DE HORÁRIO ADICIONADA AQUI ===
+    // Pega apenas os 5 primeiros caracteres (HH:mm) para não dar conflito no HTML
+    document.getElementById('campo3').value = item.entrada ? String(item.entrada).substring(0, 5) : "";
+    document.getElementById('campo4').value = item.saida ? String(item.saida).substring(0, 5) : "";
     
     const selGarantia = document.getElementById('selectGarantia');
     const garantiaValor = String(item.garantia).replace(" dias", "").trim();
@@ -369,7 +371,7 @@
         document.getElementById('campo6_manual').style.display = 'block';
         document.getElementById('campo6_manual').value = garantiaValor;
     }
- 
+
     if(item.servico.includes("Limpeza de Reservatórios:")) {
         selectServico.value = "Limpeza de Reservatórios";
         document.getElementById('descReservatorio').style.display = 'block';
@@ -379,7 +381,7 @@
         selectServico.value = item.servico;
         document.getElementById('descReservatorio').style.display = 'none';
     }
- 
+
     const checks = document.querySelectorAll('input[name="colaboradores_check"]');
     checks.forEach(c => {
         if (item.colaboradores && item.colaboradores.includes(c.value)) c.checked = true;
