@@ -1,4 +1,4 @@
-  // =========================================================================
+// =========================================================================
   // URL DO SEU WEB APP
   const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwgMyk1TaUiFi5-L3uYLmbGrs_AZ4WRJE7K-lC0uEgshRQtsnypgAZefcRHu0VRKmMffg/exec";
   // =========================================================================
@@ -65,13 +65,26 @@
  
   // --- DASHBOARD ---
   function mudarAbaDashboard(tipo) {
-    tipoServicoAtual = tipo;
-    document.getElementById('tabImovel').className = tipo === 'Imovel' ? 'tab-btn active' : 'tab-btn';
-    document.getElementById('tabVeiculo').className = tipo === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
-    document.getElementById('lblTotal').innerText = tipo === 'Imovel' ? 'Total de Imóveis' : 'Total de Veículos';
-    document.getElementById('tituloHistorico').innerText = (tipo === 'Imovel' ? 'Imóveis' : 'Veículos');
-    carregarDashboard();
-  }
+   tipoServicoAtual = tipo;
+   
+   // 1. Atualiza o aspeto dos botões (qual está selecionado)
+   document.getElementById('tabImovel').className = tipo === 'Imovel' ? 'tab-btn active' : 'tab-btn';
+   document.getElementById('tabVeiculo').className = tipo === 'Veiculo' ? 'tab-btn active' : 'tab-btn';
+   
+   // 2. Atualiza o texto do Total
+   document.getElementById('lblTotal').innerText = tipo === 'Imovel' ? 'Total de Imóveis' : 'Total de Veículos';
+   
+   if(document.getElementById('tituloHistorico')) {
+       document.getElementById('tituloHistorico').innerText = (tipo === 'Imovel' ? 'Imóveis' : 'Veículos');
+   }
+   
+   // 3. Força a limpeza visual Imediata antes de chamar o servidor
+   document.getElementById('tabelaRecentes').innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px; color:#6b7280;'>Atualizando dados...</td></tr>";
+   document.getElementById('dashTotal').innerText = "...";
+   
+   // 4. Puxa os dados corretos da aba atual
+   carregarDashboard();
+ }
  
   function carregarDashboard() {
    const tbody = document.getElementById('tabelaRecentes');
@@ -355,7 +368,6 @@
     if (item.data) { dataISO = String(item.data).substring(0, 10); }
     document.getElementById('campo5').value = dataISO;
     
-    // === BLINDAGEM DE HORÁRIO ADICIONADA AQUI ===
     // Pega apenas os 5 primeiros caracteres (HH:mm) para não dar conflito no HTML
     document.getElementById('campo3').value = item.entrada ? String(item.entrada).substring(0, 5) : "";
     document.getElementById('campo4').value = item.saida ? String(item.saida).substring(0, 5) : "";
@@ -438,16 +450,25 @@
     calcularValidade(); 
   }
  
+  // NOVA FUNÇÃO FECHAR FORMULÁRIO (Volta sempre ao Dashboard)
   function fecharFormulario() {
+    // 1. Limpa os campos do formulário
     document.getElementById('formulario').reset();
+    
+    // 2. Esconde o Formulário e o Histórico
     document.getElementById('view-formulario').style.display = 'none';
-    if(modoEdicao) {
-        document.getElementById('view-historico').style.display = 'block';
-    } else {
-        document.getElementById('view-dashboard').style.display = 'block';
-        mudarAbaDashboard(tipoServicoAtual);
-    }
-    modoEdicao = false; codigoEdicao = null;
+    document.getElementById('view-historico').style.display = 'none';
+    
+    // 3. Mostra SEMPRE a tela inicial (Dashboard)
+    document.getElementById('view-dashboard').style.display = 'block';
+    window.scrollTo(0, 0);
+    
+    // 4. Sai do modo de edição
+    modoEdicao = false; 
+    codigoEdicao = null;
+    
+    // 5. Atualiza o dashboard para garantir que mostra os dados reais
+    mudarAbaDashboard(tipoServicoAtual);
   }
  
   document.getElementById('campo9').addEventListener('change', function() {
@@ -498,9 +519,7 @@
 
         if(ret.status === "sucesso") { 
            showToast(modoEdicao ? "Registro atualizado!" : "Registro salvo!", "success");
-           fecharFormulario(); 
-           if(modoEdicao) { carregarHistorico(); } 
-           
+           fecharFormulario(); // Chama a nova função que redireciona para o Dashboard
         } else { 
            document.getElementById('view-formulario').style.display = 'block';
            showToast("Erro: " + ret.mensagem, "error"); 
