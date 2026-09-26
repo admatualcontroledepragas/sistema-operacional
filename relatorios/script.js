@@ -1,6 +1,6 @@
   // =========================================================================
   // URL DO SEU WEB APP
-  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzmS3tmbAt7DpHwm_tZHjV6x1TGSm76AaRhnUooR3ISL2Rua-wBGqSakwS-162QxRBr1Q/exec";
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwfyGLK4tuptky4bkvT5_K_kL6V4lTgr19NmBnb8WhKpljYtzSbutujBuFnYum_G5BmZw/exec";
   // =========================================================================
   
   let usuarioLogadoNome = "";
@@ -570,8 +570,19 @@
   document.addEventListener('click', function(e) { const ms = document.querySelector('.multiselect'); if (!ms.contains(e.target)) document.getElementById('checkboxes').style.display = 'none'; });
 
   // === LÓGICA DE IMPORTAÇÃO DE CLIENTES ===
+  
+  // Função auxiliar para ignorar acentuação e cedilha na busca
+  function removerAcentos(texto) {
+      if (!texto) return "";
+      return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  }
+
   function abrirModalClientes() {
       document.getElementById('modal-clientes').style.display = 'flex';
+      
+      // Limpa a busca sempre que o modal for aberto
+      document.getElementById('buscaCliente').value = '';
+      
       const divLista = document.getElementById('listaClientes');
       divLista.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">Carregando lista...</div>';
       
@@ -580,7 +591,8 @@
       .then(ret => {
           if (ret.status === "sucesso") {
               cacheClientes = ret.dados;
-              renderizarListaClientes(cacheClientes);
+              // Carrega apenas os 10 primeiros (mais recentes) ao abrir
+              renderizarListaClientes(cacheClientes.slice(0, 10));
           } else {
               divLista.innerHTML = '<div style="padding:10px; color:red;">Erro ao carregar lista.</div>';
           }
@@ -607,16 +619,100 @@
   }
 
   function filtrarListaClientes() {
-      const termo = document.getElementById('buscaCliente').value.toLowerCase();
-      const filtrados = cacheClientes.filter(c => c.nome.toLowerCase().includes(termo));
+      const termoDigitado = document.getElementById('buscaCliente').value;
+      const termo = removerAcentos(termoDigitado.toLowerCase());
+      
+      // Se a barra de pesquisa for apagada, volta a mostrar os 10 mais recentes
+      if (termo.trim() === "") {
+          renderizarListaClientes(cacheClientes.slice(0, 10));
+          return;
+      }
+
+      // Faz a busca em todo o histórico ignorando acentos
+      const filtrados = cacheClientes.filter(c => {
+          const nomeNormalizado = removerAcentos(c.nome.toLowerCase());
+          return nomeNormalizado.includes(termo);
+      });
+      
       renderizarListaClientes(filtrados);
   }
 
   function selecionarCliente(cliente) {
+      // 1. Campos Básicos
       document.getElementById('campo1').value = cliente.nome;
       document.getElementById('campo2').value = cliente.endereco;
       if(cliente.entrada) document.getElementById('campo3').value = cliente.entrada;
       if(cliente.saida) document.getElementById('campo4').value = cliente.saida;
+
+      // 2. Serviço e Descrição de Reservatório
+      if (cliente.servico) {
+          const selectServico = document.getElementById('campo9');
+          if (cliente.servico.includes("Limpeza de Reservatórios:")) {
+              selectServico.value = "Limpeza de Reservatórios";
+              document.getElementById('descReservatorio').style.display = 'block';
+              let partes = cliente.servico.split(": ");
+              document.getElementById('descReservatorio').value = partes.length > 1 ? partes[1] : "";
+          } else {
+              // Verifica se a opção existe no select antes de atribuir para evitar valores em branco
+              if (Array.from(selectServico.options).some(opt => opt.value === cliente.servico)) {
+                  selectServico.value = cliente.servico;
+              }
+              document.getElementById('descReservatorio').style.display = 'none';
+              document.getElementById('descReservatorio').value = "";
+          }
+      }
+
+      // 3. Garantia
+      if (cliente.garantia) {
+          const selGarantia = document.getElementById('selectGarantia');
+          const garantiaValor = String(cliente.garantia).replace(" dias", "").trim();
+          
+          if (["30", "60", "90", "180", "360", "720"].includes(garantiaValor)) {
+              selGarantia.value = garantiaValor;
+              document.getElementById('campo6_manual').style.display = 'none';
+          } else {
+              selGarantia.value = "Outro";
+              document.getElementById('campo6_manual').style.display = 'block';
+              document.getElementById('campo6_manual').value = garantiaValor;
+          }
+      }
+
+      // 4. Colaboradores (Checkboxes e Outro)
+      if (cliente.colaboradores) {
+          const checks = document.querySelectorAll('input[name="colaboradores_check"]');
+          let arrayColab = cliente.colaboradores.split(", ").map(item => item.trim());
+          let countSel = 0;
+
+          checks.forEach(c => {
+              // Marca os colaboradores que estão nos checkboxes fixos
+              if (c.value !== "Outro" && c.value !== "Outro (Digitar)" && arrayColab.includes(c.value)) {
+                  c.checked = true;
+                  countSel++;
+                  // Remove do array para descobrirmos depois quem foi preenchido manualmente
+                  arrayColab = arrayColab.filter(val => val !== c.value);
+              } else {
+                  c.checked = false;
+              }
+          });
+
+          // Se sobrou algum nome, ele havia sido preenchido manualmente no campo "Outro"
+          const chkOutro = document.getElementById('c_outro'); // ID definido na função criarOpcao
+          if (arrayColab.length > 0 && chkOutro) {
+              chkOutro.checked = true;
+              document.getElementById('campo8_manual').style.display = 'block';
+              document.getElementById('campo8_manual').value = arrayColab.join(", ");
+              countSel++;
+          } else {
+              if (chkOutro) chkOutro.checked = false;
+              document.getElementById('campo8_manual').style.display = 'none';
+              document.getElementById('campo8_manual').value = "";
+          }
+
+          document.getElementById('texto-selecao').innerText = countSel > 0 ? countSel + " selecionados" : "Selecione os colaboradores...";
+      }
+
+      // 5. Recalcula a validade com a nova garantia e fecha o modal
+      calcularValidade();
       document.getElementById('modal-clientes').style.display = 'none';
       showToast("Dados importados!", "success");
   }
