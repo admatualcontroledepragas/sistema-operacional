@@ -39,6 +39,9 @@
  
     <div class="content">
  
+      <!-- ========================================== -->
+      <!-- VIEW 1: DASHBOARD PRINCIPAL                -->
+      <!-- ========================================== -->
       <div id="view-dashboard">
         <div class="dash-tabs">
           <button class="tab-btn active" id="tabImovel" onclick="mudarAbaDashboard('Imovel')"><span class="material-icons" style="font-size:18px;">home</span> Imóveis</button>
@@ -66,7 +69,7 @@
                 <th style="width: 20%;">Endereço/Placa</th>
                 <th style="width: 15%;">Serviço</th>
                 <th style="width: 10%;">Data</th>
-                <th style="width: 10%; text-align: center;">Código</th> <!-- Título alterado de Cód para Código -->
+                <th style="width: 10%; text-align: center;">Código</th>
                 <th style="width: 15%; text-align: center;">Docs</th>
                 <th style="width: 5%; text-align: center;">Ações</th> 
               </tr>
@@ -78,7 +81,10 @@
         </div>
       </div>
  
-<div id="view-historico">
+      <!-- ========================================== -->
+      <!-- VIEW 2: HISTÓRICO COMPLETO                 -->
+      <!-- ========================================== -->
+      <div id="view-historico">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <h2 style="margin:0; font-size: 20px; color:#111827;">Histórico de Serviços</h2>
           <button onclick="fecharHistorico()" class="btn-action btn-historico">
@@ -151,6 +157,9 @@
         </div>
       </div>
  
+      <!-- ========================================== -->
+      <!-- VIEW 3: FORMULÁRIOS                        -->
+      <!-- ========================================== -->
       <div id="view-formulario">
         <div class="form-card">
           <div class="form-header">
@@ -252,6 +261,7 @@
     </div>
   </div>
  
+  <!-- MODAIS RESTANTES -->
   <div id="modal-selecao" class="modal-overlay">
     <div class="modal-content">
       <h3 style="margin-top:0; color:#111827;">Novo Registro</h3>
