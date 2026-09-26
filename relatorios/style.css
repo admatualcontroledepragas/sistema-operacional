@@ -192,7 +192,7 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
   font-size: 11px; font-weight: 700; color: white; transition: 0.2s; letter-spacing: 0.5px;
 }
 .btn-doc:hover { opacity: 0.9; transform: translateY(-1px); }
-.bg-relatorio { background-color: #3b82f6; } /* Azul para Relatório */
+.bg-relatorio { background-color: var(--primary-color); } /* Azul Corporativo para Relatório */
 .bg-certificado { background-color: #f59e0b; } /* Laranja para Certificado */
 .no-file { color: #9ca3af; font-size: 11px; font-style: italic; }
 
@@ -226,6 +226,28 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
     .navbar div { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
     .btn-voltar-portal { margin-right: 0; width: 100%; justify-content: center; }
     
+    /* 1. CORREÇÃO DO CABEÇALHO DO HISTÓRICO (Botão Voltar sem quebrar linha) */
+    #view-historico > div:first-child,
+    #view-formulario > div:first-child {
+        flex-wrap: nowrap !important;
+        gap: 10px;
+    }
+    #view-historico > div:first-child h2,
+    #view-formulario > div:first-child h2 {
+        font-size: 18px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #view-historico > div:first-child button,
+    #view-formulario > div:first-child button {
+        width: auto !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        flex-shrink: 0;
+        margin: 0 !important;
+    }
+
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
     .form-full { grid-column: span 1; }
     
@@ -247,11 +269,8 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
     .filter-buttons-container { flex-direction: column; gap: 10px; }
 
     /* --- TABELA EM CARDS (MOBILE) --- */
-    .table-container { 
-        background: transparent; border: none; box-shadow: none; padding: 0;
-    }
+    .table-container { background: transparent; border: none; box-shadow: none; padding: 0; }
     table, thead, tbody, th, td, tr { display: block; }
-    
     thead tr { position: absolute; top: -9999px; left: -9999px; }
     
     tr {
@@ -267,25 +286,32 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
     
     table { min-width: 0; width: 100%; }
 
+    /* 2. CORREÇÃO DO ALINHAMENTO DE "CÓDIGO" E "DOCS" */
     td {
         border: none;
         border-bottom: 1px solid #f3f4f6;
         position: relative;
-        padding: 12px 0;
+        padding: 12px 0 !important;
         
-        display: grid;
-        grid-template-columns: 80px 1fr; 
-        align-items: center;
-        text-align: left; 
-        gap: 15px;
+        display: grid !important;
+        grid-template-columns: 80px 1fr !important; /* Fixa a largura do título rigidamente */
+        align-items: center !important;
+        text-align: left !important; /* Força texto à esquerda */
+        gap: 15px !important;
         font-size: 14px;
-        font-family: 'Inter', sans-serif; /* Força fonte limpa em todo o card, incluindo CÓDIGO */
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Obriga a que o interior dos DOCS fique encostado à esquerda */
+    td > div {
+        justify-content: flex-start !important;
     }
 
     td::before {
         content: attr(data-label); 
         font-weight: 700; color: #6b7280; font-size: 11px; text-transform: uppercase;
         font-family: 'Inter', sans-serif;
+        text-align: left;
     }
 
     /* Rótulos Padronizados para o Dashboard */
@@ -293,7 +319,7 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
     #view-dashboard td:nth-of-type(2)::before { content: "Local"; }
     #view-dashboard td:nth-of-type(3)::before { content: "Serviço"; }
     #view-dashboard td:nth-of-type(4)::before { content: "Data"; }
-    #view-dashboard td:nth-of-type(5)::before { content: "Código"; } /* Mudou de Cód para Código */
+    #view-dashboard td:nth-of-type(5)::before { content: "Código"; } 
     #view-dashboard td:nth-of-type(6)::before { content: "Docs"; }
     #view-dashboard td:nth-of-type(7)::before { display: none; } 
 
@@ -302,21 +328,9 @@ tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
     #view-historico td:nth-of-type(2)::before { content: "Local"; }
     #view-historico td:nth-of-type(3)::before { content: "Data"; }
     #view-historico td:nth-of-type(4)::before { content: "Serviço"; }
-    #view-historico td:nth-of-type(5)::before { content: "Código"; } /* Mudou de Cód para Código */
+    #view-historico td:nth-of-type(5)::before { content: "Código"; } 
     #view-historico td:nth-of-type(6)::before { content: "Docs"; }
     #view-historico td:nth-of-type(7)::before { display: none; }
-
-    /* Correção do alinhamento da coluna de Documentos (DOCS) */
-    td:nth-of-type(6) {
-        display: grid !important; 
-        grid-template-columns: 80px 1fr !important;
-        align-items: center; text-align: left;
-        gap: 15px; padding: 12px 0;
-    }
-    
-    td:nth-of-type(6) > div {
-        display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start;
-    }
 
     /* AÇÕES CENTRALIZADAS (Força Bruta para Flexbox, idêntico aos Comunicados) */
     td:last-child { 
