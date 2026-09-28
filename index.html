@@ -15,70 +15,214 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f4f8; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
         
-        .header { text-align: center; margin-top: 30px; margin-bottom: 30px; }
-        .header h1 { color: #021f59; font-size: 24px; font-weight: 800; text-transform: uppercase; }
-        .header p { color: #666; font-size: 14px; margin-top: 5px; }
+        /* Layout de Fundo Dividido */
+        body { 
+            background-color: #021f59; /* Azul escuro no topo */
+            color: #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-        /* TELA DE LOGIN */
-        #tela-login { width: 100%; max-width: 350px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .input-login { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; outline: none; }
-        .input-login:focus { border-color: #021f59; }
-        .btn-login { background-color: #021f59; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        /* LOGO NO TOPO (Ajustada para fundo azul) */
+        .logo-container {
+            width: 100%;
+            height: 35vh; /* Ocupa 35% da tela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo-container img {
+            width: 140px; /* Ajuste o tamanho da sua logo aqui */
+            height: auto;
+        }
+
+        /* CARTÃO BRANCO PRINCIPAL COM CANTO ARREDONDADO */
+        .login-card {
+            background-color: white;
+            width: 100%;
+            height: 65vh; /* Ocupa os restantes 65% */
+            border-radius: 60px 0 0 0; /* Canto superior esquerdo arredondado */
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* TEXTOS DO TÍTULO */
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #021f59; font-size: 32px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
+        .header p { color: #888; font-size: 15px; font-weight: 500; }
+
+        /* FORMULÁRIO E CAMPOS */
+        form { width: 100%; max-width: 320px; }
+        
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label {
+            display: block;
+            color: #888;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            margin-left: 10px;
+        }
+
+        /* Input Estilo Pílula */
+        .input-login { 
+            width: 100%; 
+            padding: 16px 20px; 
+            background-color: #d8d8d8; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 15px; 
+            color: #333;
+            outline: none; 
+            transition: 0.2s;
+        }
+        .input-login:focus { background-color: #e5e5e5; }
+        .input-login::placeholder { color: #555; }
+
+        /* Olhinho da Senha */
+        .btn-toggle-senha {
+            position: absolute;
+            right: 15px;
+            top: 35px; /* Alinhado com o input */
+            background: transparent;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+
+        /* BOTÃO ENTRAR */
+        .btn-login { 
+            background-color: #021f59; 
+            color: white; 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 10px;
+        }
         .btn-login:disabled { background-color: #666; cursor: not-allowed; }
 
-        /* MENU DE SISTEMAS (OCULTO POR PADRÃO) */
-        #menu-sistemas { display: none; width: 100%; max-width: 400px; flex-direction: column; gap: 15px; }
-        .bem-vindo { text-align: center; margin-bottom: 15px; font-weight: 600; color: #021f59; }
+        /* RODAPÉ SITE */
+        .footer-site {
+            margin-top: auto;
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+
+        /* ------------------------------------------- */
+        /* MENU DE SISTEMAS (MOSTRADO APÓS LOGIN)      */
+        /* ------------------------------------------- */
+        #menu-sistemas { 
+            display: none; width: 100%; max-width: 350px; flex-direction: column; gap: 15px; 
+            margin-top: 20px;
+        }
+        .bem-vindo { text-align: center; margin-bottom: 10px; font-weight: 600; color: #021f59; font-size: 18px; }
         
         .menu-card {
-            background: white; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s;
-            border-left: 5px solid #004481;
+            background: white; border-radius: 16px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s;
+            border: 1px solid #eee;
         }
         .menu-card:active { transform: scale(0.98); }
-        .menu-card .icon { background: #e9ecef; padding: 12px; border-radius: 50%; color: #004481; display: flex; }
-        .menu-card .info h3 { font-size: 16px; margin-bottom: 3px; }
-        .menu-card .info p { font-size: 12px; color: #777; }
+        .menu-card .icon { background: #021f59; padding: 12px; border-radius: 12px; color: white; display: flex; }
+        .menu-card .info h3 { font-size: 15px; margin-bottom: 2px; color: #021f59; }
+        .menu-card .info p { font-size: 11px; color: #777; }
         
-        .btn-sair { margin-top: 20px; text-align: center; color: #dc3545; font-weight: bold; cursor: pointer; padding: 10px; }
+        .btn-sair { margin-top: 15px; text-align: center; color: #dc3545; font-weight: bold; cursor: pointer; padding: 10px; font-size: 14px; }
+
+        /* Controlo de Telas */
+        #tela-login { width: 100%; display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>PORTAL OPERACIONAL</h1>
-        <p>Atual Saúde Ambiental</p>
+    <!-- LOGO NO TOPO AZUL -->
+    <div class="logo-container" id="area-logo">
+        <!-- Substitua pelo src da sua logo real recortada -->
+        <img src="logo.png" alt="Logo Atual">
     </div>
 
-    <!-- ÁREA DE LOGIN -->
-    <div id="tela-login">
-        <form onsubmit="fazerLogin(event)">
-            <input type="text" id="loginUser" class="input-login" placeholder="Usuário" required>
-            <input type="password" id="loginPass" class="input-login" placeholder="Senha" required>
-            <button type="submit" id="btnLogin" class="btn-login">Entrar no Portal</button>
-        </form>
-    </div>
-
-    <!-- ÁREA DOS SISTEMAS -->
-    <div id="menu-sistemas">
-        <div class="bem-vindo" id="msg-bemvindo"></div>
-
-        <a href="comunicados/index.html" class="menu-card">
-            <div class="icon"><span class="material-icons">campaign</span></div>
-            <div class="info"><h3>Comunicados</h3><p>Dedetização, Limpeza e Termo</p></div>
-        </a>
-
-        <a href="relatorios/index.html" class="menu-card">
-            <div class="icon"><span class="material-icons">assignment_turned_in</span></div>
-            <div class="info"><h3>Relatórios e Certificados</h3><p>Gestão de Serviços e Garantias</p></div>
-        </a>
+    <!-- CARTÃO BRANCO -->
+    <div class="login-card">
         
-        <div class="btn-sair" onclick="sair()">Sair do Portal</div>
+        <!-- ÁREA DE LOGIN (Visível por padrão) -->
+        <div id="tela-login">
+            <div class="header">
+                <h1>ATUAL</h1>
+                <p>Saúde Ambiental</p>
+            </div>
+
+            <form onsubmit="fazerLogin(event)">
+                <div class="form-group">
+                    <label>NOME</label>
+                    <input type="text" id="loginUser" class="input-login" placeholder="Nome" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>SENHA</label>
+                    <input type="password" id="loginPass" class="input-login" placeholder="******" required>
+                    <!-- Botão Olhinho -->
+                    <button type="button" class="btn-toggle-senha" onclick="toggleSenha()">
+                        <span class="material-icons" id="icone-olho">visibility</span>
+                    </button>
+                </div>
+
+                <button type="submit" id="btnLogin" class="btn-login">Entrar</button>
+            </form>
+
+            <div class="footer-site">www.atualsaudeambiental.com.br</div>
+        </div>
+
+        <!-- ÁREA DOS SISTEMAS (Oculta por padrão) -->
+        <div id="menu-sistemas">
+            <div class="bem-vindo" id="msg-bemvindo"></div>
+
+            <a href="comunicados/index.html" class="menu-card">
+                <div class="icon"><span class="material-icons">campaign</span></div>
+                <div class="info"><h3>Comunicados</h3><p>Dedetização, Limpeza e Termo</p></div>
+            </a>
+
+            <a href="relatorios/index.html" class="menu-card">
+                <div class="icon"><span class="material-icons">assignment_turned_in</span></div>
+                <div class="info"><h3>Relatórios e Certificados</h3><p>Gestão de Serviços e Garantias</p></div>
+            </a>
+            
+            <div class="btn-sair" onclick="sair()">Sair do Portal</div>
+        </div>
     </div>
 
     <script>
+        // FUNÇÃO DO OLHINHO DA SENHA
+        function toggleSenha() {
+            const inputSenha = document.getElementById('loginPass');
+            const iconeOlho = document.getElementById('icone-olho');
+            
+            if (inputSenha.type === 'password') {
+                inputSenha.type = 'text';
+                iconeOlho.innerText = 'visibility_off'; // Ícone de olho riscado
+            } else {
+                inputSenha.type = 'password';
+                iconeOlho.innerText = 'visibility'; // Ícone de olho aberto
+            }
+        }
+
         // COLOQUE AQUI A URL DO NOVO SCRIPT (O COFRE CENTRAL)
         const URL_API_LOGIN = "https://script.google.com/macros/s/AKfycbwxCNM7-XWJm2btht000tgZ343KsmCfwFG4gXmCCp8e-48nPDdS3Qw9gfvkJGWGu6ym/exec";
         
@@ -105,7 +249,6 @@
                 const res = await req.json();
 
                 if (res.sucesso) {
-                    // Grava o "Cadeado Visual" no telemóvel
                     sessionStorage.setItem("sessaoAtiva", "true");
                     sessionStorage.setItem("nomeUsuario", res.nome);
                     liberarPortal(res.nome);
@@ -115,11 +258,14 @@
             } catch (erro) {
                 alert("Erro de conexão com o servidor de acessos.");
             }
-            btn.innerText = "Entrar no Portal"; btn.disabled = false;
+            btn.innerText = "Entrar"; btn.disabled = false;
         }
 
         function liberarPortal(nome) {
             document.getElementById('tela-login').style.display = 'none';
+            // Esconde a área da logo no topo para dar mais espaço ao menu, se desejar
+            document.getElementById('area-logo').style.display = 'none'; 
+            
             document.getElementById('menu-sistemas').style.display = 'flex';
             document.getElementById('msg-bemvindo').innerText = "Olá, " + nome;
         }
@@ -127,7 +273,9 @@
         function sair() {
             sessionStorage.clear();
             document.getElementById('menu-sistemas').style.display = 'none';
-            document.getElementById('tela-login').style.display = 'block';
+            
+            document.getElementById('area-logo').style.display = 'flex';
+            document.getElementById('tela-login').style.display = 'flex';
             document.getElementById('loginPass').value = "";
         }
 
