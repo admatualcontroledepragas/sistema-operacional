@@ -6,7 +6,7 @@
     <title>Atual Saúde Ambiental - Portal</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#021f59">
+    <meta name="theme-color" content="#14234c">
 
     <!-- Ícones da Aplicação (Logo Local) -->
     <link rel="apple-touch-icon" href="logo.png">
@@ -18,49 +18,60 @@
         
         /* Layout de Fundo Dividido */
         body { 
-            background-color: #021f59; /* Azul escuro no topo */
+            background-color: #14234c; /* Azul exato da Logo */
             color: #333; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             min-height: 100vh;
-            overflow: hidden;
         }
 
-        /* LOGO NO TOPO (Ajustada para fundo azul) */
+        /* LOGO NO TOPO */
         .logo-container {
             width: 100%;
             height: 35vh; /* Ocupa 35% da tela */
+            min-height: 200px;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
         }
         .logo-container img {
-            width: 140px; /* Ajuste o tamanho da sua logo aqui */
+            width: 140px; 
             height: auto;
         }
 
-        /* CARTÃO BRANCO PRINCIPAL COM CANTO ARREDONDADO */
+        /* CARTÃO BRANCO PRINCIPAL (Expande até ao fundo) */
         .login-card {
             background-color: white;
             width: 100%;
-            height: 65vh; /* Ocupa os restantes 65% */
+            flex-grow: 1; /* Preenche todo o resto da tela para não aparecer azul em baixo */
             border-radius: 60px 0 0 0; /* Canto superior esquerdo arredondado */
-            padding: 40px 30px;
+            padding: 40px 30px 20px 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
+        /* TELA DE LOGIN */
+        #tela-login { 
+            width: 100%; 
+            max-width: 320px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            flex-grow: 1; /* Força o rodapé a ir para o fundo */
+        }
+
         /* TEXTOS DO TÍTULO */
         .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { color: #021f59; font-size: 32px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
+        .header h1 { color: #14234c; font-size: 32px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
         .header p { color: #888; font-size: 15px; font-weight: 500; }
 
         /* FORMULÁRIO E CAMPOS */
-        form { width: 100%; max-width: 320px; }
+        form { width: 100%; }
         
-        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group { margin-bottom: 20px; }
         .form-group label {
             display: block;
             color: #888;
@@ -71,11 +82,18 @@
             margin-left: 10px;
         }
 
+        /* Contentor relativo para centralizar o olho na vertical */
+        .form-group-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         /* Input Estilo Pílula */
         .input-login { 
             width: 100%; 
-            padding: 16px 20px; 
-            background-color: #d8d8d8; 
+            padding: 16px 45px 16px 20px; /* Padding direito maior para não escrever por cima do olho */
+            background-color: #e5e7eb; 
             border: none; 
             border-radius: 25px; 
             font-size: 15px; 
@@ -83,17 +101,16 @@
             outline: none; 
             transition: 0.2s;
         }
-        .input-login:focus { background-color: #e5e5e5; }
-        .input-login::placeholder { color: #555; }
+        .input-login:focus { background-color: #d1d5db; }
+        .input-login::placeholder { color: #6b7280; }
 
         /* Olhinho da Senha */
         .btn-toggle-senha {
             position: absolute;
             right: 15px;
-            top: 35px; /* Alinhado com o input */
             background: transparent;
             border: none;
-            color: #555;
+            color: #6b7280;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -103,7 +120,7 @@
 
         /* BOTÃO ENTRAR */
         .btn-login { 
-            background-color: #021f59; 
+            background-color: #14234c; 
             color: white; 
             width: 100%; 
             padding: 16px; 
@@ -114,55 +131,70 @@
             cursor: pointer; 
             transition: 0.3s; 
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-login:disabled { background-color: #666; cursor: not-allowed; }
+        .btn-login:disabled { background-color: #6b7280; cursor: not-allowed; }
+
+        /* SPINNER DE CARREGAMENTO */
+        .spinner {
+            display: inline-block; width: 18px; height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* RODAPÉ SITE */
         .footer-site {
-            margin-top: auto;
-            color: #999;
+            margin-top: auto; /* Empurra o rodapé para o fundo do ecrã */
+            color: #9ca3af;
             font-size: 12px;
             text-align: center;
             padding-bottom: 10px;
+            width: 100%;
         }
 
         /* ------------------------------------------- */
         /* MENU DE SISTEMAS (MOSTRADO APÓS LOGIN)      */
         /* ------------------------------------------- */
         #menu-sistemas { 
-            display: none; width: 100%; max-width: 350px; flex-direction: column; gap: 15px; 
-            margin-top: 20px;
+            display: none; 
+            width: 100%; 
+            max-width: 350px; 
+            flex-direction: column; 
+            align-items: center;
+            margin-top: 10px;
         }
-        .bem-vindo { text-align: center; margin-bottom: 10px; font-weight: 600; color: #021f59; font-size: 18px; }
+        .bem-vindo { text-align: center; margin-bottom: 25px; font-weight: 700; color: #14234c; font-size: 20px; }
         
         .menu-card {
             background: white; border-radius: 16px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s;
-            border: 1px solid #eee;
+            text-decoration: none; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.2s;
+            border: 1px solid #f3f4f6;
+            width: 100%;
+            margin-bottom: 15px;
         }
         .menu-card:active { transform: scale(0.98); }
-        .menu-card .icon { background: #021f59; padding: 12px; border-radius: 12px; color: white; display: flex; }
-        .menu-card .info h3 { font-size: 15px; margin-bottom: 2px; color: #021f59; }
-        .menu-card .info p { font-size: 11px; color: #777; }
+        .menu-card .icon { background: #14234c; padding: 12px; border-radius: 12px; color: white; display: flex; }
+        .menu-card .info h3 { font-size: 15px; margin-bottom: 2px; color: #14234c; }
+        .menu-card .info p { font-size: 11px; color: #6b7280; }
         
-        .btn-sair { margin-top: 15px; text-align: center; color: #dc3545; font-weight: bold; cursor: pointer; padding: 10px; font-size: 14px; }
+        .btn-sair { margin-top: 20px; text-align: center; color: #dc2626; font-weight: bold; cursor: pointer; padding: 10px; font-size: 15px; }
 
-        /* Controlo de Telas */
-        #tela-login { width: 100%; display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
 
     <!-- LOGO NO TOPO AZUL -->
     <div class="logo-container" id="area-logo">
-        <!-- Substitua pelo src da sua logo real recortada -->
         <img src="logo.png" alt="Logo Atual">
     </div>
 
-    <!-- CARTÃO BRANCO -->
+    <!-- CARTÃO BRANCO (Fundo) -->
     <div class="login-card">
         
-        <!-- ÁREA DE LOGIN (Visível por padrão) -->
+        <!-- ÁREA DE LOGIN -->
         <div id="tela-login">
             <div class="header">
                 <h1>ATUAL</h1>
@@ -172,16 +204,20 @@
             <form onsubmit="fazerLogin(event)">
                 <div class="form-group">
                     <label>NOME</label>
-                    <input type="text" id="loginUser" class="input-login" placeholder="Nome" required>
+                    <div class="form-group-input">
+                        <input type="text" id="loginUser" class="input-login" placeholder="Nome" required>
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label>SENHA</label>
-                    <input type="password" id="loginPass" class="input-login" placeholder="******" required>
-                    <!-- Botão Olhinho -->
-                    <button type="button" class="btn-toggle-senha" onclick="toggleSenha()">
-                        <span class="material-icons" id="icone-olho">visibility</span>
-                    </button>
+                    <div class="form-group-input">
+                        <input type="password" id="loginPass" class="input-login" placeholder="******" required>
+                        <!-- Botão Olhinho alinhado na vertical -->
+                        <button type="button" class="btn-toggle-senha" onclick="toggleSenha()">
+                            <span class="material-icons" id="icone-olho">visibility</span>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" id="btnLogin" class="btn-login">Entrar</button>
@@ -190,7 +226,7 @@
             <div class="footer-site">www.atualsaudeambiental.com.br</div>
         </div>
 
-        <!-- ÁREA DOS SISTEMAS (Oculta por padrão) -->
+        <!-- ÁREA DOS SISTEMAS -->
         <div id="menu-sistemas">
             <div class="bem-vindo" id="msg-bemvindo"></div>
 
@@ -216,10 +252,10 @@
             
             if (inputSenha.type === 'password') {
                 inputSenha.type = 'text';
-                iconeOlho.innerText = 'visibility_off'; // Ícone de olho riscado
+                iconeOlho.innerText = 'visibility_off'; 
             } else {
                 inputSenha.type = 'password';
-                iconeOlho.innerText = 'visibility'; // Ícone de olho aberto
+                iconeOlho.innerText = 'visibility'; 
             }
         }
 
@@ -236,7 +272,10 @@
         async function fazerLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btnLogin');
-            btn.innerText = "Verificando..."; btn.disabled = true;
+            
+            // Adiciona o SPINNER de carregamento
+            btn.innerHTML = '<div class="spinner"></div> Verificando...'; 
+            btn.disabled = true;
 
             const payload = {
                 acao: "login",
@@ -258,14 +297,14 @@
             } catch (erro) {
                 alert("Erro de conexão com o servidor de acessos.");
             }
-            btn.innerText = "Entrar"; btn.disabled = false;
+            
+            // Restaura o botão original após carregar
+            btn.innerHTML = "Entrar"; 
+            btn.disabled = false;
         }
 
         function liberarPortal(nome) {
             document.getElementById('tela-login').style.display = 'none';
-            // Esconde a área da logo no topo para dar mais espaço ao menu, se desejar
-            document.getElementById('area-logo').style.display = 'none'; 
-            
             document.getElementById('menu-sistemas').style.display = 'flex';
             document.getElementById('msg-bemvindo').innerText = "Olá, " + nome;
         }
