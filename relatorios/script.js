@@ -1,6 +1,6 @@
 // =========================================================================
   // URL DO SEU WEB APP
-  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwMMuTGt2S8zFZP-qoE01lq7TisN6VQuu0CUUTYIw6-pWv2i7j-fJTSFfRaLgGf61RU5A/exec";
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbywo761p3gMz_6-7o-c3OC58xDabVHBFfa8TZxfPKlqNGaQUYJuntxi_Kl69Fh8vtskww/exec";
 // =========================================================================
   
   let usuarioLogadoNome = "";
