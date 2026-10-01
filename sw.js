@@ -1,4 +1,4 @@
-const CACHE_NAME = 'portal-atual-v26'; // Versão atualizada com os ficheiros separados
+const CACHE_NAME = 'portal-atual-v27'; // Versão atualizada com os ficheiros separados
 
 const urlsToCache = [
   './',
