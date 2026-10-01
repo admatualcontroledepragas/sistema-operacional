@@ -205,14 +205,16 @@
                 <div class="form-group">
                     <label>NOME</label>
                     <div class="form-group-input">
-                        <input type="text" id="loginUser" class="input-login" placeholder="Nome" required>
+                        <!-- Adicionado: autocomplete="username" -->
+                        <input type="text" id="loginUser" class="input-login" placeholder="Nome" autocomplete="username" required>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>SENHA</label>
                     <div class="form-group-input">
-                        <input type="password" id="loginPass" class="input-login" placeholder="******" required>
+                        <!-- Adicionado: autocomplete="current-password" -->
+                        <input type="password" id="loginPass" class="input-login" placeholder="******" autocomplete="current-password" required>
                         <!-- Botão Olhinho alinhado na vertical -->
                         <button type="button" class="btn-toggle-senha" onclick="toggleSenha()">
                             <span class="material-icons" id="icone-olho">visibility</span>
