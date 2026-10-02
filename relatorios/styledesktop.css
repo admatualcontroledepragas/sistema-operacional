@@ -1,284 +1,98 @@
 /* =======================================================
    ARQUIVO: styledesktop.css
-   (Estrutura e Layout Exclusivo para Telas a partir de 1025px)
+   (Melhorias e Layout Premium Exclusivo para Telas a partir de 1025px)
    ======================================================= */
 
+/* 1. LIMITAR LARGURA E CENTRALIZAR O SISTEMA NO MONITOR */
 body {
     padding: 40px 20px;
 }
 
 #app-container {
     width: 100%;
-    max-width: 1200px; /* Limita a largura máxima no monitor */
+    max-width: 1200px; /* Não deixa o sistema esticar infinitamente em monitores gigantes */
     margin: 0 auto;
 }
 
-/* 1. BARRA DE NAVEGAÇÃO LADO A LADO */
+/* 2. NAVBAR (CABEÇALHO FLUTUANTE) */
 .navbar {
-    background-color: white;
-    padding: 20px 30px;
-    display: flex;
-    flex-direction: row; /* Coloca o título à esquerda e botões à direita */
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 12px;
+    border-radius: 12px; /* No PC fica descolada do topo, mais elegante */
     margin-bottom: 30px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
-.navbar h1 {
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--cor-primaria);
-    margin: 0;
-}
-.navbar div {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 25px;
-    width: auto;
-}
-.btn-voltar-portal, .btn-sair {
-    font-size: 14px;
-}
 
-/* 2. CONTEÚDO PRINCIPAL */
-.content {
-    padding: 0;
-}
-
-/* 3. ABAS (DASHBOARD E HISTÓRICO) */
-.dash-tabs {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    border-bottom: 2px solid var(--cor-borda);
-    padding-bottom: 15px;
-}
-.tab-btn {
-    background: none;
-    border: none;
-    color: var(--cor-texto-secundario);
-    font-weight: 600;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: 8px;
-    transition: 0.2s;
-}
-.tab-btn:hover {
-    background-color: #f3f4f6;
-}
-.tab-btn.active {
-    background-color: #e0f2fe;
-    color: var(--cor-primaria);
-}
-
-/* 4. MÉTRICAS E AÇÕES (DASHBOARD) */
+/* 3. DASHBOARD E MÉTRICAS */
 .metrics-container {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 colunas exatas para métricas no PC */
+    gap: 25px;
+    margin-bottom: 35px;
 }
+
 .card-metric {
-    flex: 1; /* Ocupa o espaço disponível igualmente */
-    background: white;
     padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    border-left: 5px solid var(--cor-primaria);
+    transition: transform 0.2s, box-shadow 0.2s; /* Efeito suave de animação */
 }
-.card-metric span {
-    font-size: 13px;
-    text-transform: uppercase;
-    color: var(--cor-texto-secundario);
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-.card-metric strong {
-    font-size: 36px;
-    color: var(--cor-primaria);
+.card-metric:hover {
+    transform: translateY(-2px); /* Levanta ligeiramente ao passar o rato */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .action-bar {
-    display: flex;
-    justify-content: flex-end; /* Encosta os botões à direita */
-    gap: 15px;
     margin-bottom: 25px;
 }
 .btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    min-width: 180px;
-    transition: 0.2s;
-}
-.btn-historico {
-    background-color: white;
-    color: var(--cor-texto);
-    border: 1px solid var(--cor-borda);
-}
-.btn-historico:hover { background-color: #f9fafb; }
-.btn-novo {
-    background-color: var(--cor-primaria);
-    color: white;
-}
-.btn-novo:hover { background-color: #003366; }
-
-/* 5. TABELAS */
-.table-container {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    width: 100%;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-th, td {
-    padding: 16px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--cor-borda);
-}
-th {
-    color: var(--cor-texto-secundario);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 12px;
-}
-tbody tr:hover {
-    background-color: #f9fafb;
+    min-width: 180px; /* Padroniza a largura dos botões no topo */
 }
 
-/* 6. FILTROS DO HISTÓRICO EM GRID */
+/* 4. FILTROS DO HISTÓRICO (3 Colunas para poupar espaço vertical) */
 .filtros-card {
-    background: white;
     padding: 25px;
-    border-radius: 12px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 .filtros-card .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 colunas para os filtros */
+    grid-template-columns: repeat(3, 1fr); /* Coloca os filtros em 3 colunas */
     gap: 20px;
 }
 .filter-buttons-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 25px;
+    justify-content: flex-end; /* Encosta botões "Filtrar" e "Limpar" à direita */
     border-top: 1px solid var(--cor-borda);
     padding-top: 20px;
+    margin-top: 20px;
+}
+.filter-buttons-container .btn-action {
+    flex: 0 1 auto;
+    min-width: 150px;
 }
 
-/* 7. FORMULÁRIO DE REGISTRO LADO A LADO */
+/* 5. FORMULÁRIO DE REGISTRO (Mais espaçoso e organizado) */
 .form-card {
-    background: white;
     padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    max-width: 900px;
-    margin: 0 auto; /* Centraliza o formulário no ecrã largo */
-}
-.form-header {
-    margin-bottom: 35px;
-    text-align: left;
-    border-bottom: 2px solid var(--cor-fundo);
-    padding-bottom: 20px;
-}
-.form-header h2 {
-    color: var(--cor-primaria);
-    font-size: 24px;
-    margin-bottom: 8px;
-}
-.form-header p {
-    color: var(--cor-texto-secundario);
-    font-size: 14px;
+    max-width: 900px; /* Mantém o formulário focado e fácil de ler */
 }
 .form-section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--cor-primaria);
-    margin: 40px 0 20px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--cor-borda);
+    margin-top: 35px;
+    font-size: 14px;
 }
-
-/* Grid Inteligente para Campos do Formulário */
-.form-card .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Coloca 2 campos lado a lado */
-    gap: 25px;
-}
-.form-full {
-    grid-column: span 2; /* Faz o campo ocupar as duas colunas inteiras */
-}
-.input-group-row {
-    display: flex;
-    gap: 15px;
-}
-.input-group-row .form-input {
-    flex: 1;
-}
-
-/* Botões do Formulário */
 .form-actions {
-    display: flex;
-    flex-direction: row; /* Botões lado a lado no PC */
-    justify-content: flex-end;
+    justify-content: flex-end; /* Alinha botões à direita */
     gap: 20px;
-    margin-top: 50px;
+    margin-top: 40px;
     border-top: 1px solid var(--cor-borda);
     padding-top: 25px;
 }
 .form-actions button {
-    max-width: 250px; /* Impede que os botões fiquem gigantes */
+    max-width: 200px; /* Impede que os botões de Salvar/Cancelar fiquem gigantes */
 }
 
-/* 8. COMPONENTE MULTISELECT (Equipe) */
-.multiselect { position: relative; }
-.selectBox { position: relative; cursor: pointer; }
-.selectBox select { width: 100%; pointer-events: none; }
-.overSelect { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
-#checkboxes {
-    display: none;
-    border: 1px solid var(--cor-borda);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    max-height: 250px;
-    overflow-y: auto;
-    background: white;
-    position: absolute;
-    width: 100%;
-    z-index: 100;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+/* 6. TABELAS (Melhorias de Leitura no Hover) */
+.table-container {
+    padding: 25px;
 }
-#checkboxes label {
-    display: block;
-    padding: 12px 15px;
-    font-size: 14px;
-    color: var(--cor-texto);
-    font-weight: normal;
-    margin: 0;
-    border-bottom: 1px solid #f9fafb;
-    cursor: pointer;
+tbody tr {
+    transition: background-color 0.2s;
 }
-#checkboxes label:hover { background-color: #f3f4f6; }
-#checkboxes input { margin-right: 12px; transform: scale(1.2); }
+tbody tr:hover {
+    background-color: #f8fafc; /* Realce azul muito clarinho ao passar o rato na linha da tabela */
+}
