@@ -18,8 +18,14 @@
       }
   </script>
 
-  <!-- Ligação para o novo ficheiro CSS -->
-  <link rel="stylesheet" href="style.css">
+  <!-- 1. Estilos globais (Cores, Fontes, Formatação Padrão) -->
+  <link rel="stylesheet" href="stylebase.css">
+  
+  <!-- 2. Estilos exclusivos para Telemóvel (Até 1024px) -->
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+  
+  <!-- 3. Estilos exclusivos para Computador (A partir de 1025px) -->
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
 </head>
 <body>
  
