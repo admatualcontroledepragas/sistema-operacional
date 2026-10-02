@@ -3,28 +3,37 @@
    (Melhorias e Layout Premium Exclusivo para Telas a partir de 1025px)
    ======================================================= */
 
-/* 1. FUNDO ESCURO E LIMITAÇÃO DE LARGURA */
+/* 1. FUNDO ESCURO E AJUSTE DE MARGENS GLOBAIS */
 body {
-    padding: 40px 20px;
-    background-color: #14234c; /* Fundo escuro (Azul Corporativo) exclusivo para o Desktop */
+    padding: 0 !important; /* Remove o padding para colar a barra ao topo */
+    background-color: #323232; /* Novo fundo escuro solicitado */
 }
 
 #app-container {
     width: 100%;
-    max-width: 1200px; 
-    margin: 0 auto;
+    max-width: 100% !important; /* Permite que a barra ocupe 100% do ecrã horizontalmente */
+    margin: 0;
 }
 
-/* 2. NAVBAR (CABEÇALHO FLUTUANTE) */
+/* 2. NAVBAR (CABEÇALHO COLADO DE PONTA A PONTA) */
 .navbar {
-    border-radius: 12px; 
-    margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+    border-radius: 0 !important; /* Remove os cantos arredondados */
+    margin-bottom: 0 !important; /* O espaço será dado pelo conteúdo */
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+}
+
+/* Restringe a largura apenas do conteúdo abaixo da barra, mantendo o alinhamento central */
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
 /* 3. DASHBOARD E MÉTRICAS (Quadro de Ponta a Ponta) */
 .metrics-container {
-    display: block; /* Remove a grelha para ocupar 100% do espaço */
+    display: block; 
     width: 100%;
     margin-bottom: 35px;
 }
@@ -35,13 +44,13 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center; 
-    align-items: flex-start; /* Alinha o texto à esquerda (ou mude para center se preferir no meio) */
-    width: 100%; /* Garante a mesma largura da tabela de baixo */
+    align-items: flex-start; 
+    width: 100%; 
     box-sizing: border-box;
 }
 .card-metric:hover {
     transform: translateY(-2px); 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 /* 4. BARRA DE AÇÕES E BOTÕES DOS DOCS (Correção de Visibilidade) */
@@ -129,20 +138,23 @@ tbody tr:hover {
     background-color: #f8fafc; 
 }
 
-/* Centraliza a última célula (Ações) horizontal e verticalmente */
+/* Centraliza a última célula (Ações) e resolve o problema da quebra de linha */
 th:last-child, 
 td:last-child {
     text-align: center !important; 
     vertical-align: middle !important; 
-    width: 100px; /* Garante que a coluna não fique larga demais */
+    width: 140px !important; /* Aumentado para dar espaço suficiente aos dois ícones */
+    min-width: 120px !important;
 }
 
-/* Mantém os ícones alinhados entre si no centro perfeito da célula */
+/* Mantém os ícones alinhados entre si no centro perfeito e impede que caiam */
 td:last-child .actions {
     display: flex !important;
+    flex-direction: row !important;
     justify-content: center !important; 
     align-items: center !important;
+    flex-wrap: nowrap !important; /* MÁGICA: Proíbe estritamente a quebra de linha */
     height: 100% !important;
-    gap: 15px !important;
+    gap: 12px !important;
     margin: 0 !important;
 }
