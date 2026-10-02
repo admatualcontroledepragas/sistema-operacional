@@ -1,0 +1,261 @@
+/* =======================================================
+   ARQUIVO: stylemobile.css
+   (Estrutura, Espaçamentos e Layout para Telas até 1024px)
+   ======================================================= */
+
+body {
+    padding-bottom: 20px;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* 1. BARRA DE NAVEGAÇÃO */
+.navbar {
+    background-color: white;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column; /* Em mobile, empilha o título e os botões */
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.navbar h1 {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cor-primaria);
+}
+.navbar div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.btn-voltar-portal {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--cor-texto-secundario);
+    font-weight: 600;
+    font-size: 13px;
+}
+.btn-sair {
+    color: var(--cor-erro);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+/* 2. CONTEÚDO PRINCIPAL */
+.content {
+    padding: 15px;
+}
+
+/* 3. ABAS (DASHBOARD E HISTÓRICO) */
+.dash-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--cor-borda);
+    padding-bottom: 10px;
+    overflow-x: auto; /* Permite rolar com o dedo se faltar espaço */
+}
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--cor-texto-secundario);
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+.tab-btn.active {
+    background-color: #e0f2fe;
+    color: var(--cor-primaria);
+}
+
+/* 4. MÉTRICAS E AÇÕES (DASHBOARD) */
+.metrics-container {
+    margin-bottom: 20px;
+}
+.card-metric {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 4px solid var(--cor-primaria);
+}
+.card-metric span {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--cor-texto-secundario);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.card-metric strong {
+    font-size: 28px;
+    color: var(--cor-primaria);
+}
+
+.action-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.btn-action {
+    flex: 1; /* Divide o espaço igualmente em telas pequenas */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+}
+.btn-historico {
+    background-color: white;
+    color: var(--cor-texto);
+    border: 1px solid var(--cor-borda);
+}
+.btn-novo {
+    background-color: var(--cor-primaria);
+    color: white;
+}
+
+/* 5. TABELAS (COM SCROLL HORIZONTAL PROTETOR) */
+.table-container {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    overflow-x: auto; /* Fundamental: impede que a tabela quebre o site para os lados */
+    width: 100%;
+}
+table {
+    width: 100%;
+    min-width: 600px; /* Força scroll horizontal em telas muito pequenas */
+    border-collapse: collapse;
+    font-size: 13px;
+}
+th, td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--cor-borda);
+}
+th {
+    color: var(--cor-texto-secundario);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+/* 6. FILTROS DO HISTÓRICO */
+.filtros-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+.filter-buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* 7. FORMULÁRIO DE REGISTRO */
+.form-card {
+    background: white;
+    padding: 20px 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+.form-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.form-header h2 {
+    color: var(--cor-primaria);
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+.form-header p {
+    color: var(--cor-texto-secundario);
+    font-size: 13px;
+}
+.form-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cor-texto);
+    margin: 25px 0 15px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+.input-group-row {
+    display: flex;
+    gap: 10px;
+}
+.input-group-row .form-input {
+    flex: 1;
+}
+.btn-importar {
+    background-color: #e0f2fe;
+    color: var(--cor-primaria);
+    border: none;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.form-actions {
+    display: flex;
+    flex-direction: column; /* Em mobile, os botões de cancelar/salvar ficam um por cima do outro */
+    gap: 10px;
+    margin-top: 30px;
+}
+
+/* 8. COMPONENTE MULTISELECT (Equipe) */
+.multiselect { position: relative; }
+.selectBox { position: relative; }
+.selectBox select { width: 100%; pointer-events: none; }
+.overSelect { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+#checkboxes {
+    display: none;
+    border: 1px solid var(--cor-borda);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    position: absolute;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+}
+#checkboxes label {
+    display: block;
+    padding: 12px;
+    font-size: 14px;
+    color: var(--cor-texto);
+    font-weight: normal;
+    margin: 0;
+    border-bottom: 1px solid #f9fafb;
+}
+#checkboxes label:hover { background-color: #f3f4f6; }
+#checkboxes input { margin-right: 10px; transform: scale(1.2); }
