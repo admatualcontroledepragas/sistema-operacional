@@ -216,7 +216,6 @@
    const tbody = document.getElementById('tabelaHistorico');
    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; padding:30px; color:#666;'>Carregando histórico...</td></tr>";
    
-   // ATUALIZADO: Agora envia Data Inicio e Data Fim separadas para a sua pesquisa
    const payload = {
      acao: "historico", tipo: tipoServicoAtual, pagina: paginaAtual,
      filtroCliente: document.getElementById('filtroCliente').value,
@@ -368,7 +367,6 @@
     if (item.data) { dataISO = String(item.data).substring(0, 10); }
     document.getElementById('campo5').value = dataISO;
     
-    // Pega apenas os 5 primeiros caracteres (HH:mm) para não dar conflito no HTML
     document.getElementById('campo3').value = item.entrada ? String(item.entrada).substring(0, 5) : "";
     document.getElementById('campo4').value = item.saida ? String(item.saida).substring(0, 5) : "";
     
@@ -405,7 +403,7 @@
     calcularValidade();
   }
  
-  // --- FORMULÁRIO ---
+  // --- FORMULÁRIO E INJEÇÃO DO RASCUNHO ---
   function abrirModalSelecao() { document.getElementById('modal-selecao').style.display = 'flex'; }
   function handleInputPlaca(e) { if(tipoServicoAtual === 'Veiculo') { e.target.value = e.target.value.toUpperCase(); } }
  
@@ -443,6 +441,34 @@
     const hoje = new Date();
     document.getElementById('campo5').value = hoje.toISOString().split('T')[0];
 
+    // ==========================================
+    // 🚀 RECUPERA O RASCUNHO AUTOMATICAMENTE
+    // ==========================================
+    const rascunhoSalvo = localStorage.getItem('rascunho_' + tipo);
+    if (rascunhoSalvo) {
+        try {
+            const rascunho = JSON.parse(rascunhoSalvo);
+            document.getElementById('campo1').value = rascunho.campo1 || '';
+            document.getElementById('campo2').value = rascunho.campo2 || '';
+            document.getElementById('campo3').value = rascunho.campo3 || '';
+            document.getElementById('campo4').value = rascunho.campo4 || '';
+            if (rascunho.campo5) document.getElementById('campo5').value = rascunho.campo5;
+            
+            if (rascunho.campo9) document.getElementById('campo9').value = rascunho.campo9;
+            if (rascunho.selectGarantia) document.getElementById('selectGarantia').value = rascunho.selectGarantia;
+            
+            if (rascunho.descReservatorio && rascunho.campo9 === 'Limpeza de Reservatórios') {
+                document.getElementById('descReservatorio').style.display = 'block';
+                document.getElementById('descReservatorio').value = rascunho.descReservatorio;
+            }
+            
+            showToast("Rascunho recuperado. Continue de onde parou!", "success");
+        } catch(e) {
+            console.error("Erro ao ler rascunho", e);
+        }
+    }
+    // ==========================================
+
     document.getElementById('view-dashboard').style.display = 'none';
     document.getElementById('view-historico').style.display = 'none'; 
     document.getElementById('view-formulario').style.display = 'block';
@@ -450,24 +476,18 @@
     calcularValidade(); 
   }
  
-  // NOVA FUNÇÃO FECHAR FORMULÁRIO (Volta sempre ao Dashboard)
   function fecharFormulario() {
-    // 1. Limpa os campos do formulário
-    document.getElementById('formulario').reset();
+    limparRascunho(); // Limpa o rascunho porque o usuário cancelou de propósito
     
-    // 2. Esconde o Formulário e o Histórico
+    document.getElementById('formulario').reset();
     document.getElementById('view-formulario').style.display = 'none';
     document.getElementById('view-historico').style.display = 'none';
-    
-    // 3. Mostra SEMPRE a tela inicial (Dashboard)
     document.getElementById('view-dashboard').style.display = 'block';
     window.scrollTo(0, 0);
     
-    // 4. Sai do modo de edição
     modoEdicao = false; 
     codigoEdicao = null;
     
-    // 5. Atualiza o dashboard para garantir que mostra os dados reais
     mudarAbaDashboard(tipoServicoAtual);
   }
  
@@ -518,8 +538,9 @@
         document.getElementById('modal-salvando').style.display = 'none';
 
         if(ret.status === "sucesso") { 
+           limparRascunho(); // Limpa o rascunho porque o registo foi salvo no servidor com sucesso!
            showToast(modoEdicao ? "Registro atualizado!" : "Registro salvo!", "success");
-           fecharFormulario(); // Chama a nova função que redireciona para o Dashboard
+           fecharFormulario(); 
         } else { 
            document.getElementById('view-formulario').style.display = 'block';
            showToast("Erro: " + ret.mensagem, "error"); 
@@ -592,7 +613,6 @@
 
   // === LÓGICA DE IMPORTAÇÃO DE CLIENTES ===
   
-  // Função auxiliar para ignorar acentuação e cedilha na busca
   function removerAcentos(texto) {
       if (!texto) return "";
       return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
@@ -601,7 +621,6 @@
   function abrirModalClientes() {
       document.getElementById('modal-clientes').style.display = 'flex';
       
-      // Limpa a busca sempre que o modal for aberto
       document.getElementById('buscaCliente').value = '';
       
       const divLista = document.getElementById('listaClientes');
@@ -612,7 +631,6 @@
       .then(ret => {
           if (ret.status === "sucesso") {
               cacheClientes = ret.dados;
-              // Carrega apenas os 10 primeiros (mais recentes) ao abrir
               renderizarListaClientes(cacheClientes.slice(0, 10));
           } else {
               divLista.innerHTML = '<div style="padding:10px; color:red;">Erro ao carregar lista.</div>';
@@ -643,13 +661,11 @@
       const termoDigitado = document.getElementById('buscaCliente').value;
       const termo = removerAcentos(termoDigitado.toLowerCase());
       
-      // Se a barra de pesquisa for apagada, volta a mostrar os 10 mais recentes
       if (termo.trim() === "") {
           renderizarListaClientes(cacheClientes.slice(0, 10));
           return;
       }
 
-      // Faz a busca em todo o histórico ignorando acentos
       const filtrados = cacheClientes.filter(c => {
           const nomeNormalizado = removerAcentos(c.nome.toLowerCase());
           return nomeNormalizado.includes(termo);
@@ -659,13 +675,11 @@
   }
 
   function selecionarCliente(cliente) {
-      // 1. Campos Básicos
       document.getElementById('campo1').value = cliente.nome;
       document.getElementById('campo2').value = cliente.endereco;
       if(cliente.entrada) document.getElementById('campo3').value = cliente.entrada;
       if(cliente.saida) document.getElementById('campo4').value = cliente.saida;
 
-      // 2. Serviço e Descrição de Reservatório
       if (cliente.servico) {
           const selectServico = document.getElementById('campo9');
           if (cliente.servico.includes("Limpeza de Reservatórios:")) {
@@ -674,7 +688,6 @@
               let partes = cliente.servico.split(": ");
               document.getElementById('descReservatorio').value = partes.length > 1 ? partes[1] : "";
           } else {
-              // Verifica se a opção existe no select antes de atribuir para evitar valores em branco
               if (Array.from(selectServico.options).some(opt => opt.value === cliente.servico)) {
                   selectServico.value = cliente.servico;
               }
@@ -683,7 +696,6 @@
           }
       }
 
-      // 3. Garantia
       if (cliente.garantia) {
           const selGarantia = document.getElementById('selectGarantia');
           const garantiaValor = String(cliente.garantia).replace(" dias", "").trim();
@@ -698,26 +710,22 @@
           }
       }
 
-      // 4. Colaboradores (Checkboxes e Outro)
       if (cliente.colaboradores) {
           const checks = document.querySelectorAll('input[name="colaboradores_check"]');
           let arrayColab = cliente.colaboradores.split(", ").map(item => item.trim());
           let countSel = 0;
 
           checks.forEach(c => {
-              // Marca os colaboradores que estão nos checkboxes fixos
               if (c.value !== "Outro" && c.value !== "Outro (Digitar)" && arrayColab.includes(c.value)) {
                   c.checked = true;
                   countSel++;
-                  // Remove do array para descobrirmos depois quem foi preenchido manualmente
                   arrayColab = arrayColab.filter(val => val !== c.value);
               } else {
                   c.checked = false;
               }
           });
 
-          // Se sobrou algum nome, ele havia sido preenchido manualmente no campo "Outro"
-          const chkOutro = document.getElementById('c_outro'); // ID definido na função criarOpcao
+          const chkOutro = document.getElementById('c_outro'); 
           if (arrayColab.length > 0 && chkOutro) {
               chkOutro.checked = true;
               document.getElementById('campo8_manual').style.display = 'block';
@@ -732,16 +740,15 @@
           document.getElementById('texto-selecao').innerText = countSel > 0 ? countSel + " selecionados" : "Selecione os colaboradores...";
       }
 
-      // 5. Recalcula a validade com a nova garantia e fecha o modal
       calcularValidade();
       document.getElementById('modal-clientes').style.display = 'none';
       showToast("Dados importados!", "success");
   }
+
 /* =======================================================
    SISTEMA DE RASCUNHO AUTOMÁTICO (ANTI-PERDA DE DADOS)
    ======================================================= */
 
-// Inicia o observador assim que a página carrega
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('formulario');
     if (form) {
@@ -751,9 +758,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function salvarRascunhoAutomatico() {
-    // Só guarda se soubermos se ele está a preencher um Imóvel ou Veículo
-    const tipo = sessionStorage.getItem('tipoRegistroAtual');
-    if (!tipo) return; 
+    // PROTEÇÃO: Não salva rascunho se o utilizador estiver apenas a editar um registo antigo!
+    if (modoEdicao) return; 
+    
+    if (!tipoServicoAtual) return; 
 
     const rascunho = {
         campo1: document.getElementById('campo1').value,
@@ -766,13 +774,11 @@ function salvarRascunhoAutomatico() {
         descReservatorio: document.getElementById('descReservatorio').value
     };
 
-    // Guarda silenciosamente na memória do navegador
-    localStorage.setItem('rascunho_' + tipo, JSON.stringify(rascunho));
+    localStorage.setItem('rascunho_' + tipoServicoAtual, JSON.stringify(rascunho));
 }
 
 function limparRascunho() {
-    const tipo = sessionStorage.getItem('tipoRegistroAtual');
-    if (tipo) {
-        localStorage.removeItem('rascunho_' + tipo);
+    if (tipoServicoAtual) {
+        localStorage.removeItem('rascunho_' + tipoServicoAtual);
     }
 }
