@@ -737,3 +737,42 @@
       document.getElementById('modal-clientes').style.display = 'none';
       showToast("Dados importados!", "success");
   }
+/* =======================================================
+   SISTEMA DE RASCUNHO AUTOMÁTICO (ANTI-PERDA DE DADOS)
+   ======================================================= */
+
+// Inicia o observador assim que a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formulario');
+    if (form) {
+        form.addEventListener('input', salvarRascunhoAutomatico);
+        form.addEventListener('change', salvarRascunhoAutomatico);
+    }
+});
+
+function salvarRascunhoAutomatico() {
+    // Só guarda se soubermos se ele está a preencher um Imóvel ou Veículo
+    const tipo = sessionStorage.getItem('tipoRegistroAtual');
+    if (!tipo) return; 
+
+    const rascunho = {
+        campo1: document.getElementById('campo1').value,
+        campo2: document.getElementById('campo2').value,
+        campo3: document.getElementById('campo3').value,
+        campo4: document.getElementById('campo4').value,
+        campo5: document.getElementById('campo5').value,
+        campo9: document.getElementById('campo9').value,
+        selectGarantia: document.getElementById('selectGarantia').value,
+        descReservatorio: document.getElementById('descReservatorio').value
+    };
+
+    // Guarda silenciosamente na memória do navegador
+    localStorage.setItem('rascunho_' + tipo, JSON.stringify(rascunho));
+}
+
+function limparRascunho() {
+    const tipo = sessionStorage.getItem('tipoRegistroAtual');
+    if (tipo) {
+        localStorage.removeItem('rascunho_' + tipo);
+    }
+}
