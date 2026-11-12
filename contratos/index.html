@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão de Contratos</title>
+
+    <!-- Padronização: Fonte Inter e Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="manifest" href="../manifest.json">
+
+    <!-- Proteção de Sessão Unificada do Portal -->
+    <script>
+        if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <!-- Ficheiros CSS Desmembrados -->
+    <link rel="stylesheet" href="stylebase.css">
+    <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+    <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+</head>
+
+<body>
+
+    <div id="loader" class="global-loader" style="display: none;">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="loader-text">Aguarde...</div>
+        </div>
+    </div>
+
+    <div id="app-container" class="dashboard-container">
+
+        <!-- NAVBAR PADRÃO -->
+        <div class="navbar">
+            <h1><span class="material-icons" style="color:#004481;">history_edu</span> Gestão de Contratos</h1>
+            <div style="display:flex; align-items:center;">
+                <a href="../index.html" class="btn-voltar-portal">
+                    <span class="material-icons" style="font-size:16px;">arrow_back</span> Voltar
+                </a>
+                <span style="font-size: 13px; color:#4b5563;">Olá, <strong id="displayUsuario"
+                        style="color:#111827;">...</strong></span>
+                <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+            </div>
+        </div>
+
+        <!-- =========================================
+         VIEW 1: DASHBOARD PRINCIPAL (Resumo + 5 Últimos)
+         ========================================= -->
+        <div id="dashboardView" class="view-section active content">
+
+            <!-- Métricas Dinâmicas -->
+            <div class="metrics-container">
+                <div class="card-metric" style="border-left-color: #004481;">
+                    <span style="text-transform: uppercase; font-size: 12px;">Total</span>
+                    <strong id="cardTotal">0</strong>
+                </div>
+                <div class="card-metric" style="border-left-color: #10b981;">
+                    <span style="text-transform: uppercase; font-size: 12px;">Ativos</span>
+                    <strong id="cardAtivos">0</strong>
+                </div>
+                <div class="card-metric" style="border-left-color: #f59e0b;">
+                    <span style="text-transform: uppercase; font-size: 12px;">A Vencer</span>
+                    <strong id="cardAVencer">0</strong>
+                </div>
+                <div class="card-metric" style="border-left-color: #ef4444;">
+                    <span style="text-transform: uppercase; font-size: 12px;">Expirados</span>
+                    <strong id="cardExpirados">0</strong>
+                </div>
+            </div>
+
+            <!-- Barra de Ações (Apenas Botões Principais) -->
+            <div class="action-bar" style="justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 18px; color: #14234c; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons" style="font-size: 20px; color: #6b7280;">schedule</span>
+                    Últimos 5 Registos
+                </h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-action btn-historico" onclick="abrirHistorico()">
+                        <span class="material-icons" style="font-size:18px;">list_alt</span> Ver Histórico
+                    </button>
+                    <button class="btn-action btn-novo" onclick="abrirNovoContrato()">
+                        <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Contrato
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela (5 Últimos) - Sem paginação -->
+            <div class="table-container">
+                <table class="styled-table" id="tabelaDashboard">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Emissão</th>
+                            <th style="width: 25%;">Cliente</th>
+                            <th style="width: 20%;">Endereço</th>
+                            <th style="width: 15%;">Encerramento</th>
+                            <th style="width: 10%; text-align: center;">Status</th>
+                            <th style="width: 15%; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaDashboardBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 20px; color:#6b7280;">A carregar últimos
+                                contratos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- =========================================
+         VIEW 2: HISTÓRICO COMPLETO (Filtros + Paginação)
+         ========================================= -->
+        <div id="historicoView" class="view-section content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2 style="margin:0; font-size: 20px; color:#111827; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons" style="color: #004481;">list_alt</span> Histórico Completo
+                </h2>
+                <button class="btn-action btn-historico" onclick="fecharHistorico()">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar ao Painel
+                </button>
+            </div>
+
+            <!-- Barra de Busca -->
+            <div class="action-bar" style="justify-content: flex-start;">
+                <div style="flex: 1; max-width: 500px; display: flex; gap: 10px; width: 100%;">
+                    <input type="text" id="inputBusca" class="form-input" placeholder="🔍 Buscar cliente ou endereço..."
+                        style="margin: 0; flex: 1;">
+                    <button class="btn-action btn-historico" id="btnAtualizar" onclick="carregarHistorico()">
+                        <span class="material-icons" style="font-size:18px;">refresh</span> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cartão de Filtros -->
+            <div class="filtros-card">
+                <div class="form-grid" style="align-items: center; margin-bottom: 0;">
+                    <div class="form-group">
+                        <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Emissão
+                            Inicial</label>
+                        <input type="date" class="form-input" id="filtroDataIni">
+                    </div>
+                    <div class="form-group">
+                        <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Emissão
+                            Final</label>
+                        <input type="date" class="form-input" id="filtroDataFim">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Status</label>
+                        <div class="servicos-checkboxes"
+                            style="display: flex; gap: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <label class="option-lbl"
+                                style="background:#d1e7dd; color:#0f5132; padding:4px 10px; border-radius:12px; font-weight:600;"><input
+                                    type="checkbox" class="filtro-status" id="checkAtivo" value="Ativo"
+                                    style="accent-color: #10b981;"> Ativo</label>
+                            <label class="option-lbl"
+                                style="background:#fff3cd; color:#856404; padding:4px 10px; border-radius:12px; font-weight:600;"><input
+                                    type="checkbox" class="filtro-status" id="checkAvencer" value="A vencer"
+                                    style="accent-color: #f59e0b;"> A vencer</label>
+                            <label class="option-lbl"
+                                style="background:#f8d7da; color:#842029; padding:4px 10px; border-radius:12px; font-weight:600;"><input
+                                    type="checkbox" class="filtro-status" id="checkExpirado" value="Expirado"
+                                    style="accent-color: #ef4444;"> Expirado</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-buttons-container"
+                    style="justify-content: flex-end; margin-top: 15px; border-top: 1px solid #e5e7eb; padding-top: 15px; display: flex;">
+                    <button class="btn-action btn-historico" style="min-width: auto; padding: 8px 16px;"
+                        onclick="limparFiltrosData()">Limpar Filtros</button>
+                </div>
+            </div>
+
+            <!-- Tabela (Histórico Completo) -->
+            <div class="table-container">
+                <table class="styled-table" id="tabelaHistorico">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Emissão</th>
+                            <th style="width: 25%;">Cliente</th>
+                            <th style="width: 20%;">Endereço</th>
+                            <th style="width: 15%;">Encerramento</th>
+                            <th style="width: 10%; text-align: center;">Status</th>
+                            <th style="width: 15%; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaHistoricoBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 20px; color:#6b7280;">A carregar
+                                histórico...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            <div class="pagination-container">
+                <button class="btn-action btn-historico" id="btn-prev-page"
+                    onclick="mudarPagina('prev')">Anterior</button>
+                <span class="page-info" id="info-page">Página 1 de 1</span>
+                <button class="btn-action btn-historico" id="btn-next-page"
+                    onclick="mudarPagina('next')">Próxima</button>
+            </div>
+        </div>
+
+
+        <!-- =========================================
+         VIEW 3: FORMULÁRIO (Preenchimento e Edição)
+         ========================================= -->
+        <div id="formView" class="view-section content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2 style="margin:0; font-size: 20px; color:#111827;">Preenchimento</h2>
+                <button class="btn-action btn-historico" onclick="voltarParaPainel()">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <!-- Mensagem de Sucesso (Oculta por padrão) -->
+            <div id="successMessage" class="form-card" style="display: none; text-align: center; padding: 40px;">
+                <span class="material-icons"
+                    style="font-size: 64px; color: #10b981; margin-bottom: 15px;">check_circle</span>
+                <h2 style="color: #10b981; margin-bottom: 15px;">Sucesso!</h2>
+                <p style="color: #6b7280; font-size: 16px; margin-bottom: 25px;">Os dados foram salvos e o contrato foi
+                    atualizado no Drive.</p>
+                <a id="btnAbrirContrato" href="#" target="_blank" class="btn-action btn-novo"
+                    style="text-decoration: none; padding: 12px 24px; font-size: 16px; margin-bottom: 15px; display: inline-flex;"><span
+                        class="material-icons" style="font-size:20px; margin-right:5px;">description</span> Abrir
+                    Contrato Gerado</a><br>
+                <button type="button" onclick="voltarParaPainel(true)" class="btn-action btn-historico">Voltar para o
+                    Painel</button>
+            </div>
+
+            <!-- Formulário Principal -->
+            <div id="formWrapper" class="form-card">
+                <div class="form-header">
+                    <h2 id="formTitle">Novo Contrato</h2>
+                    <p>Preencha os dados abaixo para salvar no sistema.</p>
+                </div>
+
+                <!-- Caixa de Alerta do Formulário -->
+                <div id="alertBox" class="alert-warning"
+                    style="display:none; background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                </div>
+
+                <!-- Alerta de Edição -->
+                <div id="alertaEdicao"
+                    style="display:none; background-color: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: center; gap: 10px;">
+                    <span class="material-icons">edit_note</span>
+                    <span>A editar o contrato <strong><span id="spanIdEdicao"></span></strong></span>
+                </div>
+
+                <form id="contractForm">
+                    <div class="form-section-title">Informações do Cliente</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label">Razão Social / Empresa *</label>
+                            <input type="text" class="form-input" id="empresa" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Nome Fantasia *</label>
+                            <input type="text" class="form-input" id="nomeFantasia" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">CNPJ *</label>
+                            <input type="text" class="form-input" id="cnpj" placeholder="00.000.000/0000-00"
+                                maxlength="18" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Endereço *</label>
+                            <input type="text" class="form-input" id="endereco"
+                                placeholder="Rua, número, bairro, cidade - UF" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Imóvel (Apenas em Contratos Novos)</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label">Tipo de Imóvel/Local</label>
+                            <input type="text" class="form-input preview-servico-trigger" list="opcoesImovel"
+                                id="imovelArtigo" placeholder="Ex: restaurante, padaria">
+                            <datalist id="opcoesImovel">
+                                <option value="restaurante">
+                                <option value="empresa">
+                                <option value="imóvel">
+                                <option value="estabelecimento">
+                                <option value="lanchonete">
+                                <option value="galpão">
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label">Área Definida</label>
+                            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                <label class="option-lbl"
+                                    style="background:#f8f9fa; padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; flex:1; justify-content:center; display: flex; align-items: center;"><input
+                                        type="checkbox" class="preview-servico-trigger" id="areaInterna">
+                                    Interna</label>
+                                <label class="option-lbl"
+                                    style="background:#f8f9fa; padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; flex:1; justify-content:center; display: flex; align-items: center;"><input
+                                        type="checkbox" class="preview-servico-trigger" id="areaExterna">
+                                    Externa</label>
+                            </div>
+                            <input type="text" class="form-input preview-servico-trigger" id="areaDefinidaDetalhe"
+                                placeholder="Detalhes opcional. Ex: Apenas no refeitório">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title"
+                        style="display:flex; justify-content:space-between; align-items:center;">
+                        Descrição dos Serviços
+                        <label
+                            style="font-size:12px; font-weight:normal; text-transform:none; display:flex; align-items:center; gap:5px; color:#6b7280; cursor:pointer;">
+                            <input type="checkbox" id="modoManualServicos" style="accent-color: #004481;"> Escrever
+                            texto livremente
+                        </label>
+                    </div>
+
+                    <div id="blocoChecksServicos">
+                        <label class="title-label">Serviços Contratados (Marcação para sistema)</label>
+                        <div class="servicos-checkboxes-geral"
+                            style="margin-bottom: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label class="option-lbl" style="display:flex; align-items:center; gap:5px;"><input
+                                    type="checkbox" class="servico-check preview-servico-trigger"
+                                    value="Desinsetização"> Desinsetização</label>
+                            <label class="option-lbl" style="display:flex; align-items:center; gap:5px;"><input
+                                    type="checkbox" class="servico-check preview-servico-trigger" value="Desratização">
+                                Desratização</label>
+                            <label class="option-lbl" style="display:flex; align-items:center; gap:5px;"><input
+                                    type="checkbox" class="servico-check preview-servico-trigger"
+                                    value="Descupinização"> Descupinização</label>
+                            <label class="option-lbl"
+                                style="font-weight: bold; color: #004481; display:flex; align-items:center; gap:5px;"><input
+                                    type="checkbox" class="servico-check preview-servico-trigger"
+                                    value="Limpeza dos reservatórios de água"> Limpeza dos reservatórios</label>
+                        </div>
+
+                        <div class="checkbox-section"
+                            style="background-color: #f0f4f8; border-radius: 12px; padding: 15px; border: 1px dashed #004481; margin-bottom: 15px;">
+                            <label class="title-label" style="font-size: 14px; margin-bottom: 10px;">Pragas Alvo</label>
+                            <div class="checkbox-container"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="baratas">
+                                    Baratas</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="formigas">
+                                    Formigas</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="cupins">
+                                    Cupins</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="roedores">
+                                    Roedores</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="moscas">
+                                    Moscas</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="mosquitos">
+                                    Mosquitos</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="carrapatos">
+                                    Carrapatos</label>
+                                <label class="checkbox-item" style="display:flex; align-items:center; gap:5px;"><input
+                                        type="checkbox" class="praga-check preview-servico-trigger" value="pulgas">
+                                    Pulgas</label>
+                                <label class="checkbox-item item-outro"
+                                    style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start;">
+                                    <div style="display:flex; gap:8px; font-weight: bold;"><input type="checkbox"
+                                            class="preview-servico-trigger" id="pragaOutros"> Outros</div>
+                                    <input type="text" class="form-input input-outro preview-servico-trigger"
+                                        id="pragasOutrosTexto" placeholder="Especifique a praga..." disabled
+                                        style="background:#fff; margin-top:5px; width:100%;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-box" id="caixaPreviewServicos"
+                        style="background-color: #f8fafc; border-left: 4px solid #004481; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                        <p
+                            style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; display:flex; align-items:center; gap:5px;">
+                            <span class="material-icons" style="font-size:14px;">visibility</span> Preview da Cláusula
+                        </p>
+                        <p id="previewServicosTexto"
+                            style="font-size: 13px; font-style: italic; color: #1f2937; margin:0; line-height: 1.5;">
+                        </p>
+                    </div>
+                    <div id="blocoServicosManual" style="display:none; margin-bottom: 20px;">
+                        <textarea class="form-input" id="textoServicosManual" rows="6"
+                            style="background-color: #fffbeb; border-color: #f59e0b;"></textarea>
+                    </div>
+
+                    <div class="form-group"
+                        style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+                        <div class="form-grid" style="margin-bottom:0; align-items:center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="comodato"
+                                    style="width: 18px; height: 18px; cursor: pointer; accent-color: #004481;">
+                                <label for="comodato"
+                                    style="margin: 0; cursor: pointer; font-size: 14px; font-weight: 600; color: #1f2937;">Incluir
+                                    Comodato (Arandelas)?</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="title-label">Qtd. Arandelas</label>
+                                <input type="number" class="form-input" id="qtdArandelas" min="1" disabled
+                                    placeholder="0" style="max-width:150px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label class="title-label">Frequência de atendimento *</label>
+                        <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                            <input type="number" class="form-input" id="qtdVisitas" min="1" value="1" required
+                                style="width: 100px;">
+                            <span
+                                style="display:flex; align-items:center; background:#f8f9fa; padding:0 15px; border:1px solid #e5e7eb; border-radius:8px; color:#6b7280; font-size:14px;"
+                                id="spanVisitaTexto">visita</span>
+                            <select class="form-input" id="periodoVisitas" required style="flex:1; min-width: 200px;">
+                                <option value="">Selecione a periodicidade...</option>
+                                <option value="semanalmente">Semanalmente</option>
+                                <option value="quinzenalmente">Quinzenalmente</option>
+                                <option value="mensalmente">Mensalmente</option>
+                                <option value="trimestralmente">Trimestralmente</option>
+                                <option value="semestralmente">Semestralmente</option>
+                                <option value="anualmente">Anualmente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title"
+                        style="display:flex; justify-content:space-between; align-items:center;">
+                        Condições de Pagamento
+                        <label
+                            style="font-size:12px; font-weight:normal; text-transform:none; display:flex; align-items:center; gap:5px; color:#6b7280; cursor:pointer;">
+                            <input type="checkbox" id="modoManualPagamento" style="accent-color: #004481;"> Escrever
+                            texto livremente
+                        </label>
+                    </div>
+
+                    <div id="blocoPagamentoAuto">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label class="title-label" style="font-size:15px; color:#111827;">Valor do Contrato (R$)
+                                *</label>
+                            <input type="number" step="0.01" class="form-input preview-trigger auto-req" id="valorTotal"
+                                style="font-size: 18px; font-weight: bold; color:#004481;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #004481; font-weight:600; font-size:14px;">
+                                <input type="checkbox" class="preview-trigger" id="habilitarLimpezaSeparada"
+                                    style="width: 18px; height: 18px; accent-color: #004481;"> Cobrar serviço de limpeza
+                                à parte?
+                            </label>
+                        </div>
+
+                        <div id="blocoLimpezaSeparada"
+                            style="display:none; background:#eff6ff; border-left: 4px solid #3b82f6; padding:15px; border-radius:4px; margin-bottom:15px;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="title-label">Valor (R$)</label>
+                                    <input type="number" step="0.01" class="form-input preview-trigger"
+                                        id="valorLimpeza">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="title-label">Pagamento do serviço de limpeza</label>
+                                    <input type="text" class="form-input preview-trigger" id="pagamentoLimpeza">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="margin-bottom: 15px;">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label class="title-label">Previsão de pagamento *</label>
+                                <input type="text" class="form-input preview-trigger auto-req" id="previsaoPagamento">
+                            </div>
+                        </div>
+
+                        <div class="form-group"
+                            style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+                            <div class="form-grid" style="margin-bottom:0; align-items:center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="preview-trigger" id="pagamentoAto"
+                                        style="width: 18px; height: 18px; cursor: pointer; accent-color: #004481;">
+                                    <label for="pagamentoAto"
+                                        style="margin: 0; cursor: pointer; font-size: 14px; font-weight: 600; color: #1f2937;">Primeiro
+                                        pagamento no Ato?</label>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="title-label">Método de pagamento *</label>
+                                    <input type="text" class="form-input preview-trigger auto-req"
+                                        id="primeiroPagamento">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="blocoPagamentoManual" style="display:none; margin-bottom: 20px;">
+                        <textarea class="form-input" id="textoPagamentoManual" rows="6"
+                            style="background-color: #fffbeb; border-color: #f59e0b;"></textarea>
+                    </div>
+
+                    <div class="preview-box" id="caixaPreviewPagamento"
+                        style="background-color: #f8fafc; border-left: 4px solid #004481; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                        <p
+                            style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; display:flex; align-items:center; gap:5px;">
+                            <span class="material-icons" style="font-size:14px;">visibility</span> Preview da Cláusula
+                        </p>
+                        <p id="previewPagamentoTexto"
+                            style="font-size: 13px; font-style: italic; color: #1f2937; margin:0; line-height: 1.5;">
+                        </p>
+                    </div>
+
+                    <div class="form-section-title">Data do Contrato</div>
+                    <div class="form-group" style="margin-bottom: 30px; max-width: 300px;">
+                        <label class="title-label">Data de emissão (Documento) *</label>
+                        <input type="date" class="form-input" id="dataContrato" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="voltarParaPainel()">Cancelar</button>
+                        <button type="submit" id="btnSubmit" class="btn-action btn-novo"
+                            style="padding: 15px 30px; font-size: 16px;">Salvar e Gerar Contrato</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div> <!-- FIM DO APP-CONTAINER -->
+
+    <!-- MODAL EXCLUSÃO (Padronizado) -->
+    <div id="modalExcluir" class="modal-overlay">
+        <div class="modal-box">
+            <span class="material-icons"
+                style="font-size: 48px; color: var(--error-color); margin-bottom: 10px;">warning</span>
+            <h3 style="color: #1f2937;">Confirmar Exclusão</h3>
+            <p style="margin-top: 10px; color: #6b7280; font-size: 14px;">Deseja realmente <strong>EXCLUIR</strong> este
+                contrato? A linha será apagada da planilha e o PDF deletado. Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="fecharModalExcluir()">Cancelar</button>
+                <button class="btn-action" id="btnConfirmarExclusao"
+                    style="background-color: var(--error-color); color: white;">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS GERAIS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nomeUsuario = sessionStorage.getItem("nomeUsuario") || "Usuário";
+            const display = document.getElementById('displayUsuario');
+            if (display) display.innerText = nomeUsuario;
+        });
+
+        function fazerLogout() {
+            sessionStorage.clear();
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <!-- Ligação para o ficheiro JavaScript desmembrado -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Atual Saúde Ambiental - Portal</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#14234c">
+
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- CSS BASE EMBUTIDO (Proporções Ajustadas para a Nova Imagem) -->
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; }
+        
+        body { background-color: #14234c; color: #333; min-height: 100vh; overflow-x: hidden; }
+
+        /* =========================================
+           TELA DE LOGIN (Estrutura Base / Mobile First)
+           ========================================= */
+        #login-wrapper { display: flex; width: 100%; min-height: 100vh; }
+        
+        .logo-container { display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #14234c; }
+        .logo-container img { height: auto; }
+        
+        .welcome-text { text-align: center; color: white; display: none; margin-top: 15px; }
+        .welcome-text h2 { font-size: 32px; font-weight: 700; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .welcome-text p { font-size: 18px; font-weight: 400; opacity: 0.9; }
+        
+        /* Fundo branco no mobile, será sobrescrito para cinza no desktop */
+        .login-card { background-color: white; display: flex; flex-direction: column; align-items: center; }
+        #tela-login { width: 100%; max-width: 320px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; }
+        
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 { color: #14234c; font-size: 36px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
+        .header p { color: #9ca3af; font-size: 15px; font-weight: 500; }
+        
+        form { width: 100%; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #9ca3af; font-size: 12px; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; margin-left: 5px; text-transform: uppercase; }
+        
+        .form-group-input { position: relative; display: flex; align-items: center; }
+        
+        /* Inputs formatados */
+        .input-login { width: 100%; padding: 16px 45px 16px 20px; background-color: #e5e7eb; border: none; border-radius: 12px; font-size: 15px; color: #333; outline: none; transition: 0.2s; }
+        .input-login:focus { background-color: #d1d5db; }
+        .input-login::placeholder { color: #6b7280; }
+        
+        .btn-toggle-senha { position: absolute; right: 15px; background: transparent; border: none; color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; }
+        
+        .btn-login { background-color: #14234c; color: white; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; display: flex; justify-content: center; align-items: center; }
+        .btn-login:disabled { background-color: #6b7280; cursor: not-allowed; }
+        
+        #login-error { color: #dc2626; font-size: 13px; font-weight: 600; text-align: center; margin-top: 15px; display: none; }
+        
+        .footer-site { margin-top: auto; color: #9ca3af; font-size: 13px; text-align: center; padding-bottom: 20px; width: 100%; line-height: 1.5; }
+
+        /* =========================================
+           RESPONSIVIDADE (MOBILE VS DESKTOP)
+           ========================================= */
+        
+        /* MOBILE (Mantém o visual antigo com a curva e branco puro) */
+        @media screen and (max-width: 1024px) {
+            #login-wrapper { flex-direction: column; }
+            .logo-container { width: 100%; height: 35vh; min-height: 200px; flex-shrink: 0; justify-content: center; }
+            .logo-container img { width: 140px; }
+            
+            .login-card { width: 100%; flex-grow: 1; border-radius: 60px 0 0 0; padding: 40px 30px 20px 30px; justify-content: flex-start; background-color: white; }
+            #tela-login { margin-top: 0; }
+        }
+
+        /* DESKTOP (Split-Screen com Ajustes de Posição) */
+        @media screen and (min-width: 1025px) {
+            #login-wrapper { flex-direction: row; }
+            
+            /* LADO AZUL: Centralizado verticalmente */
+            .logo-container { 
+                width: 50%; 
+                height: 100vh; 
+                justify-content: center; 
+                align-items: center; 
+                padding: 40px; 
+            }
+            .logo-container img { 
+                width: 260px; /* REDUZIDO PARA A NOVA IMAGEM CORTADA */
+                max-width: 75%; 
+                margin-bottom: 0; 
+            }
+            
+            .welcome-text { display: block; margin-top: 35px; z-index: 10; }
+            .welcome-text h2 { font-size: 38px; } 
+            .welcome-text p { font-size: 20px; }
+            
+            /* LADO CINZA: Fundo cinza clarinho e conteúdo puxado para baixo */
+            .login-card { 
+                width: 50%; 
+                height: 100vh; 
+                border-radius: 0; 
+                padding: 40px; 
+                justify-content: flex-start; 
+                background-color: #f8fafc; 
+            }
+            
+            #tela-login { 
+                margin: 0 auto; 
+                max-width: 420px; 
+                margin-top: 10vh; 
+            } 
+            
+            .header { margin-bottom: 40px; }
+            .header h1 { font-size: 46px; margin-bottom: 5px; } 
+            .header p { font-size: 18px; }
+            
+            .form-group { margin-bottom: 25px; }
+            
+            .input-login { padding: 18px 45px 18px 20px; font-size: 16px; background-color: #e2e8f0; } 
+            .input-login:focus { background-color: #cbd5e1; }
+            
+            .btn-login { padding: 18px; font-size: 18px; margin-top: 20px; }
+        }
+    </style>
+
+    <!-- Chamada dos estilos apenas para o interior do portal -->
+    <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+    <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+</head>
+<body data-tema="azul">
+
+    <!-- ÁREA 1: TELA DE LOGIN -->
+    <div id="login-wrapper">
+        
+        <!-- Lado Esquerdo (Azul) -->
+        <div class="logo-container" id="area-logo">
+            <img src="logo.png" alt="Logo Atual">
+            <div class="welcome-text">
+                <h2>Bem-vindo de volta!</h2>
+                <p>Acesse o sistema</p>
+            </div>
+        </div>
+
+        <!-- Lado Direito (Cinza Claro) -->
+        <div class="login-card">
+            <div id="tela-login">
+                <div class="header">
+                    <h1>ATUAL</h1>
+                    <p>Saúde Ambiental</p>
+                </div>
+
+                <form onsubmit="fazerLogin(event)">
+                    <div class="form-group">
+                        <label>NOME</label>
+                        <div class="form-group-input">
+                            <input type="text" id="loginUser" class="input-login" placeholder="Nome" autocomplete="username" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>SENHA</label>
+                        <div class="form-group-input">
+                            <input type="password" id="loginPass" class="input-login" placeholder="******" autocomplete="current-password" required>
+                            <button type="button" class="btn-toggle-senha" onclick="toggleSenha()">
+                                <span class="material-icons" id="icone-olho">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnLogin" class="btn-login">Entrar</button>
+                    <div id="login-error">⚠️ Usuário ou senha incorretos.</div>
+                </form>
+
+                <div class="footer-site">
+                    Desenvolvido por<br>Atual Saúde Ambiental
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÁREA 2: PORTAL DESKTOP PRINCIPAL -->
+    <div id="portal-wrapper" style="display: none;">
+        
+        <nav id="sidebar" class="sidebar">
+            <header class="sidebar-header">
+                <img src="logo.png" alt="Logo Atual" class="sidebar-logo">
+                <span class="sidebar-title">Atual Saúde Ambiental</span>
+                <button type="button" class="btn-logout-mobile" onclick="sair()" title="Sair do Sistema">
+                    <span class="material-icons">logout</span>
+                    <span>Sair</span>
+                </button>
+            </header>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item active" onclick="mudarAba('dashboard')">
+                    <span class="material-icons">home</span>
+                    <span class="menu-text">Home</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('relatorios/index.html', 'Relatórios', this)">
+                    <span class="material-icons">description</span>
+                    <span class="menu-text">Relatórios</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('comunicados/index.html', 'Comunicados', this)">
+                    <span class="material-icons">campaign</span>
+                    <span class="menu-text">Comunicados</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('recibos/index.html', 'Recibos', this)">
+                    <span class="material-icons">request_quote</span>
+                    <span class="menu-text">Recibos</span>
+                </li>
+                <!-- NOVO MÓDULO ADICIONADO AQUI -->
+                <li class="menu-item" onclick="abrirModulo('orcamentos/index.html', 'Orçamentos', this)">
+                    <span class="material-icons">receipt</span>
+                    <span class="menu-text">Orçamentos</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('contratos/index.html', 'Contratos', this)">
+                    <span class="material-icons">history_edu</span>
+                    <span class="menu-text">Contratos</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('cronogramas/index.html', 'Cronogramas', this)">
+                    <span class="material-icons">calendar_month</span>
+                    <span class="menu-text">Cronogramas</span>
+                </li>
+                <li class="menu-item" onclick="abrirModulo('comprovantes/index.html', 'Comprovantes OP', this)">
+                    <span class="material-icons">assignment_turned_in</span>
+                    <span class="menu-text">Comprovantes OP</span>
+                </li>
+                <li class="menu-item" onclick="mudarAba('configuracoes')">
+                    <span class="material-icons">settings</span>
+                    <span class="menu-text">Configurações</span>
+                </li>
+            </ul>
+        </nav>
+
+        <main id="main-content">
+            
+            <header id="topbar">
+                <h2 id="topbar-title">Dashboard</h2>
+                <div class="topbar-right">
+                    <span id="nomeUsuarioDisplay" class="user-name">Caio Matheus</span>
+                    <button type="button" class="btn-menu" onclick="sair()" title="Sair do Sistema">
+                        <span class="material-icons">logout</span>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <!-- VIEW 1: DASHBOARD EM DESENVOLVIMENTO -->
+                <div id="view-dashboard" class="view-section active">
+                    <div class="development-notice">
+                        <span class="material-icons">construction</span>
+                        <h3>Dashboard em desenvolvimento</h3>
+                        <p>A área de indicadores gráficos e resumos operacionais será disponibilizada numa futura atualização.</p>
+                    </div>
+
+                    <div class="dashboard-skeleton">
+                        <div class="skeleton-col">
+                            <div class="skeleton-card card-tall"></div>
+                            <div class="skeleton-card card-wide"></div>
+                        </div>
+                        <div class="skeleton-col">
+                            <div class="skeleton-card card-square"></div>
+                            <div class="skeleton-card card-square"></div>
+                            <div class="skeleton-card card-wide-bottom"></div>
+                        </div>
+                        <div class="skeleton-col">
+                            <div class="skeleton-card card-small"></div>
+                            <div class="skeleton-card card-medium"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: JANELA DOS MÓDULOS (IFRAME) -->
+                <div id="view-iframe" class="view-section" style="display: none; height: 100%; width: 100%;">
+                    <iframe id="frame-sistema" src="" frameborder="0" style="width: 100%; height: 100%; border-radius: 12px; background: transparent;"></iframe>
+                </div>
+
+                <!-- VIEW 3: CONFIGURAÇÕES -->
+                <div id="view-configuracoes" class="view-section" style="display: none;">
+                    <div class="config-card">
+                        <h3>Personalização do Sistema</h3>
+                        <p>Escolha a cor de fundo (tema) que prefere usar na área principal do portal.</p>
+                        
+                        <div class="tema-opcoes">
+                            <div class="tema-box" onclick="alterarTema('azul')">
+                                <div class="tema-cor" style="background-color: #172c4c; border: 2px solid #ffffff33;"></div>
+                                <span>Azul Original</span>
+                            </div>
+                            <div class="tema-box" onclick="alterarTema('escuro')">
+                                <div class="tema-cor" style="background-color: #1f2937; border: 2px solid #ffffff33;"></div>
+                                <span>Cinza Escuro</span>
+                            </div>
+                            <div class="tema-box" onclick="alterarTema('claro')">
+                                <div class="tema-cor" style="background-color: #f3f4f6; border: 2px solid #d1d5db;"></div>
+                                <span style="color: #374151;">Cinza Claro</span>
+                            </div>
+                            <div class="tema-box" onclick="alterarTema('branco')">
+                                <div class="tema-cor" style="background-color: #ffffff; border: 2px solid #e5e7eb;"></div>
+                                <span style="color: #374151;">Branco Puro</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

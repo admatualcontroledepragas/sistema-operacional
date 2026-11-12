@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão de Cronogramas</title>
+    
+    <!-- Padronização: Fonte Inter, Material Icons e html2canvas -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link rel="manifest" href="../manifest.json">
+    
+    <!-- Proteção de Sessão Unificada do Portal -->
+    <script>
+        if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <!-- Ficheiros CSS Desmembrados -->
+    <link rel="stylesheet" href="stylebase.css">
+    <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+    <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+</head>
+<body>
+
+<!-- LOADER GLOBAL -->
+<div id="loader" class="global-loader" style="display: none;">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <div class="spinner-text" id="loader-text">Aguarde...</div>
+    </div>
+</div>
+
+<div id="app-container" class="dashboard-container">
+
+    <!-- NAVBAR PADRÃO -->
+    <div class="navbar">
+        <h1><span class="material-icons" style="color:#004481;">calendar_month</span> Gestão de Cronogramas</h1>
+        <div style="display:flex; align-items:center;">
+            <a href="../index.html" class="btn-voltar-portal">
+                <span class="material-icons" style="font-size:16px;">arrow_back</span> Voltar
+            </a>
+            <span style="font-size: 13px; color:#4b5563;">Olá, <strong id="displayUsuario" style="color:#111827;">...</strong></span>
+            <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+        </div>
+    </div>
+
+    <!-- =========================================
+         VIEW: DASHBOARD PRINCIPAL
+         ========================================= -->
+    <div id="area-painel" class="view-section active content">
+        
+        <!-- Ações do Topo -->
+        <div class="action-bar" style="justify-content: space-between; align-items: center;">
+            <h2 style="margin:0; font-size: 20px; color:#111827; display:flex; align-items:center; gap:8px;">
+                <span class="material-icons" style="color:#004481;">view_timeline</span> Painel de Cronogramas
+            </h2>
+            <button class="btn-action btn-novo" onclick="mostrarFormulario()">
+                <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Cronograma
+            </button>
+        </div>
+
+        <!-- Métricas Dinâmicas Padronizadas -->
+        <div class="metrics-container">
+            <div class="card-metric" style="border-left-color: #004481;">
+                <span style="text-transform: uppercase; font-size: 12px;">Total</span>
+                <strong id="count-total">0</strong>
+            </div>
+            <div class="card-metric" style="border-left-color: #10b981;">
+                <span style="text-transform: uppercase; font-size: 12px;">Ativos</span>
+                <strong id="count-ativos">0</strong>
+            </div>
+            <div class="card-metric" style="border-left-color: #f59e0b;">
+                <span style="text-transform: uppercase; font-size: 12px;">A Vencer</span>
+                <strong id="count-vencer">0</strong>
+            </div>
+            <div class="card-metric" style="border-left-color: #ef4444;">
+                <span style="text-transform: uppercase; font-size: 12px;">Expirados</span>
+                <strong id="count-expirados">0</strong>
+            </div>
+        </div>
+
+        <!-- Cartão de Filtros -->
+        <div class="filtros-card">
+            <div class="form-grid" style="align-items: start; margin-bottom: 0;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Buscar</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="inputBusca" class="form-input" placeholder="🔍 Cliente ou endereço..." onkeyup="filtrarTabela()" style="flex:1;">
+                        <button class="btn-action btn-historico" onclick="carregarHistorico()">
+                            <span class="material-icons" style="font-size:18px;">refresh</span> Atualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Emissão Inicial</label>
+                    <input type="date" class="form-input" id="dataInicio" onchange="filtrarTabela()">
+                </div>
+                <div class="form-group">
+                    <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Emissão Final</label>
+                    <input type="date" class="form-input" id="dataFim" onchange="filtrarTabela()">
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Filtro de Serviço</label>
+                    <div class="servicos-checkboxes" style="display: flex; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; flex-wrap: wrap;">
+                        <label class="option-lbl" style="font-size:13px; font-weight:600;"><input type="checkbox" class="chk-servico" value="DEDETIZAÇÃO" onchange="filtrarTabela()"> Dedetização</label>
+                        <label class="option-lbl" style="font-size:13px; font-weight:600;"><input type="checkbox" class="chk-servico" value="DESINSETIZAÇÃO" onchange="filtrarTabela()"> Desinsetização</label>
+                        <label class="option-lbl" style="font-size:13px; font-weight:600;"><input type="checkbox" class="chk-servico" value="DESINSETIZAÇÃO E DESRATIZAÇÃO" onchange="filtrarTabela()"> Desratização</label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="title-label" style="text-transform: uppercase; font-size: 11px;">Status</label>
+                    <div class="servicos-checkboxes" style="display: flex; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; flex-wrap: wrap;">
+                        <label class="option-lbl" style="background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:12px; font-weight:600;"><input type="checkbox" class="chk-status" value="Ativo" onchange="filtrarTabela()"> Ativo</label>
+                        <label class="option-lbl" style="background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:12px; font-weight:600;"><input type="checkbox" class="chk-status" value="A vencer" onchange="filtrarTabela()"> A vencer</label>
+                        <label class="option-lbl" style="background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:12px; font-weight:600;"><input type="checkbox" class="chk-status" value="Expirado" onchange="filtrarTabela()"> Expirado</label>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-buttons-container" style="justify-content: flex-end; margin-top: 15px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                <button class="btn-action btn-historico" style="min-width: auto; padding: 8px 16px;" onclick="limparDatas()">Limpar Datas</button>
+            </div>
+        </div>
+
+        <div id="mensagem" class="alert-warning" style="display:none; margin-bottom:15px;">Nenhum registro encontrado.</div>
+
+        <!-- Tabela -->
+        <div class="table-container" id="containerTabela" style="display: none;">
+            <table class="styled-table" id="tabelaHistorico">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Emissão</th>
+                        <th style="width: 25%;">Cliente</th>
+                        <th style="width: 20%;">Serviço</th>
+                        <th style="width: 10%; text-align: center;">Abertura</th>
+                        <th style="width: 10%; text-align: center;">Fim</th>
+                        <th style="width: 10%; text-align: center;">Status</th>
+                        <th style="width: 15%; text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        <div id="paginacaoArea" style="display: none;">
+            <div class="pagination-container" id="botoesPaginacao" style="justify-content: center; gap: 5px;"></div>
+            <div class="page-info" id="infoPaginacao" style="text-align: center; margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         VIEW: FORMULÁRIO (Preenchimento)
+         ========================================= -->
+    <div id="area-formulario" class="view-section content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h2 style="margin:0; font-size: 20px; color:#111827;">Preenchimento</h2>
+            <button class="btn-action btn-historico" onclick="resetarFormularioEVoltar()">
+                <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+            </button>
+        </div>
+
+        <!-- Mensagem de Sucesso (Oculta por padrão) -->
+        <div id="success-content" class="form-card" style="display: none; text-align: center; padding: 40px;">
+            <span class="material-icons" id="icone-sucesso" style="font-size: 64px; color: #10b981; margin-bottom: 15px;">check_circle</span>
+            <h2 id="texto-sucesso-titulo" style="color: #10b981; margin-bottom: 15px;">Concluído com sucesso!</h2>
+            <p id="texto-sucesso" style="color: #6b7280; font-size: 16px; margin-bottom: 25px;">O cronograma foi processado.</p>
+            <a id="btn-abrir-pdf" href="#" target="_blank" class="btn-action btn-novo" style="text-decoration: none; padding: 12px 24px; font-size: 16px; margin-bottom: 15px; display: inline-flex;"><span class="material-icons" style="font-size:20px; margin-right:5px;">calendar_month</span> Abrir Arquivo Gerado</a><br>
+            <button type="button" onclick="resetarFormularioEVoltar()" class="btn-action btn-historico">Voltar ao Painel</button>
+        </div>
+
+        <div id="formWrapper" class="form-card">
+            <div class="form-header">
+                <h2 id="titulo-formulario">NOVO CRONOGRAMA</h2>
+                <p>Preencha os dados e desenhe as marcações para gerar o arquivo.</p>
+            </div>
+
+            <div class="form-section-title">Informações Iniciais</div>
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="title-label">Cliente *</label>
+                    <input type="text" class="form-input" id="cliente" required>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="title-label">Endereço *</label>
+                    <input type="text" class="form-input" id="endereco" required>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="title-label">Serviço Principal *</label>
+                    <select class="form-input" id="servico" onchange="verificarServico()">
+                        <option value="DEDETIZAÇÃO">DEDETIZAÇÃO</option>
+                        <option value="DESINSETIZAÇÃO">DESINSETIZAÇÃO</option>
+                        <option value="DESINSETIZAÇÃO E DESRATIZAÇÃO">DESINSETIZAÇÃO E DESRATIZAÇÃO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="title-label" id="lbl-entrada-principal">Horário de entrada *</label>
+                    <input type="time" class="form-input" id="horarioEntrada" required>
+                </div>
+                <div class="form-group">
+                    <label class="title-label" id="lbl-saida-principal">Horário de saída *</label>
+                    <input type="time" class="form-input" id="horarioSaida" required>
+                </div>
+                <div class="form-group">
+                    <label class="title-label">Mês/Ano de Início *</label>
+                    <input type="month" class="form-input" id="mesAnoInicio" required>
+                </div>
+                <div class="form-group">
+                    <label class="title-label" id="lbl-visitas-principal">Nº de Visitas</label>
+                    <input type="number" class="form-input" id="visitas" readonly style="background-color: #f3f4f6;" required>
+                </div>
+            </div>
+
+            <!-- Bloco Desratização (Opcional) -->
+            <div id="bloco-desratizacao" style="display:none; background-color: #eff6ff; border: 1px dashed #3b82f6; padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 20px;">
+                <label style="display:flex; align-items:center; gap:8px; font-weight:600; color:#1e40af; cursor:pointer;">
+                    <input type="checkbox" id="check-desratizacao" onchange="verificarDesratizacao()" style="width:18px; height:18px; accent-color:#2563eb;"> 
+                    Habilitar datas isoladas para DESRATIZAÇÃO?
+                </label>
+                
+                <div id="campos-desratizacao" style="display:none; margin-top: 15px;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label" style="color:#1e40af;">Horário entrada (Desrat.)</label>
+                            <input type="time" class="form-input" id="horarioEntradaDesrat">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label" style="color:#1e40af;">Horário saída (Desrat.)</label>
+                            <input type="time" class="form-input" id="horarioSaidaDesrat">
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label" style="color:#1e40af;">Nº Visitas (Desrat.)</label>
+                            <input type="number" class="form-input" id="visitas-desrat" readonly style="background-color: #dbeafe;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-title">Calendário de Marcações</div>
+            
+            <div id="toggle-calendario" class="action-bar" style="display:none; justify-content: flex-start; gap: 10px; margin-bottom: 15px;">
+                <button type="button" id="btn-principal" class="btn-action btn-novo" onclick="setModoCalendario('principal')">📍 Marcando: SERVIÇO PRINCIPAL</button>
+                <button type="button" id="btn-desratizacao" class="btn-action btn-historico" onclick="setModoCalendario('desratizacao')">🐀 Marcando: DESRATIZAÇÃO</button>
+            </div>
+
+            <div id="info-selecao" style="display:none; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+                <div style="font-size: 14px; font-weight: bold; color: #004481;"><span id="lbl-datas-principal">DATAS SELECIONADAS:</span> <span id="cont-principal" style="font-size:18px;">0</span></div>
+                <div id="info-desrat" style="display:none; font-size: 14px; font-weight: bold; color: #2563eb; margin-top: 5px;">DATAS DE DESRATIZAÇÃO SELECIONADAS: <span id="cont-desrat" style="font-size:18px;">0</span></div>
+            </div>
+
+            <!-- O SEGREDO DO MOBILE: Envolver a área de impressão num div scrollável -->
+            <div class="calendar-scroll-wrapper" style="width: 100%; overflow-x: auto; background: #f4f7fb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+                <!-- A área de impressão tem largura mínima para não esmagar -->
+                <div id="area-print" style="min-width: 820px; background: white; padding: 20px; border-radius: 4px;">
+                    <div id="calendario-container"></div>
+                    <div id="legenda-container">
+                        <div class="legenda-item"><div class="legenda-quadrado quadrado-principal"></div><span id="legenda-texto-principal">DEDETIZAÇÃO</span></div>
+                        <div class="legenda-item"><div class="legenda-quadrado quadrado-desrat"></div><span>DESRATIZAÇÃO</span></div>
+                    </div>
+                </div>
+                <p style="text-align: center; font-size: 11px; color: #6b7280; margin-top: 10px; font-style: italic;">Deslize para os lados para ver os meses completos em ecrãs pequenos.</p>
+            </div>
+            
+            <button id="btn-salvar" class="btn-action btn-novo" style="width: 100%; padding: 15px; font-size: 16px; display:none;" onclick="enviarDados()">GERAR CRONOGRAMA EM PDF</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL DE EXCLUSÃO (Padronizado) -->
+<div class="modal-overlay" id="modal-exclusao">
+    <div class="modal-box">
+        <span class="material-icons" style="font-size: 48px; color: var(--error-color); margin-bottom: 10px;">warning</span>
+        <h3 style="color: #1f2937;">Confirmar Exclusão</h3>
+        <p style="margin-top: 10px; color: #6b7280; font-size: 14px;">Tem certeza que deseja excluir o cronograma de <br><strong id="nome-cliente-exclusao"></strong>?<br><br>Essa ação apagará o PDF no Drive e não poderá ser desfeita.</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="fecharModalExclusao()">Cancelar</button>
+            <button class="btn-action" style="background-color: var(--error-color); color: white;" onclick="executarExclusao()">Sim, Excluir</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOASTS DE MENSAGENS -->
+<div id="toast-container" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; display: flex; flex-direction: column; gap: 10px; width: 80%; max-width: 400px;"></div>
+
+<!-- SCRIPTS GERAIS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const nomeUsuario = sessionStorage.getItem("nomeUsuario") || "Usuário";
+        const display = document.getElementById('displayUsuario');
+        if (display) display.innerText = nomeUsuario;
+    });
+    
+    function fazerLogout() {
+        sessionStorage.clear();
+        window.location.href = "../index.html";
+    }
+</script>
+
+<!-- Ligação para o ficheiro JavaScript desmembrado -->
+<script src="script.js"></script>
+
+</body>
+</html>

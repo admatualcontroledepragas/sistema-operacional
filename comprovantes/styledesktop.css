@@ -1,0 +1,94 @@
+/* =======================================================
+   ARQUIVO: styledesktop.css (MÓDULO IFRAME - COMPROVANTES)
+   (Layout Premium Exclusivo para Ecrãs a partir de 1025px)
+   ======================================================= */
+
+/* 1. INTEGRAÇÃO COM O IFRAME (Fundo Transparente e Sem Barra Visível) */
+body {
+    padding: 0 !important; 
+    background-color: transparent !important; /* Herda a cor do Portal */
+    overflow-y: auto !important; /* Permite rolar a página com o rato */
+    overflow-x: hidden !important;
+    
+    /* Oculta a barra no Firefox e Edge antigo */
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+}
+
+/* Oculta a barra no Chrome, Safari e novo Edge */
+::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    background: transparent !important;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 100% !important; 
+    margin: 0;
+    padding-bottom: 50px; /* Espaço extra no fundo */
+}
+
+/* 2. NAVBAR (Ocultada no Desktop pois o Portal já tem a sua) */
+.navbar {
+    display: none !important;
+}
+
+/* 3. REGRAS DE LARGURA DO CONTEÚDO */
+.content {
+    max-width: 1200px !important;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 4. BARRA DE AÇÕES DO DASHBOARD */
+.action-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+/* 5. FORMULÁRIOS E CARTÕES */
+.form-card {
+    padding: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* 6. TABELAS E CENTRALIZAÇÃO DAS AÇÕES */
+.table-container {
+    padding: 25px;
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.2s;
+}
+.styled-table tbody tr:hover {
+    background-color: #f8fafc; 
+}
+
+/* Centraliza a última célula (Ações) e garante espaço para os botões */
+.styled-table th:last-child, 
+.styled-table td:last-child {
+    text-align: center !important; 
+    vertical-align: middle !important; 
+    width: 200px !important; 
+    min-width: 190px !important;
+}
+
+/* Mantém os ícones alinhados entre si no centro perfeito e impede que caiam */
+.styled-table td:last-child .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    flex-wrap: nowrap !important; /* Proíbe estritamente a quebra de linha */
+    height: 100% !important;
+    gap: 10px !important;
+    margin: 0 !important;
+}
+
+/* 7. MODAL DESKTOP */
+.modal-box {
+    padding: 40px;
+}

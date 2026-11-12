@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sistema de Gestão - Relatórios</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Link para o Manifest do PWA -->
+  <link rel="manifest" href="../manifest.json">
+
+  <!-- Porteiro Visual: Verifica se o usuário passou pelo menu principal -->
+  <script>
+    if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+      window.location.href = "../index.html";
+    }
+  </script>
+
+  <!-- Estilos (Padrão Ouro) -->
+  <link rel="stylesheet" href="stylebase.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+</head>
+
+<body>
+
+  <!-- Toast Nativo -->
+  <div id="toast">Mensagem...</div>
+
+  <!-- MODAL CUSTOMIZADO GERAL (Avisos e Confirmações) -->
+  <div id="modal-sistema" class="modal-overlay">
+    <div class="modal-box">
+      <p id="modal-texto" style="font-size: 16px; margin-bottom: 20px; color: #1f2937; line-height: 1.5;"></p>
+      <div id="modal-botoes" class="modal-actions" style="display: flex; justify-content: center; gap: 15px;">
+        <!-- Botões injetados via JS -->
+      </div>
+    </div>
+  </div>
+
+  <div id="app-container" class="dashboard-container">
+
+    <div class="navbar">
+      <h1><span class="material-icons" style="color:var(--primary-color);">assignment_turned_in</span> Relatórios</h1>
+      <div style="display:flex; align-items:center;">
+        <a href="../index.html" class="btn-voltar-portal">
+          <span class="material-icons" style="font-size:16px;">arrow_back</span> Voltar
+        </a>
+        <span style="font-size: 13px; color:#4b5563; margin-right: 15px;">Olá, <strong id="displayUsuario"
+            style="color:#111827;">...</strong></span>
+        <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: DASHBOARD PRINCIPAL                -->
+      <!-- ========================================== -->
+      <div id="view-dashboard" class="view-section active">
+        <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center;">
+          <button class="tab-btn active" id="tabImovel" onclick="mudarAbaDashboard('Imovel')"><span
+              class="material-icons" style="font-size:18px;">home</span> Imóveis</button>
+          <button class="tab-btn" id="tabVeiculo" onclick="mudarAbaDashboard('Veiculo')"><span class="material-icons"
+              style="font-size:18px;">directions_car</span> Veículos</button>
+        </div>
+
+        <div class="metrics-container">
+          <div class="card-metric">
+            <span id="lblTotal">Total de Imóveis</span>
+            <strong id="dashTotal">0</strong>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn-action btn-historico" onclick="abrirHistorico()"><span class="material-icons"
+              style="font-size:18px;">manage_search</span> Histórico</button>
+          <button class="btn-action btn-novo" onclick="abrirModalSelecao()"><span class="material-icons"
+              style="font-size:18px;">add_circle</span> Novo Registro</button>
+        </div>
+
+        <div class="table-container">
+          <h3 class="titulo-tela" style="margin-top:0; color:#111827; font-size:16px; margin-bottom: 15px;">Últimas
+            emissões</h3>
+          <div style="overflow-x: auto;">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Cliente</th>
+                  <th style="width: 20%;">Endereço</th>
+                  <th style="width: 15%;">Serviço</th>
+                  <th style="width: 10%;">Data</th>
+                  <th style="width: 10%; text-align: center;">Código</th>
+                  <th style="width: 15%; text-align: center;">Docs</th>
+                  <th style="width: 5%; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaRecentes">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: #6b7280; padding: 25px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                      <span>Carregando dados...</span>
+                      <div class="spinner"
+                        style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: HISTÓRICO COMPLETO                 -->
+      <!-- ========================================== -->
+      <div id="view-historico" class="view-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h2 class="titulo-tela" style="margin:0; font-size: 20px; transition: color 0.3s;">Histórico de Serviços</h2>
+          <button onclick="fecharHistorico()" class="btn-action btn-historico">
+            <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+          </button>
+        </div>
+
+        <!-- FILTROS SEPARADOS EM CARD -->
+        <div class="filtros-card">
+          <!-- ABAS DENTRO DO HISTÓRICO -->
+          <div class="dash-tabs"
+            style="border:none; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; background: transparent;">
+            <button class="tab-btn active" id="tabHistImovel" onclick="mudarAbaHistorico('Imovel')">Imóveis</button>
+            <button class="tab-btn" id="tabHistVeiculo" onclick="mudarAbaHistorico('Veiculo')">Veículos</button>
+          </div>
+
+          <div class="form-grid" style="align-items: end;">
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Cliente</label>
+              <input type="text" id="filtroCliente" class="form-input" placeholder="Cliente...">
+            </div>
+            <div class="form-group" id="containerFiltroEndereco">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Local</label>
+              <input type="text" id="filtroEndereco" class="form-input" placeholder="Endereço...">
+            </div>
+            <div class="form-group" id="containerFiltroPlaca" style="display:none;">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Local</label>
+              <input type="text" id="filtroPlaca" class="form-input" placeholder="Placa...">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Serviço</label>
+              <input type="text" id="filtroServico" class="form-input" placeholder="Serviço...">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Inicial</label>
+              <input type="date" id="filtroDataInicio" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="title-label" style="font-size: 11px; text-transform: uppercase;">Data Final</label>
+              <input type="date" id="filtroDataFim" class="form-input">
+            </div>
+
+            <!-- BOTÕES MOVIDOS PARA DENTRO DO GRID (3ª Coluna) -->
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; height: 43px;">
+              <button class="btn-action btn-historico" onclick="limparFiltros()"
+                style="flex: 1; margin: 0; justify-content: center;">
+                <span class="material-icons" style="font-size:18px;">clear_all</span> Limpar
+              </button>
+              <button class="btn-action btn-novo" onclick="paginaAtual=1; carregarHistorico()"
+                style="flex: 1; margin: 0; justify-content: center;">
+                <span class="material-icons" style="font-size:18px;">search</span> Buscar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div style="overflow-x: auto;">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Cliente</th>
+                  <th style="width: 20%;" id="thIdentificacao">Endereço</th>
+                  <th style="width: 10%;">Data</th>
+                  <th style="width: 15%;">Serviço</th>
+                  <th style="width: 10%; text-align: center;">Código</th>
+                  <th style="width: 15%; text-align: center;">Docs</th>
+                  <th style="width: 5%; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaHistorico">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: #6b7280; padding: 25px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                      <span>Carregando dados...</span>
+                      <div class="spinner"
+                        style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-container">
+            <button class="btn-action btn-historico" id="btnAnt" onclick="mudarPagina(-1)">Anterior</button>
+            <span class="page-info" id="infoPagina">Página 1 de 1</span>
+            <button class="btn-action btn-historico" id="btnProx" onclick="mudarPagina(1)">Próxima</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: FORMULÁRIOS                        -->
+      <!-- ========================================== -->
+      <div id="view-formulario" class="view-section">
+
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
+          <button onclick="fecharFormulario()" class="btn-action btn-historico">
+            <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+          </button>
+        </div>
+
+        <div class="form-card">
+          <div class="form-header">
+            <h2 id="tituloFormulario" class="titulo-tela" style="color: var(--primary-color);">Novo Registro</h2>
+            <p>Preencha os dados abaixo para salvar no sistema.</p>
+          </div>
+
+          <form id="formulario">
+
+            <div class="form-section-title">Dados Principais</div>
+
+            <div class="form-grid">
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="title-label">Cliente</label>
+                <div class="input-group-row">
+                  <input type="text" id="campo1" class="form-input" placeholder="Nome do Cliente" required>
+                  <button type="button" class="btn-importar" onclick="abrirModalClientes()" id="btnImportarCliente"
+                    title="Importar da lista">
+                    <span class="material-icons" style="font-size:18px;">cloud_download</span> Importar
+                  </button>
+                </div>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="title-label" id="lblCampo2">Endereço</label>
+                <input type="text" id="campo2" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-section-title">Execução</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="title-label">Data Realização</label>
+                <input type="date" id="campo5" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="title-label">Horário (Entrada / Saída)</label>
+                <div class="time-group">
+                  <input type="time" id="campo3" class="form-input" required>
+                  <input type="time" id="campo4" class="form-input">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section-title">Garantia & Colaboradores</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="title-label">Garantia</label>
+                <select id="selectGarantia" class="form-input">
+                  <option value="30">30 dias</option>
+                  <option value="60">60 dias</option>
+                  <option value="90">90 dias</option>
+                  <option value="180">180 dias</option>
+                  <option value="360">360 dias</option>
+                  <option value="720">720 dias</option>
+                  <option value="Outro">Outro...</option>
+                </select>
+                <input type="number" id="campo6_manual" class="form-input" style="margin-top:5px; display:none;"
+                  placeholder="Digite os dias...">
+              </div>
+
+              <div class="form-group">
+                <label class="title-label">Validade (Calculada)</label>
+                <input type="date" id="campo7" class="form-input" readonly>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="title-label">Equipe Técnica</label>
+                <div class="multiselect">
+                  <div class="selectBox" onclick="toggleCheckboxes()">
+                    <select class="form-input">
+                      <option id="texto-selecao">Selecione os colaboradores...</option>
+                    </select>
+                    <div class="overSelect"></div>
+                  </div>
+                  <div id="checkboxes"><label style="color:#999; padding:10px;">Carregando lista...</label></div>
+                </div>
+                <input type="text" id="campo8_manual" class="form-input" style="margin-top:5px; display:none;"
+                  placeholder="Nome do colaborador extra...">
+              </div>
+            </div>
+
+            <div class="form-section-title">Detalhes do Serviço</div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="title-label">Tipo de Serviço</label>
+              <select id="campo9" class="form-input"></select>
+            </div>
+
+            <div class="form-group" style="margin-top:10px; grid-column: 1 / -1;">
+              <input type="text" id="descReservatorio" class="form-input"
+                placeholder="Descreva os reservatórios (Ex: 1x 1000L + Cisterna)..." style="display:none;">
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" onclick="fecharFormulario()">Cancelar</button>
+              <button type="submit" id="btnSalvarForm" class="btn-action btn-novo"><span class="material-icons"
+                  style="font-size: 18px;">save</span> Salvar Registro</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAIS RESTANTES -->
+  <div id="modal-selecao" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="color: var(--primary-color); margin-bottom: 10px;">Novo Registro</h3>
+      <p style="font-size: 14px; color: #6b7280;">Selecione onde deseja salvar:</p>
+      <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">Selecione onde deseja salvar:</p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn-opcao btn-imovel" onclick="iniciarRegistro('Imovel')"><span
+              class="material-icons">home</span> Imóveis</button>
+          <button class="btn-opcao btn-veiculo" onclick="iniciarRegistro('Veiculo')"><span
+              class="material-icons">directions_car</span> Veículos</button>
+        </div>
+
+        <button class="btn-cancel" style="width: 100%; margin-top: 15px;"
+          onclick="document.getElementById('modal-selecao').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+
+    <div id="modal-clientes" class="modal-overlay" style="z-index: 4000;">
+      <div class="modal-box md">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px;">
+          <h3 style="color: var(--primary-color); display:flex; align-items:center; gap:8px;"><span
+              class="material-icons">search</span> Importar Cliente</h3>
+          <button class="icon-btn" onclick="document.getElementById('modal-clientes').style.display='none'"><span
+              class="material-icons">close</span></button>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="buscaCliente" class="form-input" placeholder="🔍 Buscar nome..."
+            onkeyup="filtrarListaClientes()">
+        </div>
+
+        <div id="listaClientes" class="list-group-import">
+          <div style="padding:20px; text-align:center; color:#999;">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-salvando" class="modal-overlay" style="z-index: 4000; display: none;">
+      <div class="modal-box"
+        style="text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center;">
+        <div class="spinner" style="width: 40px; height: 40px; border-width: 4px; margin-bottom: 20px;"></div>
+        <h3 style="margin: 0; color: var(--primary-color); font-size: 18px;">Salvando Registro...</h3>
+        <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">Gerando PDFs e atualizando a base de dados.</p>
+      </div>
+    </div>
+
+    <!-- Ligação para o novo ficheiro JavaScript -->
+    <script src="script.js"></script>
+</body>
+
+</html>

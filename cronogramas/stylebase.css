@@ -1,0 +1,145 @@
+/* =======================================================
+   ARQUIVO: stylebase.css (CRONOGRAMAS)
+   Padronizado com Recibos, Comunicados, Relatórios e Login
+   ======================================================= */
+
+:root {
+    --primary-color: #004481; /* Azul dos botões e ações */
+    --primary-dark: #14234c;  /* Azul corporativo oficial (títulos e navbar) */
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --warning-color: #f59e0b;
+    --desrat-color: #2563eb;  /* Azul mais claro para destacar Desratização no calendário */
+    --bg-body: transparent; 
+    --cor-borda: #e5e7eb;
+    --cor-texto: #1f2937;
+    --cor-texto-secundario: #6b7280;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+body { background-color: var(--bg-body); color: var(--cor-texto); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+/* ================================
+   CONTROLE DE VISIBILIDADE SPA
+   ================================ */
+.view-section { display: none; }
+.view-section.active { display: block; animation: fadein 0.3s; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* ================================
+   NAVBAR GERAL
+   ================================ */
+.navbar { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.navbar h1 { margin: 0; font-size: 18px; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.btn-voltar-portal { color: var(--error-color); font-weight: 600; cursor: pointer; margin-right: 15px; font-size: 14px; transition: 0.2s; white-space: nowrap; border: 1px solid var(--error-color); padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.btn-voltar-portal:hover { background-color: #fef2f2; }
+.btn-sair { color: #6b7280; font-weight: 600; cursor: pointer; margin-left: 15px; font-size: 14px; transition: 0.2s; white-space: nowrap; }
+.btn-sair:hover { color: #374151; text-decoration: underline; }
+
+.content { padding: 20px; max-width: 1100px; margin: auto; padding-bottom: 80px; }
+
+/* ================================
+   LOADER GLOBAL E TOASTS
+   ================================ */
+.global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.loader-box { background: white; padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.spinner { border: 4px solid #e2e8f0; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+.spinner-text { font-size: 15px; font-weight: 600; color: var(--primary-color); }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ================================
+   MÉTRICAS E ABAS DO DASHBOARD
+   ================================ */
+.metrics-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.card-metric { background: rgba(255, 255, 255, 0.85); padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; border-left: 6px solid var(--primary-color); }
+.card-metric span { font-size: 13px; color: #6b7280; font-weight: 500; letter-spacing: 0.5px; }
+.card-metric strong { font-size: 32px; display: block; margin-top: 5px; color: #111827; }
+
+.action-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+.btn-action { border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.btn-novo { background-color: var(--primary-color); color: white; }
+.btn-novo:hover { background-color: #003366; transform: translateY(-1px); }
+.btn-historico { background-color: white; color: #374151; border: 1px solid #d1d5db; }
+.btn-historico:hover { background-color: #f9fafb; border-color: #9ca3af; }
+
+/* ================================
+   TABELAS (Dashboard) E FILTROS
+   ================================ */
+.table-container { background: rgba(255, 255, 255, 0.85); border-radius: 12px; padding: 15px; overflow-x: auto; border: 1px solid #e5e7eb; }
+.styled-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.styled-table th { text-align: left; padding: 14px; border-bottom: 2px solid #e5e7eb; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; white-space: nowrap; }
+.styled-table td { padding: 14px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151; vertical-align: middle; }
+.styled-table tr:last-child td { border-bottom: none; }
+.styled-table tr:hover td { background-color: rgba(249, 250, 251, 0.5); }
+
+.filtros-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; margin-top: 15px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+/* Ícones de Ação Padronizados */
+.actions { display: flex; gap: 8px; align-items: center; justify-content: center; }
+.icon-btn { background: transparent; border: none; cursor: pointer; color: #6b7280; display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: 50%; transition: 0.2s; }
+.icon-btn:hover { background: #f3f4f6; color: #111827; }
+.icon-edit:hover { color: #2563eb; background: #eff6ff; }
+.icon-del:hover { color: var(--error-color); background: #fef2f2; }
+.icon-pdf:hover { color: var(--warning-color); background: #fef3c7; }
+.icon-share:hover { color: var(--success-color); background: #f0fdf4; }
+
+.pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+.page-info { font-size: 14px; font-weight: 600; color: #4b5563; }
+
+/* =========================================================
+   FORMULÁRIOS & INPUTS
+   ========================================================= */
+.form-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 800px; margin: auto; }
+.form-header { text-align: center; margin-bottom: 25px; }
+.form-header h2 { margin: 0; color: var(--primary-dark); font-size: 20px; text-transform: uppercase; }
+.form-header p { margin: 5px 0 0; color: #6b7280; font-size: 13px; }
+
+.form-section-title { font-size: 12px; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--cor-borda); padding-bottom: 8px; }
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.title-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 2px; }
+
+.form-input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; background-color: #fff; color: #1f2937; box-sizing: border-box; appearance: none; }
+.form-input:focus, select:focus, textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 68, 129, 0.1); }
+.form-input[readonly], .form-input:disabled { background-color: #e5e7eb; cursor: not-allowed; color: #6b7280; }
+
+.option-lbl { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #444; cursor: pointer; }
+input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--primary-color); }
+
+.form-actions { display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end; align-items: center; }
+
+/* =========================================================
+   SISTEMA DE CALENDÁRIO PARA PDF (Exclusivo Cronogramas)
+   ========================================================= */
+#calendario-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; padding: 0; }
+.mes-box { border: 1px solid var(--primary-color); border-radius: 6px; padding: 10px 8px; background-color: #ffffff; }
+.mes-titulo { text-align: center; font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--cor-borda); color: var(--primary-dark); font-size: 14px; text-transform: uppercase; }
+.dias-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.dia-semana { font-weight: 700; font-size: 11px; color: var(--primary-color); padding-bottom: 4px; }
+.dia { padding: 6px 3px; cursor: pointer; border-radius: 4px; border: 1px solid var(--cor-borda); color: #374151; font-size: 12px; font-weight: 500; transition: 0.1s; }
+.dia:hover:not(.vazio) { border-color: var(--primary-color); background-color: #f0f6ff; }
+.dia.vazio { border: none; background: transparent; cursor: default; }
+
+/* Cores de Seleção */
+.dia.selecionado-principal { background-color: var(--primary-color); color: white; border-color: var(--primary-dark); font-weight: 700; }
+.dia.selecionado-desratizacao { background-color: var(--desrat-color); color: white; border-color: #1d4ed8; font-weight: 700; }
+.dia.selecionado-ambos { background: linear-gradient(135deg, var(--primary-color) 50%, var(--desrat-color) 50%); color: white; border-color: var(--primary-dark); font-weight: 700; }
+
+#legenda-container { display: flex; justify-content: center; gap: 20px; margin-top: 15px; padding: 12px; border: 1px solid var(--cor-borda); border-radius: 6px; background-color: #f8fafc; }
+.legenda-item { display: inline-flex; align-items: center; font-weight: 600; font-size: 12px; color: var(--primary-dark); }
+.legenda-quadrado { width: 14px; height: 14px; margin-right: 8px; border-radius: 3px; }
+.quadrado-principal { background-color: var(--primary-color); }
+.quadrado-desrat { background-color: var(--desrat-color); }
+
+/* =========================================================
+   MODAIS
+   ========================================================= */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: flex-start; justify-content: center; z-index: 3000; backdrop-filter: blur(2px); overflow-y: auto; padding-top: 80px; padding-bottom: 40px; }
+.modal-box { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); margin: auto; animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+.btn-cancel { background-color: #e9ecef; color: #333; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-cancel:hover { background-color: #d1d5db; }

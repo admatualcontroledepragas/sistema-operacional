@@ -1,0 +1,142 @@
+/* =======================================================
+   ARQUIVO: stylemobile.css (Portal Principal)
+   (Garante que o Mobile fica 100% igual ao design antigo)
+   ======================================================= */
+
+/* Apenas aplica se o ecrã for menor ou igual a 1024px */
+@media screen and (max-width: 1024px) {
+    
+    body { background-color: #14234c; }
+
+    #portal-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: 100vh;
+        background-color: #14234c;
+        overflow-y: auto; /* Permite rolar a página toda no mobile */
+    }
+
+    /* 1. TOPBAR (Cabecalho Azul com Botão de Sair) */
+    #topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        background-color: #14234c;
+        height: auto;
+    }
+
+    #topbar-title { display: none; } /* Oculta o título "Dashboard" no mobile */
+
+    .topbar-right {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .user-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: white;
+    }
+    .user-name::before { content: "Olá, "; font-weight: 400; opacity: 0.8; }
+
+    .btn-menu {
+        background: transparent;
+        border: none;
+        color: #ef4444; /* Vermelho para dar destaque ao Sair */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 2. SIDEBAR (Transformada no Cartão Branco do Menu Mobile) */
+    #sidebar {
+        background-color: white;
+        border-radius: 40px 40px 0 0;
+        flex-grow: 1;
+        width: 100%;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        height: auto; /* Remove a altura fixa de 100vh do desktop */
+        border-right: none;
+    }
+
+    .sidebar-header { margin-bottom: 25px; padding: 0; height: auto; border: none; }
+    .sidebar-logo { width: 90px; height: auto; transform: none !important; }
+    .sidebar-title { display: none; } /* Oculta o texto da logo no mobile */
+
+    /* 3. MENU DE SISTEMAS (Estilo Cartões App) */
+    .sidebar-menu {
+        list-style: none;
+        width: 100%;
+        max-width: 350px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 0;
+        overflow: visible; /* Garante que os cartões não são cortados */
+    }
+
+    /* Oculta os itens Home e Configurações (Apenas para Desktop) */
+    .menu-item:nth-child(1),
+    .menu-item:last-child {
+        display: none !important;
+    }
+
+    /* Transforma os links na exata estética do seu mobile antigo */
+    .menu-item {
+        background: white;
+        border-radius: 16px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid #f3f4f6;
+        text-decoration: none;
+        color: #333;
+        white-space: normal; /* Permite texto em duas linhas */
+    }
+
+    /* Oculta a borda branca de seleção do Desktop */
+    .menu-item.active { background: white; color: #333; }
+    .menu-item.active::before { display: none; }
+    .menu-item:hover { background: white; color: #333; }
+
+    .menu-item .material-icons {
+        background: #14234c;
+        color: white;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 24px;
+        margin-right: 15px;
+        min-width: auto;
+    }
+
+    .menu-text {
+        font-size: 15px;
+        font-weight: 700;
+        color: #14234c;
+        opacity: 1 !important; /* Força visibilidade */
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Adiciona sub-textos descritivos via CSS pseudo-elementos (para simular o HTML antigo) */
+    .menu-item:nth-child(2) .menu-text::after { content: "Gestão de Serviços e Garantias"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+    .menu-item:nth-child(3) .menu-text::after { content: "Dedetização, Limpeza e Termo"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+    .menu-item:nth-child(4) .menu-text::after { content: "Emissão e Gestão Financeira"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+    .menu-item:nth-child(5) .menu-text::after { content: "Emissão de Contratos de Serviço"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+    .menu-item:nth-child(6) .menu-text::after { content: "Planejamento anual de visitas"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+    .menu-item:nth-child(7) .menu-text::after { content: "Registros da execução em campo"; font-size: 11px; color: #6b7280; font-weight: 400; margin-top: 2px; }
+
+    /* 4. ÁREA DE DASHBOARD E CONTEÚDO (Esconde no Mobile) */
+    #main-content {
+        display: none !important;
+    }
+}

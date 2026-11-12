@@ -1,0 +1,28 @@
+/* =======================================================
+   ARQUIVO: cssglobal/padrao-loader.css
+   (Padronização visual do estado de carregamento das tabelas)
+   ======================================================= */
+
+.loader-tabela {
+    text-align: center;
+    color: #6b7280;
+    padding: 25px;
+}
+
+.spinner-inline {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #004481; /* Azul padrão da Atual Saúde Ambiental */
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-bottom: 0;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

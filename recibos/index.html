@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Recibos - Atual Saúde Ambiental</title>
+
+    <!-- Padronização: Fontes Inter e Material Icons Exclusivo -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="manifest" href="../manifest.json">
+
+    <!-- Proteção de Sessão Unificada -->
+    <script>
+        if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <link rel="stylesheet" href="stylebase.css">
+    <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+    <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+</head>
+
+<body>
+
+    <!-- LOADER GLOBAL (Apenas para gerar/apagar) -->
+    <div id="loader" class="global-loader" style="display: none;">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="loader-text">Aguarde...</div>
+        </div>
+    </div>
+
+    <div id="app-container" class="dashboard-container">
+
+        <!-- NAVBAR PADRÃO (Com Botão Voltar, Saudação e Sair) -->
+        <div class="navbar">
+            <h1><span class="material-icons" style="color:#004481;">receipt_long</span> Gestão de Recibos</h1>
+            <div style="display:flex; align-items:center;">
+                <a href="../index.html" class="btn-voltar-portal">
+                    <span class="material-icons" style="font-size:16px;">arrow_back</span> Voltar
+                </a>
+                <span style="font-size: 13px; color:#4b5563; margin-right: 15px;">Olá, <strong id="displayUsuario"
+                        style="color:#111827;">...</strong></span>
+                <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+            </div>
+        </div>
+
+        <!-- MODAL: ESCOLHA DO TIPO DE RECIBO -->
+        <div id="modalEscolhaRecibo" class="modal-overlay">
+            <div class="modal-box">
+                <h3 style="color: var(--primary-color); margin-bottom: 10px;">Novo Recibo</h3>
+                <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">Selecione onde deseja salvar:</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button onclick="selecionarTipoFormulario('form')" class="btn-opcao btn-imovel"
+                        style="background: linear-gradient(135deg, #004481 0%, #003366 100%);">
+                        <span class="material-icons">home</span> Imóvel
+                    </button>
+                    <button onclick="selecionarTipoFormulario('form-veiculo')" class="btn-opcao btn-veiculo"
+                        style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);">
+                        <span class="material-icons">directions_car</span> Veículo
+                    </button>
+                </div>
+
+                <button class="btn-cancel" style="width: 100%; margin-top: 15px;"
+                    onclick="fecharModalEscolhaRecibo()">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- =========================================
+         VIEW: DASHBOARD
+         ========================================= -->
+        <div id="view-dashboard" class="view-section active content">
+
+            <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center;">
+                <button id="tab-dash-imovel" class="tab-btn active" onclick="alternarDashboard('imovel')">
+                    <span class="material-icons" style="font-size:18px;">home</span> Imóveis
+                </button>
+                <button id="tab-dash-veiculo" class="tab-btn" onclick="alternarDashboard('veiculo')">
+                    <span class="material-icons" style="font-size:18px;">directions_car</span> Veículos
+                </button>
+            </div>
+
+            <!-- Estrutura Padronizada das Métricas -->
+            <div class="metrics-container">
+                <div class="card-metric">
+                    <span style="text-transform: uppercase; font-size: 12px;">Total Registrado</span>
+                    <strong id="dash-total-display">0</strong>
+                </div>
+            </div>
+
+            <!-- Estrutura Padronizada de Ações -->
+            <div class="action-bar">
+                <!-- Texto simplificado para "Histórico" -->
+                <button class="btn-action btn-historico" onclick="mudarAba('historico')">
+                    <span class="material-icons" style="font-size:18px;">manage_search</span> Histórico
+                </button>
+                <button class="btn-action btn-novo" onclick="abrirModalEscolhaRecibo()">
+                    <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Recibo
+                </button>
+            </div>
+
+            <div class="table-container">
+                <h3 style="margin-top:0; color:#111827; font-size:16px; margin-bottom:15px;" id="dash-tabela-titulo">
+                    Últimas emissões</h3>
+                <div style="overflow-x: auto;">
+                    <table class="styled-table" id="tabela-ultimos-dashboard">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Cliente</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%;">Valor</th>
+                                <th style="width: 15%; text-align: center;">Código</th>
+                                <th style="width: 15%; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loader embutido -->
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #6b7280; padding: 25px;">
+                                    <div
+                                        style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                                        <span>Carregando dados...</span>
+                                        <div class="spinner"
+                                            style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================
+         VIEW: HISTÓRICO
+         ========================================= -->
+        <div id="view-historico" class="view-section content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <!-- Adicionada classe .titulo-tela para mudar cor em modo escuro -->
+                <h2 class="titulo-tela" style="margin:0; font-size: 20px; transition: color 0.3s;">Histórico de Recibos
+                </h2>
+                <button class="btn-action btn-historico" onclick="mudarAba('dashboard')">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <!-- ABAS IDÊNTICAS AO PAINEL -->
+            <div class="dash-tabs" style="flex-wrap: wrap; justify-content: center;">
+                <button id="btn-hist-imoveis" class="tab-btn active" onclick="mudarFiltroHistorico('imoveis')">
+                    <span class="material-icons" style="font-size:18px;">home</span> Imóveis
+                </button>
+                <button id="btn-hist-veiculos" class="tab-btn" onclick="mudarFiltroHistorico('veiculos')">
+                    <span class="material-icons" style="font-size:18px;">directions_car</span> Veículos
+                </button>
+            </div>
+
+            <div class="table-container">
+                <div style="overflow-x: auto;">
+                    <table class="styled-table" id="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Cliente</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%;">Valor</th>
+                                <th style="width: 15%; text-align: center;">Código</th>
+                                <th style="width: 15%; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loader embutido -->
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #6b7280; padding: 25px;">
+                                    <div
+                                        style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                                        <span>Carregando dados...</span>
+                                        <div class="spinner"
+                                            style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container">
+                    <button class="btn-action btn-historico" id="btn-prev-page"
+                        onclick="mudarPagina(-1)">Anterior</button>
+                    <span class="page-info" id="info-page">Página 1 de 1</span>
+                    <button class="btn-action btn-historico" id="btn-next-page"
+                        onclick="mudarPagina(1)">Próxima</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO 1: GERAL (IMÓVEIS) -->
+        <div id="view-form" class="view-section content">
+            <!-- Título "Preenchimento" removido, mantendo botão voltar -->
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: 20px;">
+                <button class="btn-action btn-historico" onclick="mudarAba('dashboard')">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <h2 id="titulo-form">Novo Recibo de Imóveis</h2>
+                    <p>Preencha os dados abaixo para salvar no sistema.</p>
+                </div>
+
+                <div id="alertaEdicao" class="alert-warning"
+                    style="display:none; background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
+                    <span>⚠️ <b>MODO DE EDIÇÃO:</b> Editando Recibo <span id="spanIdEdicao"></span></span>
+                    <button type="button" class="btn-action btn-historico" onclick="cancelarEdicao()">Cancelar
+                        Edição</button>
+                </div>
+
+                <form id="reciboForm">
+                    <div class="form-section-title">Dados Principais</div>
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Cliente *</label>
+                            <div class="input-group-row">
+                                <input type="text" id="cliente" class="form-input" required
+                                    placeholder="Nome ou Razão Social">
+                                <button type="button" id="btnAbrirImportacao" class="btn-importar"><span
+                                        class="material-icons" style="font-size:18px;">cloud_download</span>
+                                    Importar</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Data do Recibo *</label>
+                            <input type="date" id="data_recibo" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label class="title-label">Tipo de Documento:</label>
+                        <div class="servicos-checkboxes"
+                            style="display: flex; gap: 15px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <label class="option-lbl"><input type="radio" name="tipo_pessoa" value="F" checked>
+                                Física</label>
+                            <label class="option-lbl"><input type="radio" name="tipo_pessoa" value="J"> Jurídica</label>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="title-label" id="docLabel">CPF</label>
+                        <input type="text" id="cpf_cnpj" class="form-input" placeholder="000.000.000-00">
+                    </div>
+
+                    <div class="form-section-title">Valor Global</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label">Valor Total (R$) *</label>
+                            <input type="text" id="valor_numerico" class="form-input" required placeholder="0,00">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Valor por Extenso</label>
+                            <input type="text" id="valor_por_extenso" class="form-input" required readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Descrição dos Serviços (Até 5 itens)</div>
+                    <div id="blocos-imoveis-container"></div>
+
+                    <button type="button" id="btnAddItem" class="btn-action btn-historico"
+                        style="width: 100%; border: 2px dashed #cbd5e1; background: transparent; margin-bottom: 20px;"><span
+                            class="material-icons" style="font-size: 16px;">add</span> Adicionar outro serviço</button>
+
+                    <!-- CAIXA DE SELEÇÃO: DADOS BANCÁRIOS -->
+                    <div class="form-group"
+                        style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="incluir_dados_bancarios"
+                            style="width: 18px; height: 18px; cursor: pointer; margin: 0; accent-color: #004481;">
+                        <label for="incluir_dados_bancarios"
+                            style="margin: 0; cursor: pointer; font-size: 14px; font-weight: 600; color: #004481;">Incluir
+                            Dados Bancários no Recibo</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="mudarAba('dashboard')">Cancelar</button>
+                        <button type="submit" id="btnSubmit" class="btn-action btn-novo"><span class="material-icons"
+                                style="font-size: 18px;">receipt_long</span> Salvar e Gerar Recibo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO 2: VEÍCULOS -->
+        <div id="view-form-veiculo" class="view-section content">
+            <!-- Título "Preenchimento" removido -->
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: 20px;">
+                <button class="btn-action btn-historico" onclick="mudarAba('dashboard')">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <h2 id="titulo-form-veiculo">Novo Recibo de Veículos</h2>
+                    <p>Preencha os dados abaixo para salvar no sistema.</p>
+                </div>
+
+                <div id="alertaEdicaoVeiculo" class="alert-warning"
+                    style="display:none; background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
+                    <span>⚠️ <b>MODO DE EDIÇÃO:</b> Editando Recibo Veículo <span
+                            id="spanIdEdicaoVeiculo"></span></span>
+                    <button type="button" class="btn-action btn-historico" onclick="cancelarEdicao()">Cancelar
+                        Edição</button>
+                </div>
+
+                <form id="reciboVeiculoForm">
+                    <div class="form-section-title">Dados do Cliente</div>
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Cliente *</label>
+                            <div class="input-group-row">
+                                <input type="text" id="cliente_v" class="form-input" required
+                                    placeholder="Nome ou Razão Social">
+                                <button type="button" id="btnAbrirImportacaoVeiculo" class="btn-importar"><span
+                                        class="material-icons" style="font-size:18px;">cloud_download</span>
+                                    Importar</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Data do Recibo *</label>
+                            <input type="date" id="data_recibo_v" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label class="title-label">Tipo de Documento:</label>
+                        <div class="servicos-checkboxes"
+                            style="display: flex; gap: 15px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <label class="option-lbl"><input type="radio" name="tipo_pessoa_v" value="F" checked>
+                                Física</label>
+                            <label class="option-lbl"><input type="radio" name="tipo_pessoa_v" value="J">
+                                Jurídica</label>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="title-label" id="docLabel_v">CPF</label>
+                        <input type="text" id="cpf_cnpj_v" class="form-input" placeholder="000.000.000-00">
+                    </div>
+
+                    <div class="form-section-title">Valor Global</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="title-label">Valor Total (R$) *</label>
+                            <input type="text" id="valor_numerico_v" class="form-input" required placeholder="0,00">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Valor por Extenso</label>
+                            <input type="text" id="valor_por_extenso_v" class="form-input" required readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Dados do Serviço e Veículo</div>
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Serviço Executado *</label>
+                            <select id="servico_v" class="form-select form-input" required>
+                                <option value="">Selecione o serviço...</option>
+                                <option value="Desinsetização">Desinsetização</option>
+                                <option value="Limpeza e desinfecção do tanque">Limpeza e desinfecção do tanque</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Placa do Veículo *</label>
+                            <input type="text" id="placa_v" class="form-input" required placeholder="Ex: ABC-1234"
+                                style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Data da Execução *</label>
+                            <input type="date" id="data_execucao_v" class="form-input" required>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="title-label">Garantia *</label>
+                            <select id="garantia_select_v" class="form-select form-input" onchange="toggleOutroV()"
+                                required>
+                                <option value="">Selecione...</option>
+                                <option value="30 dias">30 dias</option>
+                                <option value="60 dias">60 dias</option>
+                                <option value="90 dias">90 dias</option>
+                                <option value="180 dias">180 dias</option>
+                                <option value="Outro">Outro...</option>
+                            </select>
+                            <input type="text" id="garantia_outro_v" class="form-input"
+                                style="display:none; margin-top:8px;" placeholder="Digite a garantia">
+                        </div>
+                    </div>
+
+                    <!-- CAIXA DE SELEÇÃO: DADOS BANCÁRIOS -->
+                    <div class="form-group"
+                        style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; flex-direction: row; align-items: center; gap: 10px; margin-top: 15px;">
+                        <input type="checkbox" id="incluir_dados_bancarios_v"
+                            style="width: 18px; height: 18px; cursor: pointer; margin: 0; accent-color: #004481;">
+                        <label for="incluir_dados_bancarios_v"
+                            style="margin: 0; cursor: pointer; font-size: 14px; font-weight: 600; color: #004481;">Incluir
+                            Dados Bancários no Recibo</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="mudarAba('dashboard')">Cancelar</button>
+                        <button type="submit" id="btnSubmitVeiculo" class="btn-action btn-novo"
+                            style="background-color: #0ea5e9;"><span class="material-icons"
+                                style="font-size: 18px;">directions_car</span> Salvar Recibo Veículo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div> <!-- FIM DO APP-CONTAINER -->
+
+    <!-- MODAL IMPORTAÇÃO -->
+    <div id="modalImportacao" class="modal-overlay">
+        <div class="modal-box md">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                <h3 style="color: var(--primary-color); display:flex; align-items:center; gap:8px;"><span
+                        class="material-icons">search</span> Importar Serviços</h3>
+                <button class="icon-btn" onclick="fecharModalImportacao()" style="background:none;"><span
+                        class="material-icons">close</span></button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="buscaModal" class="form-input" placeholder="🔍 Digite o nome do cliente...">
+            </div>
+            <div class="list-group-import"
+                style="max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;" id="tabelaServicos">
+                    <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 1;">
+                        <tr>
+                            <th style="padding:12px; border-bottom:1px solid #e5e7eb; width:40px;">Sel.</th>
+                            <th style="padding:12px; border-bottom:1px solid #e5e7eb;">Cliente</th>
+                            <th id="thServicoPlaca" style="padding:12px; border-bottom:1px solid #e5e7eb;">Serviço</th>
+                            <th style="padding:12px; border-bottom:1px solid #e5e7eb;">Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                <span id="contadorSelecao" style="font-weight:bold; color:#6b7280; font-size:14px;">0
+                    selecionados</span>
+                <div style="display:flex; gap: 10px;">
+                    <button type="button" class="btn-cancel" id="btnCancelarModal">Cancelar</button>
+                    <button type="button" class="btn-action btn-novo" id="btnConfirmarModal">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS CUSTOMIZADOS (ALERTA E CONFIRMAÇÃO) -->
+    <div id="customAlert" class="modal-overlay">
+        <div class="modal-box">
+            <div id="customAlertMsg" style="font-size: 16px; margin-bottom: 25px; color: #1f2937; line-height: 1.5;">
+            </div>
+            <button class="btn-action btn-novo" style="width: 100%;" onclick="fecharAlerta()">OK</button>
+        </div>
+    </div>
+
+    <div id="customConfirm" class="modal-overlay">
+        <div class="modal-box">
+            <span class="material-icons" style="font-size: 48px; color: #ef4444; margin-bottom: 10px;">warning</span>
+            <div id="customConfirmMsg" style="font-size: 16px; margin-bottom: 20px; color: #1f2937; line-height: 1.5;">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="fecharConfirmacao()">Cancelar</button>
+                <button class="btn-action" style="background-color: #ef4444; color: white;"
+                    id="btnCustomConfirmAcao">Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nomeUsuario = sessionStorage.getItem("nomeUsuario") || "Usuário";
+            const display = document.getElementById('displayUsuario');
+            if (display) display.innerText = nomeUsuario;
+        });
+        function fazerLogout() {
+            sessionStorage.clear();
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <!-- Scripts Modulares em Ordem de Execução -->
+    <script src="script-utils.js"></script>
+    <script src="script-ui.js"></script>
+    <script src="script-api.js"></script>
+
+</body>
+
+</html>

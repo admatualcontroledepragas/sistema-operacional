@@ -1,0 +1,147 @@
+/* =======================================================
+   ARQUIVO: styledesktop.css (MÓDULO IFRAME - COMUNICADOS)
+   (Melhorias e Layout Premium Exclusivo para Ecrãs a partir de 1025px)
+   ======================================================= */
+
+/* 1. INTEGRAÇÃO COM O IFRAME (Fundo Transparente e Sem Barra Visível) */
+body {
+    padding: 0 !important;
+    background-color: transparent !important;
+    /* Herda a cor do Portal */
+    overflow-y: auto !important;
+    /* Permite rolar a página com o rato */
+    overflow-x: hidden !important;
+
+    /* Oculta a barra no Firefox e Edge antigo */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+/* Oculta a barra no Chrome, Safari e novo Edge */
+::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    background: transparent !important;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 100% !important;
+    margin: 0;
+    padding-bottom: 50px;
+    /* Espaço extra no fundo */
+}
+
+/* 2. NAVBAR (Ocultada no Desktop pois o Portal já tem a sua) */
+.navbar {
+    display: none !important;
+}
+
+/* 3. REGRAS DE LARGURA DO CONTEÚDO */
+.content {
+    max-width: 1200px !important;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* =======================================================
+   ABAS DE NAVEGAÇÃO
+   ======================================================= */
+/* Acompanha a largura total do ecrã e mantém o espaço inferior */
+.dash-tabs {
+    margin-bottom: 25px !important;
+    width: 100%;
+    max-width: none;
+}
+
+/* 4. DASHBOARD E MÉTRICAS (Alinhamento em Linha) */
+.metrics-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 35px;
+}
+
+.card-metric {
+    flex: 1;
+    padding: 30px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.card-metric:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 5. BARRA DE AÇÕES DO DASHBOARD */
+.action-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-action {
+    min-width: 180px;
+}
+
+/* 6. FORMULÁRIOS E CARTÕES DE FILTRO */
+.form-card {
+    padding: 40px;
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.filtros-card {
+    padding: 30px;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 25px 0 !important;
+}
+
+/* 7. TABELAS E CENTRALIZAÇÃO DAS AÇÕES */
+.table-container {
+    padding: 25px;
+    width: 100%;
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Centraliza a última célula (Ações) e garante espaço para os botões */
+.styled-table th:last-child,
+.styled-table td:last-child:not([colspan]) {
+    text-align: center !important;
+    vertical-align: middle !important;
+    width: 190px !important;
+    min-width: 170px !important;
+}
+
+/* Mantém os ícones alinhados entre si no centro perfeito e impede que caiam */
+.styled-table td:last-child .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    /* MÁGICA: Proíbe estritamente a quebra de linha */
+    height: 100% !important;
+    gap: 10px !important;
+    margin: 0 !important;
+}
+
+/* 8. MODAL DESKTOP */
+.modal-box {
+    padding: 40px !important;
+    max-width: 500px !important;
+}

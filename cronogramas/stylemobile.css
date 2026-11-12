@@ -1,0 +1,180 @@
+/* =======================================================
+   ARQUIVO: stylemobile.css (CRONOGRAMAS)
+   (Estrutura, Espaçamentos e Layout para Ecrãs até 1024px)
+   ======================================================= */
+
+body {
+    padding-bottom: 20px;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* 1. CABEÇALHO E NAVBAR */
+.navbar { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 10px; 
+    padding: 15px; 
+}
+.navbar div { 
+    width: 100%; 
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+}
+.btn-voltar-portal { 
+    margin-right: 0; 
+    width: 100%; 
+    justify-content: center; 
+}
+
+/* 2. ABAS E AÇÕES */
+.dash-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.tab-btn {
+    min-width: 120px;
+    flex: 1 1 auto;
+    font-size: 13px;
+    padding: 10px;
+}
+
+.action-bar {
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+.action-bar > div {
+    flex-direction: column;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.btn-action {
+    width: 100%;
+    justify-content: center;
+}
+
+/* 3. FORMULÁRIOS E FILTROS */
+.form-grid { 
+    grid-template-columns: 1fr !important; 
+    gap: 10px; 
+}
+.form-card, .filtros-card { 
+    padding: 15px; 
+    border-radius: 12px; 
+    box-shadow: none; 
+    border: 1px solid var(--cor-borda); 
+}
+.servicos-checkboxes {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.horario-container {
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 4. TABELAS TRANSFORMADAS EM CARTÕES (MOBILE) */
+.content { padding: 10px; padding-bottom: 80px; }
+.table-container { 
+    background: transparent; 
+    border: none; 
+    box-shadow: none; 
+    padding: 0; 
+}
+
+.styled-table, .styled-table thead, .styled-table tbody, .styled-table th, .styled-table td, .styled-table tr {
+    display: block;
+}
+.styled-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+.styled-table tr {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
+    border: 1px solid var(--cor-borda);
+    padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.styled-table td {
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    position: relative;
+    padding: 12px 0 !important;
+    display: grid !important;
+    grid-template-columns: 90px 1fr !important; /* Fixa a largura do rótulo */
+    align-items: center !important;
+    text-align: left !important;
+    gap: 15px !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+}
+
+/* Rótulos Padronizados */
+.styled-table td::before {
+    font-weight: 700; 
+    color: var(--cor-texto-secundario); 
+    font-size: 11px; 
+    text-transform: uppercase;
+}
+
+/* Mapeamento de Colunas do Módulo de Cronogramas */
+.styled-table td:nth-of-type(1)::before { content: "Emissão"; }
+.styled-table td:nth-of-type(2)::before { content: "Cliente"; }
+.styled-table td:nth-of-type(3)::before { content: "Serviço"; }
+.styled-table td:nth-of-type(4)::before { content: "Abertura"; }
+.styled-table td:nth-of-type(5)::before { content: "Fim"; }
+.styled-table td:nth-of-type(6)::before { content: "Status"; }
+.styled-table td:nth-of-type(7)::before { display: none; } /* Ações */
+
+/* AÇÕES CENTRALIZADAS PERFEITAMENTE */
+.styled-table td:last-child {
+    border-bottom: none !important;
+    display: flex !important;
+    width: 100% !important;
+    padding: 15px 0 5px 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 15px !important;
+    margin: 0 !important;
+    flex-wrap: nowrap !important; /* Proíbe a quebra de linha */
+}
+
+.icon-btn {
+    padding: 10px !important;
+    font-size: 18px !important;
+    background-color: #f8fafc;
+}
+
+/* 5. AJUSTES DOS MODAIS PARA ECRÃS PEQUENOS */
+.modal-box {
+    width: 95%;
+    max-height: 85vh;
+    padding: 20px;
+}
+.modal-overlay { 
+    padding-top: 40px; 
+    padding-bottom: 40px; 
+}

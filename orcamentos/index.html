@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Orçamentos - Atual Saúde Ambiental</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <script>
+        if (sessionStorage.getItem("sessaoAtiva") !== "true") {
+            window.location.href = "../index.html";
+        }
+    </script>
+
+    <link rel="stylesheet" href="stylebase.css">
+    <link rel="stylesheet" media="screen and (max-width: 1024px)" href="stylemobile.css">
+    <link rel="stylesheet" media="screen and (min-width: 1025px)" href="styledesktop.css">
+</head>
+
+<body>
+
+    <!-- LOADER GLOBAL PADRONIZADO -->
+    <div id="loader" class="global-loader" style="display: none;">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="loader-text">Aguarde...</div>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOMIZADO -->
+    <div id="modal-sistema" class="modal-overlay">
+        <div class="modal-box">
+            <p id="modal-texto" style="font-size: 16px; margin-bottom: 20px; color: #1f2937; line-height: 1.5;"></p>
+            <div id="modal-botoes" class="modal-actions" style="display: flex; justify-content: center; gap: 15px;">
+                <!-- Botões injetados via JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="dashboard-container">
+
+        <!-- NAVBAR PADRÃO -->
+        <div class="navbar">
+            <h1><span class="material-icons" style="color: var(--primary-color);">request_quote</span> Gestão de
+                Orçamentos</h1>
+            <div style="display:flex; align-items:center;">
+                <a href="../index.html" class="btn-voltar-portal">
+                    <span class="material-icons" style="font-size:16px;">arrow_back</span> Voltar
+                </a>
+                <span style="font-size: 13px; color:#4b5563; margin-right: 15px;">Olá, <strong id="displayUsuario"
+                        style="color:#111827;">...</strong></span>
+                <span class="btn-sair" onclick="fazerLogout()">Sair</span>
+            </div>
+        </div>
+
+        <!-- ==============================================
+             VISÃO 1: PAINEL DE CONTROLE (DASHBOARD)
+             ============================================== -->
+        <div id="view-dashboard" class="view-section active content">
+
+            <div class="metrics-container">
+                <div class="card-metric">
+                    <span>Total Registrado</span>
+                    <strong id="total-registrado">0</strong>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn-action btn-historico" onclick="alternarTela('historico')">
+                    <span class="material-icons" style="font-size:18px;">manage_search</span> Histórico
+                </button>
+                <button class="btn-action btn-novo" onclick="alternarTela('formulario')">
+                    <span class="material-icons" style="font-size:18px;">add_circle</span> Novo Orçamento
+                </button>
+            </div>
+
+            <div class="table-container">
+                <h3>Últimas emissões</h3>
+                <div style="overflow-x: auto;">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Cliente</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%;">Valor</th>
+                                <th style="width: 15%; text-align: center;">Código</th>
+                                <th style="width: 15%; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-dashboard">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #6b7280; padding: 25px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                                        <span>Carregando dados...</span>
+                                        <div class="spinner"
+                                            style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================================
+             VISÃO 2: HISTÓRICO COMPLETO
+             ============================================== -->
+        <div id="view-historico" class="view-section content hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <!-- Classe titulo-tela adicionada para controlo de cor dinâmico via JS/CSS -->
+                <h2 class="titulo-tela" style="margin:0; font-size: 20px; transition: color 0.3s;">Histórico de
+                    Orçamentos</h2>
+                <button class="btn-action btn-historico" onclick="alternarTela('dashboard')">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <div class="filtros-card">
+                <div class="form-grid" style="align-items: end;">
+                    <div class="form-group">
+                        <label class="title-label">Cliente:</label>
+                        <input type="text" id="filtro-cliente" class="form-input" placeholder="Nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label class="title-label">Código:</label>
+                        <input type="text" id="filtro-codigo" class="form-input" placeholder="Ex: ABC1234O">
+                    </div>
+                    <div class="form-group">
+                        <label class="title-label">De:</label>
+                        <input type="date" id="filtro-data-inicio" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="title-label">Até:</label>
+                        <input type="date" id="filtro-data-fim" class="form-input">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 15px;">
+                    <button class="btn-action btn-historico" onclick="limparFiltros()"><span class="material-icons"
+                            style="font-size:18px;">clear_all</span> Limpar</button>
+                    <button class="btn-action btn-novo" onclick="aplicarFiltros()"><span class="material-icons"
+                            style="font-size:18px;">search</span> Buscar</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="overflow-x: auto;">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Cliente</th>
+                                <th style="width: 20%;">Data</th>
+                                <th style="width: 20%;">Valor</th>
+                                <th style="width: 15%; text-align: center;">Código</th>
+                                <th style="width: 15%; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-historico">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #6b7280; padding: 25px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;">
+                                        <span>Carregando dados...</span>
+                                        <div class="spinner"
+                                            style="width: 18px; height: 18px; border-width: 3px; margin: 0; flex-shrink: 0;">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Controles de Paginação -->
+                <div class="pagination-container">
+                    <button id="btn-prev" class="btn-action btn-historico" onclick="mudarPagina(-1)">Anterior</button>
+                    <span id="pagina-info" class="page-info">Página 1</span>
+                    <button id="btn-next" class="btn-action btn-historico" onclick="mudarPagina(1)">Próxima</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================================
+             VISÃO 3: FORMULÁRIO DE NOVO ORÇAMENTO
+             ============================================== -->
+        <div id="view-formulario" class="view-section content hidden">
+            <!-- Título 'Preenchimento' removido, mantendo o botão Voltar encostado à direita -->
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: 20px;">
+                <button class="btn-action btn-historico" onclick="alternarTela('dashboard')">
+                    <span class="material-icons" style="font-size:18px;">arrow_back</span> Voltar
+                </button>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <h2>Novo Orçamento</h2>
+                    <p>Preencha os dados abaixo para gerar um novo orçamento.</p>
+                </div>
+
+                <form id="form-orcamento">
+                    <!-- Dados Principais -->
+                    <div class="section-block">
+                        <div class="form-section-title" style="margin-top: 0;">Dados Principais</div>
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <div class="form-group"><label class="title-label" for="cliente">Cliente *</label><input
+                                    type="text" class="form-input" id="cliente" placeholder="Nome do cliente ou empresa"
+                                    required></div>
+                            <div class="form-group"><label class="title-label" for="endereco">Endereço *</label><input
+                                    type="text" class="form-input" id="endereco" required></div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="title-label" for="dataEmissao">Data de Emissão
+                                    *</label><input type="date" class="form-input" id="dataEmissao" required></div>
+                            <div class="form-group"><label class="title-label" for="valor">Valor Global (R$)
+                                    *</label><input type="number" class="form-input" id="valor" step="0.01"
+                                    placeholder="Ex: 150.00" required></div>
+                        </div>
+                    </div>
+
+                    <!-- Seleção de Serviços -->
+                    <div class="section-block" style="background-color: #f8fafc; border-color: #cbd5e1;">
+                        <div class="form-section-title" style="margin-top: 0;">Serviços a Executar</div>
+                        <div class="grid-checkboxes-3">
+                            <label class="checkbox-label"><input type="checkbox" id="master-desinsetizacao"
+                                    onchange="acaoDesinsetizacao(this.checked)"> Desinsetização</label>
+                            <label class="checkbox-label"><input type="checkbox" id="master-descupinizacao"
+                                    onchange="toggleSecao('sec-descupinizacao', this.checked); atualizarGarantia(); sincronizarServicoParaPraga('descupinizacao', this.checked)">
+                                Descupinização</label>
+                            <label class="checkbox-label"><input type="checkbox" id="master-desratizacao"
+                                    onchange="atualizarGarantia(); sincronizarServicoParaPraga('desratizacao', this.checked)">
+                                Desratização</label>
+                            <label class="checkbox-label"><input type="checkbox" id="master-caramujos"
+                                    onchange="atualizarGarantia(); sincronizarServicoParaPraga('caramujos', this.checked)">
+                                Controle de Caramujos</label>
+                            <label class="checkbox-label"><input type="checkbox" id="master-reservatorios"
+                                    onchange="atualizarGarantia()"> Limpeza de Reservatórios</label>
+                            <label class="checkbox-label"><input type="checkbox" id="master-capina"
+                                    onchange="atualizarGarantia()"> Capina Química</label>
+                        </div>
+                    </div>
+
+                    <!-- Sub-opções Desinsetização -->
+                    <div id="sec-desinsetizacao" class="section-block" style="display: none;">
+                        <div class="form-section-title" style="margin-top: 0;">Opções de Desinsetização</div>
+                        <div class="form-grid">
+                            <div>
+                                <div class="sub-section-title">Insetos e Aracnídeos</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" id="b1-pulverizacao">
+                                        Pulverização</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b1-gel"> Aplicação de
+                                        gel</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b1-polvilhamento">
+                                        Polvilhamento</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b1-spray"> Aplicação em
+                                        spray</label>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sub-section-title">Insetos Alados</div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" id="b2-pulverizacao-repouso">
+                                        Pulverização (Residencial)</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b2-pulverizacao-focos">
+                                        Pulverização (Comercial)</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b2-atomizacao"> Atomização
+                                        (UBV)</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b2-termonebulizacao">
+                                        Termonebulização (Fumacê)</label>
+                                    <label class="checkbox-label"><input type="checkbox" id="b2-armadilhas"> Armadilhas
+                                        Luminosas (Arandela)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-opções Descupinização -->
+                    <div id="sec-descupinizacao" class="section-block" style="display: none;">
+                        <div class="form-section-title" style="margin-top: 0;">Opções de Descupinização</div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" id="b5-injecao"> Injeção localizada
+                                e/ou pulverização</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b5-pincelamento"> Pincelamento
+                                técnico</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b5-barreira"> Barreira química
+                                perimetral</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b5-cobertura-livre"> Tratamento em
+                                coberturas (acesso livre)</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b5-cobertura-forrada"> Tratamento
+                                em coberturas (cobertura forrada)</label>
+                        </div>
+                    </div>
+
+                    <!-- Pragas e Documentação -->
+                    <div class="section-block">
+                        <div class="form-section-title" style="margin-top: 0;">Pragas Alvo</div>
+                        <div class="form-group">
+                            <div class="grid-checkboxes-3">
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-baratas"
+                                        value="Baratas"> Baratas</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-formigas"
+                                        value="Formigas"> Formigas</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-cupins"
+                                        value="Cupins" onchange="sincronizarPragaParaServico('cupins', this.checked)">
+                                    Cupins</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-roedores"
+                                        value="Roedores"
+                                        onchange="sincronizarPragaParaServico('roedores', this.checked)">
+                                    Roedores</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-moscas"
+                                        value="Moscas"> Moscas</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-mosquitos"
+                                        value="Mosquitos"> Mosquitos</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-carrapatos"
+                                        value="Carrapatos"> Carrapatos</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-pulgas"
+                                        value="Pulgas"> Pulgas</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-escorpioes"
+                                        value="Escorpiões"> Escorpiões</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-aranhas"
+                                        value="Aranhas"> Aranhas</label>
+                                <label class="checkbox-label"><input type="checkbox" name="praga" id="praga-caramujos"
+                                        value="Caramujos"
+                                        onchange="sincronizarPragaParaServico('caramujos', this.checked)">
+                                    Caramujos</label>
+                                <label class="checkbox-label"><input type="checkbox" id="praga-outros"
+                                        onchange="toggleOutros()"> Outros</label>
+                            </div>
+                            <input type="text" id="praga-outros-texto" class="form-input"
+                                placeholder="Especifique outras pragas..." style="display: none; margin-top: 10px;">
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="form-section-title" style="margin-top: 0;">Documentação Inclusa</div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" id="b8-certificado"> Comprovante de
+                                Execução / Certificado (RDC nº 622/2022)</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-cronograma"> Cronograma Anual de
+                                Atividades</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-fds"> Fichas com Dados de
+                                Segurança (FDS)</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-mapeamento"> Mapeamento de
+                                Dispositivos</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-relatorio-inspecao"> Planilha de
+                                Inspeção de Dispositivos</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-relatorio-quantitativo">
+                                Relatórios Quantitativos</label>
+                            <label class="checkbox-label"><input type="checkbox" id="b8-relatorio-naoconformidade">
+                                Relatório de Não-Conformidades</label>
+                        </div>
+                    </div>
+
+                    <!-- Detalhamento e Garantia -->
+                    <div class="section-block" style="border: none; padding: 0;">
+                        <div class="form-section-title">Considerações Finais</div>
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label class="title-label" for="detalhamento">Detalhamento do Serviço (Opcional):</label>
+                            <div id="editor-detalhamento" style="height: 150px; background: white;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="title-label" for="garantia">Garantias Aplicadas (Editável / Opcional):</label>
+                            <textarea id="garantia" class="form-input" rows="4"
+                                placeholder="Marque os serviços acima para preencher automaticamente ou digite livremente..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions"
+                        style="display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end;">
+                        <button type="button" class="btn-cancel" onclick="alternarTela('dashboard')">Cancelar</button>
+                        <button type="button" id="btn-gerar" class="btn-action btn-novo" onclick="enviarFormulario()">
+                            <span class="material-icons" style="font-size:18px;">request_quote</span> Gerar Orçamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> <!-- FIM DO APP-CONTAINER -->
+
+    <!-- Scripts e lógicas da aplicação -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nomeUsuario = sessionStorage.getItem("nomeUsuario") || "Usuário";
+            const display = document.getElementById('displayUsuario');
+            if (display) display.innerText = nomeUsuario;
+        });
+
+        function fazerLogout() {
+            sessionStorage.clear();
+            window.location.href = "../index.html";
+        }
+    </script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

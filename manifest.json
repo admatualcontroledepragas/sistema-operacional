@@ -1,0 +1,23 @@
+{
+  "name": "Portal Atual",
+  "short_name": "Portal Atual",
+  "description": "Portal Operacional - Atual Saúde Ambiental",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#14234c",
+  "theme_color": "#14234c",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
