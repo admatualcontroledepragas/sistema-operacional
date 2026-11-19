@@ -3,7 +3,7 @@
    Variáveis Globais, Utilitários, Formatações e Máscaras
    ======================================================= */
 
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbycL2E2wsmQIB7ta3EyLH8NpzzMo5trtHySkRIsXWIX64OzdOMTcCoxjiDfefhm6EGuMQ/exec";
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbwW5ePJg5yEi4TzTUnkKohjDV60T_kOkDA-iWncCxFJHhWm1JgCTLtp9Q9XmxXSfxwecw/exec";
 
 // Variáveis Globais partilhadas entre os ficheiros
 var baseServicosGeral = [];
